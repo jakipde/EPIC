@@ -13,7 +13,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Sabar yak banh</title>
+    <title>Login - EPIC</title>
 
     <meta name="description" content="" />
 
@@ -35,38 +35,76 @@
 
   <body>
     <!-- Content -->
-    <div class="container flex-grow-1 container-p-y my-2">
-      <h3>Ini nanti buat loginnnn jaakkkk</h3>
-      <p>
-        Easily navigate to demos, documentation, support or changelog using below links.<br />
-        Git repo access link helps you to request the repository access, once approved one can use the repository to
-        raise an issus(support, feature request & feedback) and track future updates & releases.
-      </p>
-      <!-- Examples -->
-      <div class="row mt-sm-4 mt-3">
-        <div class="col-12 mb-3">
+    <div class="container-xxl">
+      <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+          <!-- Login -->
           <div class="card">
-            <h5 class="card-header">Template Links</h5>
-            <!-- Template Demo Links -->
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Full Version</th>
-                  <th scope="col">Starter</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><a href="views/Dashboard/V_my_shop.php" target="_blank">Vertical Menu Template</a></td>
-                </tr>
-              </tbody>
-            </table>
-            <!--/ Template Demo Links -->
+            <div class="card-body">
+              <!-- Logo -->
+              <div class="app-brand justify-content-center mb-4 mt-2">
+                <span class="app-brand-logo demo">
+                  <!-- Add your logo here -->
+                </span>
+                <span class="app-brand-text demo text-body fw-bold ms-1">EPIC</span>
+              </div>
+              <!-- /Logo -->
+              <h4 class="mb-2">Welcome to EPIC! 👋</h4>
+              <p class="mb-4">Please sign-in to your account and start the adventure</p>
+
+              <form id="formAuthentication" class="mb-3" action="views/Dashboard/V_my_shop.php" method="POST">
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email or Username</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="email"
+                    name="email-username"
+                    placeholder="Enter your email or username"
+                    autofocus
+                  />
+                </div>
+                <div class="mb-3 form-password-toggle">
+                  <div class="d-flex justify-content-between">
+                    <label class="form-label" for="password">Password</label>
+                    <a href="#">
+                      <small>Forgot Password?</small>
+                    </a>
+                  </div>
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      name="password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-describedby="password"
+                    />
+                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="remember-me" />
+                    <label class="form-check-label" for="remember-me"> Remember Me </label>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                </div>
+              </form>
+
+              <p class="text-center">
+                <span>New on our platform?</span>
+                <a href="#">
+                  <span>Create an account</span>
+                </a>
+              </p>
+            </div>
           </div>
+          <!-- /Login -->
         </div>
-
       </div>
-
     </div>
     <!-- / Content -->
   </body>
