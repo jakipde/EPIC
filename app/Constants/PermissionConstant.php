@@ -33,6 +33,18 @@ class PermissionConstant
         ['label' => 'Delete Custom Form Record', 'name' => 'delete-custom-form-record'],
 
         // #Add New Permission Below!
+		['label' => 'View Products', 'name' => 'view-products'],
+		['label' => 'View Tools', 'name' => 'view-tools'],
+		['label' => 'View SparePart', 'name' => 'view-sparePart'],
+		['label' => 'Delete Accessories', 'name' => 'delete-accessories'],
+		['label' => 'Update Accessories', 'name' => 'update-accessories'],
+		['label' => 'Create Accessories', 'name' => 'create-accessories'],
+		['label' => 'View Accessories', 'name' => 'view-accessories'],
+		['label' => 'Delete Device', 'name' => 'delete-device'],
+		['label' => 'Update Device', 'name' => 'update-device'],
+		['label' => 'Create Device', 'name' => 'create-device'],
+		['label' => 'View Device', 'name' => 'view-device'],
+		['label' => 'View Repairs', 'name' => 'view-repairs'],
 
     ];
 }

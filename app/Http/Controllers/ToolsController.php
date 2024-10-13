@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Repairs;
+use App\Models\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class RepairsController extends Controller
+class ToolsController extends Controller
 {
     public function index()
     {
-        return inertia('Repairs/Index', [
-            'repairs' => Repairs::first(),
+        return inertia('Tools/Index', [
+            'tools' => Tools::first(),
         ]);
     }
 
@@ -21,12 +21,12 @@ class RepairsController extends Controller
             'name' => 'required|string',
         ]);
 
-        Repairs::updateOrCreate(
+        Tools::updateOrCreate(
             ['name' => $request->name],
             ['name' => $request->name],
         );
 
-        return redirect()->route('repairs.index')
+        return redirect()->route('tools.index')
             ->with('message', ['type' => 'success', 'message' => 'Item has beed updated']);
     }
 }

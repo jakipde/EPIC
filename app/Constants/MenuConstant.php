@@ -48,7 +48,55 @@ class MenuConstant
             ],
 
             // # Add Generated Menu Here!
-        ];
+
+            [
+                'name' => 'Products',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('products.index'),
+                'active' => 'products.*',
+                'permission' => 'view-products',
+            ],
+            [
+                'name' => 'Tools',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('tools.index'),
+                'active' => 'tools.*',
+                'permission' => 'view-tools',
+            ],
+            [
+                'name' => 'SparePart',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('spare-parts.index'),
+                'active' => 'spare-parts.*',
+                'permission' => 'view-sparePart',
+            ],
+            [
+                'name' => 'Accessories',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('accessories.index'),
+                'active' => 'accessories.*',
+                'permission' => 'view-accessories',
+            ],
+            [
+                'name' => 'Device',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('devices.index'),
+                'active' => 'devices.*',
+                'permission' => 'view-device',
+            ],
+            [
+                'name' => 'Repairs',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('repairs.index'),
+                'active' => 'repairs.*',
+                'permission' => 'view-repairs',
+            ],        ];
 
         if (Route::has('shortlink.link.index')) {
             $menu = array_merge(

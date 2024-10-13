@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Repairs;
+use App\Models\SparePart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class RepairsController extends Controller
+class SparePartController extends Controller
 {
     public function index()
     {
-        return inertia('Repairs/Index', [
-            'repairs' => Repairs::first(),
+        return inertia('SparePart/Index', [
+            'sparePart' => SparePart::first(),
         ]);
     }
 
@@ -21,12 +21,12 @@ class RepairsController extends Controller
             'name' => 'required|string',
         ]);
 
-        Repairs::updateOrCreate(
+        SparePart::updateOrCreate(
             ['name' => $request->name],
             ['name' => $request->name],
         );
 
-        return redirect()->route('repairs.index')
+        return redirect()->route('spare-parts.index')
             ->with('message', ['type' => 'success', 'message' => 'Item has beed updated']);
     }
 }

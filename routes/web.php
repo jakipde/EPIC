@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\ToolsController;
+use App\Http\Controllers\SparePartController;
+use App\Http\Controllers\AccessoriesController;
+use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\Default\FileController;
 use App\Http\Controllers\Default\GeneralController;
 use App\Http\Controllers\Default\PermissionController;
@@ -46,6 +52,19 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // #Admin
+Route::post('products', [ProductsController::class,'update'])->name('products.update');
+Route::get('products', [ProductsController::class,'index'])->name('products.index');
+Route::post('tools', [ToolsController::class,'update'])->name('tools.update');
+Route::get('tools', [ToolsController::class,'index'])->name('tools.index');
+Route::post('spare-parts', [SparePartController::class,'update'])->name('spare-parts.update');
+Route::get('spare-parts', [SparePartController::class,'index'])->name('spare-parts.index');
+Route::delete('accessories/{accessories}', [AccessoriesController::class,'destroy'])->name('accessories.destroy');
+Route::put('accessories/{accessories}', [AccessoriesController::class,'update'])->name('accessories.update');
+Route::post('accessories', [AccessoriesController::class,'store'])->name('accessories.store');
+Route::get('accessories', [AccessoriesController::class,'index'])->name('accessories.index');
+    Route::resource('devices', DeviceController::class);
+    Route::post('repairs', [RepairsController::class,'update'])->name('repairs.update');
+Route::get('repairs', [RepairsController::class,'index'])->name('repairs.index');
 });
 
 // #Guest

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('repairs', function (Blueprint $table) {
             $table->id();
             $table->string('description');
-            // Add other fields as necessary
+            $table->ulid('deleted_at')->nullable();
             $table->timestamps();
         });
     }
