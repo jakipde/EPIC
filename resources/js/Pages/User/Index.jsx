@@ -3,7 +3,6 @@ import { router, Head } from '@inertiajs/react'
 import { usePrevious } from 'react-use'
 import { HiPencil, HiTrash } from 'react-icons/hi2'
 import { useModalState } from '@/hooks'
-import axios from 'axios' // Import Axios
 
 import HasPermission from '@/Components/Common/HasPermission'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
@@ -25,10 +24,6 @@ export default function Index(props) {
 
     const confirmModal = useModalState()
     const formModal = useModalState()
-
-    // State for role and user counts
-    const [roleCount, setRoleCount] = useState(0)
-    const [userCount, setUserCount] = useState(0)
 
     const toggleFormModal = (user = null) => {
         formModal.setData(user)
@@ -59,22 +54,6 @@ export default function Index(props) {
             )
         }
     }, [search])
-
-    // Fetch role and user counts
-    useEffect(() => {
-        const fetchCounts = async () => {
-            try {
-                const response = await axios.get('/count')
-                const { role_count, user_count } = response.data
-                setRoleCount(role_count)
-                setUserCount(user_count)
-            } catch (error) {
-                console.error('Error fetching counts:', error)
-            }
-        }
-
-        fetchCounts()
-    }, []) // Empty dependency array to run only on mount
 
     return (
         <AuthenticatedLayout page={'System'} action={'User'}>
@@ -161,13 +140,6 @@ export default function Index(props) {
             </div>
             <ModalConfirm onConfirm={onDelete} modalState={confirmModal} />
             <FormModal modalState={formModal} />
-
-            {/* Display the counts */}
-            <div className="mt-4">
-                <h2>Counts</h2>
-                <p>Role Count: {roleCount}</p>
-                <p>User Count: {userCount}</p>
-            </div>
         </AuthenticatedLayout>
     )
 }

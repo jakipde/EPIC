@@ -75,7 +75,7 @@ const SidebarItemGroup = ({ item }) => {
                 </summary>
                 <ul>
                     {item.items.map((item) => (
-                        <div key={item.route + item.name}>
+                        <div key={item.route}>
                             <SidebarItem item={item} />
                         </div>
                     ))}
@@ -85,7 +85,7 @@ const SidebarItemGroup = ({ item }) => {
     )
 }
 
-export default function SidebarNav({ user, show, setShow, repair }) {
+export default function SidebarNav({ user, show, setShow }) {
     const {
         props: {
             app: { app_name },
@@ -137,6 +137,16 @@ export default function SidebarNav({ user, show, setShow, repair }) {
                     </div>
                     <nav className="w-full">
                         <ul className="menu rounded-box">
+                            {/* <SidebarItem
+                                item={{
+                                    name: 'Dashboard',
+                                    show: true,
+                                    icon: HiChartPie,
+                                    route: route('dashboard'),
+                                    active: 'dashboard',
+                                    permission: 'view-dashboard',
+                                }}
+                            /> */}
                             {menus.map((item) => (
                                 <div key={`item-${item.name}`}>
                                     {item.items === undefined ? (
@@ -146,23 +156,6 @@ export default function SidebarNav({ user, show, setShow, repair }) {
                                     )}
                                 </div>
                             ))}
-                            {/* Repairs Group */}
-                            <SidebarItemGroup item={{
-                                name: 'Repairs',
-                                icon: 'HiClipboardDocumentList',
-                                items: [
-                                    {
-                                        name: 'Repair Dashboard',
-                                        route: route('repairs.dashboard'), // Ensure this is correct
-                                        active: 'repairs.dashboard',
-                                    },
-                                    {
-                                        name: 'Data Overview',
-                                        route: route('repairs.data-overview'), // Ensure this is correct
-                                        active: 'repairs.data-overview',
-                                    },
-                                ],
-                            }} />
                             <li>
                                 <div
                                     onClick={() => router.post(route('logout'))}

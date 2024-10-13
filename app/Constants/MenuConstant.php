@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 class MenuConstant
 {
-    public static function all($repairId = null) // Accept repairId as a parameter
+    public static function all()
     {
         $menu = [
             [
@@ -46,56 +46,35 @@ class MenuConstant
                 'active' => 'setting.index',
                 'permission' => 'view-setting',
             ],
-            // Repairs Menu
-            [
-                'name' => 'Repairs',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => $repairId ? route('repairs.dashboard', ['repair' => $repairId]) : '#', // Use a placeholder if repairId is null
-                'active' => 'repairs.dashboard',
-                'permission' => 'view-repair-dashboard',
-                'items' => [
-                    [
-                        'name' => 'Repair Dashboard',
-                        'show' => true,
-                        'route' => $repairId ? route('repairs.dashboard', ['repair' => $repairId]) : '#', // Use a placeholder if repairId is null
-                        'active' => 'repairs.dashboard',
-                        'permission' => 'view-repair-dashboard',
-                    ],
-                    [
-                        'name' => 'Data Overview',
-                        'show' => true,
-                        'route' => $repairId ? route('repairs.data-overview', ['repair' => $repairId]) : '#', // Use a placeholder if repairId is null
-                        'active' => 'repairs.data-overview',
-                        'permission' => 'view-repair-data-overview',
-                    ],
-                ],
-            ],
+
+            // # Add Generated Menu Here!
         ];
 
-        // Add other menu items conditionally
         if (Route::has('shortlink.link.index')) {
-            $menu[] = [
-                'name' => 'Shortlink',
-                'show' => true,
-                'icon' => 'HiGlobeAlt',
-                'route' => route('shortlink.link.index'),
-                'active' => 'shortlink.link.*',
-                'permission' => 'view-shortlink',
-            ];
+            $menu = array_merge(
+                $menu,
+                [[
+                    'name' => 'Shortlink',
+                    'show' => true,
+                    'icon' => 'HiGlobeAlt',
+                    'route' => route('shortlink.link.index'),
+                    'active' => 'shortlink.link.*',
+                    'permission' => 'view-shortlink',
+                ]],
+            );
         }
 
         if (Route::has('custom-form.forms.index')) {
-            $menu[] = [
+            $menu = array_merge($menu, [[
                 'name' => 'Custom Form',
                 'show' => true,
                 'icon' => 'HiInformationCircle',
                 'route' => route('custom-form.forms.index'),
                 'active' => 'custom-form.forms.*',
                 'permission' => 'view-custom-form',
-            ];
+            ]]);
         }
 
-        return $menu; // Return the complete menu
+        return $menu;
     }
 }

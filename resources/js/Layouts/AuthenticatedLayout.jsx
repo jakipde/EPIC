@@ -10,7 +10,11 @@ import Breadcrumb from '@/Components/DaisyUI/Breadcrumb'
 import { ThemeSwitch, DarkSwitch } from '@/Components/DaisyUI/ThemeSwitch'
 import { showToast } from '@/utils'
 
-const AuthenticatedLayout = ({ children, page = '', action = '', repair }) => {
+export default function AuthenticatedLayout({
+    children,
+    page = '',
+    action = '',
+}) {
     const {
         props: { auth, flash },
     } = usePage()
@@ -29,12 +33,11 @@ const AuthenticatedLayout = ({ children, page = '', action = '', repair }) => {
     }, [])
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen">
             <SidebarNav
                 user={auth.user}
                 show={showingNavigationDropdown}
                 setShow={setShowingNavigationDropdown}
-                repair={repair} // Pass the repair object here
             />
             <main className="ml-0 transition md:ml-64">
                 <nav className="">
@@ -134,5 +137,3 @@ const AuthenticatedLayout = ({ children, page = '', action = '', repair }) => {
         </div>
     )
 }
-
-export default AuthenticatedLayout

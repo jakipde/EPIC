@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\Default\FileController;
 use App\Http\Controllers\Default\GeneralController;
 use App\Http\Controllers\Default\PermissionController;
@@ -53,13 +52,3 @@ Route::middleware(['auth'])->group(function () {
 
 
 // Route::get('/{link:code}', [App\Module\Shortlink\Controllers\HomeController::class, 'redirect'])->name('redirect');
-
-Route::get('/test-session', function () {
-    session(['key' => 'value']);
-    return session('key');
-});
-
-Route::get('/count', [GeneralController::class, 'count'])->name('count');
-
-Route::get('repairs/dashboard/{repairId?}', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
-Route::get('repairs/data-overview/{repairId?}', [RepairsController::class, 'dataOverview'])->name('repairs.data-overview');

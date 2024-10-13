@@ -33,8 +33,6 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        \Log::info('Sharing data in HandleInertiaRequests middleware');
-
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user() ? $request->user()->load(['role.permissions']) : $request->user(),

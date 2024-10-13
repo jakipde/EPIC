@@ -33,10 +33,6 @@ class PermissionConstant
         ['label' => 'Delete Custom Form Record', 'name' => 'delete-custom-form-record'],
 
         // #Add New Permission Below!
-		['label' => 'Delete Repairs', 'name' => 'delete-repairs'],
-		['label' => 'Update Repairs', 'name' => 'update-repairs'],
-		['label' => 'Create Repairs', 'name' => 'create-repairs'],
-		['label' => 'View Repairs', 'name' => 'view-repairs'],
 
     ];
 }
