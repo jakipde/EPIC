@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\DataEntryController;
-use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\ToolsController;
-use App\Http\Controllers\SparePartController;
 use App\Http\Controllers\AccessoriesController;
-use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\DataEntryController;
+use App\Http\Controllers\DevicesController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\RepairsController;
+use App\Http\Controllers\SparePartsController;
+use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\Default\FileController;
 use App\Http\Controllers\Default\GeneralController;
 use App\Http\Controllers\Default\PermissionController;
@@ -52,27 +52,40 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // #Admin
-Route::delete('data-entries/{dataEntry}', [DataEntryController::class,'destroy'])->name('data-entries.destroy');
-Route::put('data-entries/{dataEntry}', [DataEntryController::class,'update'])->name('data-entries.update');
-Route::post('data-entries', [DataEntryController::class,'store'])->name('data-entries.store');
-Route::get('data-entries', [DataEntryController::class,'index'])->name('data-entries.index');
-Route::post('products', [ProductsController::class,'update'])->name('products.update');
-Route::get('products', [ProductsController::class,'index'])->name('products.index');
-Route::post('tools', [ToolsController::class,'update'])->name('tools.update');
-Route::get('tools', [ToolsController::class,'index'])->name('tools.index');
-Route::post('spare-parts', [SparePartController::class,'update'])->name('spare-parts.update');
-Route::get('spare-parts', [SparePartController::class,'index'])->name('spare-parts.index');
-Route::delete('accessories/{accessories}', [AccessoriesController::class,'destroy'])->name('accessories.destroy');
-Route::put('accessories/{accessories}', [AccessoriesController::class,'update'])->name('accessories.update');
-Route::post('accessories', [AccessoriesController::class,'store'])->name('accessories.store');
-Route::get('accessories', [AccessoriesController::class,'index'])->name('accessories.index');
-    Route::resource('devices', DeviceController::class);
-    Route::post('repairs', [RepairsController::class,'update'])->name('repairs.update');
-Route::get('repairs', [RepairsController::class,'index'])->name('repairs.index');
+    // Repairs
+    Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
+    Route::get('/repairs/overview', [RepairsController::class, 'overview'])->name('repairs.overview');
+
+    // Devices
+    Route::get('/devices/dashboard', [DevicesController::class, 'dashboard'])->name('devices.dashboard');
+    Route::get('/devices/overview', [DevicesController::class, 'overview'])->name('devices.overview');
+
+    // Accessories
+    Route::get('/accessories/dashboard', [AccessoriesController::class, 'dashboard'])->name('accessories.dashboard');
+    Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
+
+    // Spare Parts
+    Route::get('/spare-parts/dashboard', [SparePartsController::class, 'dashboard'])->name('spare-parts.dashboard');
+    Route::get('/spare-parts/overview', [SparePartsController::class, 'overview'])->name('spare-parts.overview');
+
+    // Tools
+    Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
+    Route::get('/tools/overview', [ToolsController::class, 'overview'])->name('tools.overview');
+
+    // Products
+    Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
+    Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
+
+    // Data Entry
+    Route::get('/data-entries/input', [DataEntryController::class, 'input'])->name('data-entries.input');
+    Route::get('/data-entries/customer-input', [DataEntryController::class, 'customerInput'])->name('data-entries.customer-input');
+
+    // Setting
+    Route::get('/settings', [SettingController::class, 'index'])->name('setting.index');
+    Route::post('/settings', [SettingController::class, 'update'])->name('setting.update');
+
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-// #Guest
-
-
-// Route::get('/{link:code}', [App\Module\Shortlink\Controllers\HomeController::class, 'redirect'])->name('redirect');

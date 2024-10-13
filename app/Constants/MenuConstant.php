@@ -21,59 +21,150 @@ class MenuConstant
                 'name' => 'Repairs',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',
-                'route' => route('repairs.index'),
-                'active' => 'repairs.*',
-                'permission' => 'view-repairs',
+                'items' => [
+                    [
+                        'name' => 'Repairs Dashboard',
+                        'show' => true,
+                        'route' => route('repairs.dashboard'),
+                        'active' => 'repairs.dashboard',
+                        'permission' => 'view-repairs-dashboard',
+                    ],
+                    [
+                        'name' => 'Data Overview',
+                        'show' => true,
+                        'route' => route('repairs.overview'),
+                        'active' => 'repairs.overview',
+                        'permission' => 'view-repairs-overview',
+                    ],
+                ],
             ],
             [
                 'name' => 'Devices',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',
-                'route' => route('devices.index'),
-                'active' => 'devices.*',
-                'permission' => 'view-device',
+                'items' => [
+                    [
+                        'name' => 'Devices Dashboard',
+                        'show' => true,
+                        'route' => route('devices.dashboard'),
+                        'active' => 'devices.dashboard',
+                        'permission' => 'view-devices-dashboard',
+                    ],
+                    [
+                        'name' => 'Data Overview',
+                        'show' => true,
+                        'route' => route('devices.overview'),
+                        'active' => 'devices.overview',
+                        'permission' => 'view-devices-overview',
+                    ],
+                ],
             ],
             [
                 'name' => 'Accessories',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',
-                'route' => route('accessories.index'),
-                'active' => 'accessories.*',
-                'permission' => 'view-accessories',
+                'items' => [
+                    [
+                        'name' => 'Accessories Dashboard',
+                        'show' => true,
+                        'route' => route('accessories.dashboard'),
+                        'active' => 'accessories.dashboard',
+                        'permission' => 'view-accessories-dashboard',
+                    ],
+                    [
+                        'name' => 'Data Overview',
+                        'show' => true,
+                        'route' => route('accessories.overview'),
+                        'active' => 'accessories.overview',
+                        'permission' => 'view-accessories-overview',
+                    ],
+                ],
             ],
             [
                 'name' => 'Spare Parts',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',
-                'route' => route('spare-parts.index'),
-                'active' => 'spare-parts.*',
-                'permission' => 'view-sparePart',
+                'items' => [
+                    [
+                        'name' => 'Spare Parts Dashboard',
+                        'show' => true,
+                        'route' => route('spare-parts.dashboard'),
+                        'active' => 'spare-parts.dashboard',
+                        'permission' => 'view-spare-parts-dashboard',
+                    ],
+                    [
+                        'name' => 'Data Overview',
+                        'show' => true,
+                        'route' => route('spare-parts.overview'),
+                        'active' => 'spare-parts.overview',
+                        'permission' => 'view-spare-parts-overview',
+                    ],
+                ],
             ],
             [
                 'name' => 'Tools',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',
-                'route' => route('tools.index'),
-                'active' => 'tools.*',
-                'permission' => 'view-tools',
+                'items' => [
+                    [
+                        'name' => 'Tools Dashboard',
+                        'show' => true,
+                        'route' => route('tools.dashboard'),
+                        'active' => 'tools.dashboard',
+                        'permission' => 'view-tools-dashboard',
+                    ],
+                    [
+                        'name' => 'Data Overview',
+                        'show' => true,
+                        'route' => route('tools.overview'),
+                        'active' => 'tools.overview',
+                        'permission' => 'view-tools-overview',
+                    ],
+                ],
             ],
             [
                 'name' => 'Products',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',
-                'route' => route('products.index'),
-                'active' => 'products.*',
-                'permission' => 'view-products',
+                'items' => [
+                    [
+                        'name' => 'Products Dashboard',
+                        'show' => true,
+                        'route' => route('products.dashboard'),
+                        'active' => 'products.dashboard',
+                        'permission' => 'view-products-dashboard',
+                    ],
+                    [
+                        'name' => 'Data Overview',
+                        'show' => true,
+                        'route' => route('products.overview'),
+                        'active' => 'products.overview',
+                        'permission' => 'view-products-overview',
+                    ],
+                ],
             ],
             [
                 'name' => 'Data Entry',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',
-                'route' => route('data-entries.index'),
-                'active' => 'data-entries.*',
-                'permission' => 'view-dataEntry',
+                'items' => [
+                    [
+                        'name' => 'Input Data',
+                        'show' => true,
+                        'route' => route('data-entries.input'),
+                        'active' => 'data-entries.input',
+                        'permission' => 'view-data-entries-input',
+                    ],
+                    [
+                        'name' => 'Customer Input',
+                        'show' => true,
+                        'route' => route('data-entries.customer-input'),
+                        'active' => 'data-entries.customer-input',
+                        'permission' => 'view-data-entries-customer-input',
+                    ],
+                ],
             ],
-            [
+[
                 'name' => 'User',
                 'show' => true,
                 'icon' => 'HiUser',
@@ -96,7 +187,7 @@ class MenuConstant
             ],
         ];
 
-        // The rest of the existing code for conditional menu items
+        // Conditional menu items
         if (Route::has('shortlink.link.index')) {
             $menu[] = [
                 'name' => 'Shortlink',

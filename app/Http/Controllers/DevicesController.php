@@ -7,7 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
-class DeviceController extends Controller
+class DevicesController extends Controller
 {
     public function index(Request $request): Response
     {

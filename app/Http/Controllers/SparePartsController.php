@@ -6,7 +6,7 @@ use App\Models\SparePart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class SparePartController extends Controller
+class SparePartsController extends Controller
 {
     public function index()
     {

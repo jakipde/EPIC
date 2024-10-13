@@ -50,7 +50,7 @@ export default function AuthenticatedLayout({
                                             (previousState) => !previousState
                                         )
                                     }
-                                    className="inline-flex items-center justify-center p-2 rounded-md text-base-content focus:outline-none  transition duration-150 ease-in-out"
+                                    className="inline-flex items-center justify-center p-2 rounded-md text-base-content focus:outline-none transition duration-150 ease-in-out"
                                 >
                                     <HiBars3 className="h-5 w-5" />
                                 </button>
