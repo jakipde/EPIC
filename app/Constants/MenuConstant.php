@@ -20,7 +20,7 @@ class MenuConstant
             [
                 'name' => 'Repairs',
                 'show' => true,
-                'icon' => 'HiClipboardDocumentList',
+                'icon' => 'HiWrenchScrewdriver',
                 'items' => [
                     [
                         'name' => 'Repairs Dashboard',
@@ -41,7 +41,7 @@ class MenuConstant
             [
                 'name' => 'Devices',
                 'show' => true,
-                'icon' => 'HiClipboardDocumentList',
+                'icon' => 'HiDevicePhoneMobile',
                 'items' => [
                     [
                         'name' => 'Devices Dashboard',
@@ -62,7 +62,7 @@ class MenuConstant
             [
                 'name' => 'Accessories',
                 'show' => true,
-                'icon' => 'HiClipboardDocumentList',
+                'icon' => 'IoMdHeadset',
                 'items' => [
                     [
                         'name' => 'Accessories Dashboard',
@@ -83,7 +83,7 @@ class MenuConstant
             [
                 'name' => 'Spare Parts',
                 'show' => true,
-                'icon' => 'HiClipboardDocumentList',
+                'icon' => 'HiCpuChip',
                 'items' => [
                     [
                         'name' => 'Spare Parts Dashboard',
@@ -104,7 +104,7 @@ class MenuConstant
             [
                 'name' => 'Tools',
                 'show' => true,
-                'icon' => 'HiClipboardDocumentList',
+                'icon' => 'GiSolderingIron',
                 'items' => [
                     [
                         'name' => 'Tools Dashboard',
@@ -125,7 +125,7 @@ class MenuConstant
             [
                 'name' => 'Products',
                 'show' => true,
-                'icon' => 'HiClipboardDocumentList',
+                'icon' => 'FaToolbox',
                 'items' => [
                     [
                         'name' => 'Products Dashboard',

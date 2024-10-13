@@ -9,7 +9,15 @@ import {
     HiGlobeAlt,
     HiInformationCircle,
     HiClipboardDocumentList,
+    HiWrenchScrewdriver,
+    HiDevicePhoneMobile,
+    HiCpuChip ,
+
 } from 'react-icons/hi2';
+import { IoMdHeadset } from 'react-icons/io';
+import { GiSolderingIron } from "react-icons/gi";
+import { FaToolbox } from "react-icons/fa";
+
 
 import { filterAllowedMenu } from './helpers.cjs';
 
@@ -22,8 +30,13 @@ const Icons = {
     HiGlobeAlt,
     HiInformationCircle,
     HiClipboardDocumentList,
+    HiWrenchScrewdriver,
+    HiDevicePhoneMobile,
+    IoMdHeadset,
+    HiCpuChip,
+    GiSolderingIron,
+    FaToolbox,
 };
-
 const ItemIcon = ({ icon, ...rest }) => {
     const Component = Icons[icon];
     return <Component {...rest} />;
