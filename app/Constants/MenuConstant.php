@@ -18,6 +18,62 @@ class MenuConstant
                 'permission' => 'view-dashboard',
             ],
             [
+                'name' => 'Repairs',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('repairs.index'),
+                'active' => 'repairs.*',
+                'permission' => 'view-repairs',
+            ],
+            [
+                'name' => 'Devices',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('devices.index'),
+                'active' => 'devices.*',
+                'permission' => 'view-device',
+            ],
+            [
+                'name' => 'Accessories',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('accessories.index'),
+                'active' => 'accessories.*',
+                'permission' => 'view-accessories',
+            ],
+            [
+                'name' => 'Spare Parts',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('spare-parts.index'),
+                'active' => 'spare-parts.*',
+                'permission' => 'view-sparePart',
+            ],
+            [
+                'name' => 'Tools',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('tools.index'),
+                'active' => 'tools.*',
+                'permission' => 'view-tools',
+            ],
+            [
+                'name' => 'Products',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('products.index'),
+                'active' => 'products.*',
+                'permission' => 'view-products',
+            ],
+            [
+                'name' => 'Data Entry',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('data-entries.index'),
+                'active' => 'data-entries.*',
+                'permission' => 'view-dataEntry',
+            ],
+            [
                 'name' => 'User',
                 'show' => true,
                 'icon' => 'HiUser',
@@ -38,97 +94,40 @@ class MenuConstant
                     ],
                 ],
             ],
-            [
-                'name' => 'Setting',
-                'show' => true,
-                'icon' => 'HiCog',
-                'route' => route('setting.index'),
-                'active' => 'setting.index',
-                'permission' => 'view-setting',
-            ],
+        ];
 
-            // # Add Generated Menu Here!
-
-            [
-                'name' => 'DataEntry',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => route('data-entries.index'),
-                'active' => 'data-entries.*',
-                'permission' => 'view-dataEntry',
-            ],
-            [
-                'name' => 'Products',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => route('products.index'),
-                'active' => 'products.*',
-                'permission' => 'view-products',
-            ],
-            [
-                'name' => 'Tools',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => route('tools.index'),
-                'active' => 'tools.*',
-                'permission' => 'view-tools',
-            ],
-            [
-                'name' => 'SparePart',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => route('spare-parts.index'),
-                'active' => 'spare-parts.*',
-                'permission' => 'view-sparePart',
-            ],
-            [
-                'name' => 'Accessories',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => route('accessories.index'),
-                'active' => 'accessories.*',
-                'permission' => 'view-accessories',
-            ],
-            [
-                'name' => 'Device',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => route('devices.index'),
-                'active' => 'devices.*',
-                'permission' => 'view-device',
-            ],
-            [
-                'name' => 'Repairs',
-                'show' => true,
-                'icon' => 'HiClipboardDocumentList',
-                'route' => route('repairs.index'),
-                'active' => 'repairs.*',
-                'permission' => 'view-repairs',
-            ],        ];
-
+        // The rest of the existing code for conditional menu items
         if (Route::has('shortlink.link.index')) {
-            $menu = array_merge(
-                $menu,
-                [[
-                    'name' => 'Shortlink',
-                    'show' => true,
-                    'icon' => 'HiGlobeAlt',
-                    'route' => route('shortlink.link.index'),
-                    'active' => 'shortlink.link.*',
-                    'permission' => 'view-shortlink',
-                ]],
-            );
+            $menu[] = [
+                'name' => 'Shortlink',
+                'show' => true,
+                'icon' => 'HiGlobeAlt',
+                'route' => route('shortlink.link.index'),
+                'active' => 'shortlink.link.*',
+                'permission' => 'view-shortlink',
+            ];
         }
 
         if (Route::has('custom-form.forms.index')) {
-            $menu = array_merge($menu, [[
+            $menu[] = [
                 'name' => 'Custom Form',
                 'show' => true,
                 'icon' => 'HiInformationCircle',
                 'route' => route('custom-form.forms.index'),
                 'active' => 'custom-form.forms.*',
                 'permission' => 'view-custom-form',
-            ]]);
+            ];
+        }
+
+        if (Route::has('setting.index')) {
+            $menu[] = [
+                'name' => 'Setting',
+                'show' => true,
+                'icon' => 'HiCog',
+                'route' => route('setting.index'),
+                'active' => 'setting.index',
+                'permission' => 'view-setting',
+            ];
         }
 
         return $menu;
