@@ -33,6 +33,10 @@ class PermissionConstant
         ['label' => 'Delete Custom Form Record', 'name' => 'delete-custom-form-record'],
 
         // #Add New Permission Below!
+		['label' => 'Delete DataEntry', 'name' => 'delete-dataEntry'],
+		['label' => 'Update DataEntry', 'name' => 'update-dataEntry'],
+		['label' => 'Create DataEntry', 'name' => 'create-dataEntry'],
+		['label' => 'View DataEntry', 'name' => 'view-dataEntry'],
 		['label' => 'View Products', 'name' => 'view-products'],
 		['label' => 'View Tools', 'name' => 'view-tools'],
 		['label' => 'View SparePart', 'name' => 'view-sparePart'],

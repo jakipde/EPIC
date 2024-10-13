@@ -50,6 +50,14 @@ class MenuConstant
             // # Add Generated Menu Here!
 
             [
+                'name' => 'DataEntry',
+                'show' => true,
+                'icon' => 'HiClipboardDocumentList',
+                'route' => route('data-entries.index'),
+                'active' => 'data-entries.*',
+                'permission' => 'view-dataEntry',
+            ],
+            [
                 'name' => 'Products',
                 'show' => true,
                 'icon' => 'HiClipboardDocumentList',

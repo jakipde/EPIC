@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DataEntryController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\SparePartController;
@@ -52,6 +53,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // #Admin
+Route::delete('data-entries/{dataEntry}', [DataEntryController::class,'destroy'])->name('data-entries.destroy');
+Route::put('data-entries/{dataEntry}', [DataEntryController::class,'update'])->name('data-entries.update');
+Route::post('data-entries', [DataEntryController::class,'store'])->name('data-entries.store');
+Route::get('data-entries', [DataEntryController::class,'index'])->name('data-entries.index');
 Route::post('products', [ProductsController::class,'update'])->name('products.update');
 Route::get('products', [ProductsController::class,'index'])->name('products.index');
 Route::post('tools', [ToolsController::class,'update'])->name('tools.update');
