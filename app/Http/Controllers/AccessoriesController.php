@@ -2,63 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Accessories;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Accessory;
+use App\Models\Product;
+use App\Models\Category; // Import the Category model
 use Illuminate\Http\Request;
-use Inertia\Response;
 
 class AccessoriesController extends Controller
 {
-    public function index(Request $request): Response
-    {
-        $query = Accessories::query();
-
-        if ($request->q) {
-            $query->where('name', 'like', "%{$request->q}%");
-        }
-
-        $query->orderBy('created_at', 'desc');
-
-        return inertia('Accessories/Index', [
-            'data' => $query->paginate(10),
-        ]);
-    }
-
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'description' => 'nullable|string',
         ]);
 
-        Accessories::create([
-            'name' => $request->name
+        // Create the accessory
+        $accessory = Accessory::create($request->all());
+
+        // Find the category for 'Accessories'
+        $category = Category::where('name', 'Accessories')->first();
+
+        // Create a product entry for the accessory
+        Product::create([
+            'category_id' => $category->id, // Set the category_id
+            'type' => $category->name, // Set the type to the category name
+            'price' => $request->price,
+            'description' => $request->description,
         ]);
 
-        return redirect()->route('accessories.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed created']);
-    }
-
-    public function update(Request $request, Accessories $accessories): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $accessories->fill([
-            'name' => $request->name,
-        ]);
-
-        $accessories->save();
-
-        return redirect()->route('accessories.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed updated']);
-    }
-
-    public function destroy(Accessories $accessories): RedirectResponse
-    {
-        $accessories->delete();
-
-        return redirect()->route('accessories.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed deleted']);
+        return redirect()->back()->with('success', 'Accessory created successfully.');
     }
 }

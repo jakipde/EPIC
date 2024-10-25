@@ -137,3 +137,5 @@ export const SelectOptionObject = ({
         </Select>
     )
 }
+
+export default Select;

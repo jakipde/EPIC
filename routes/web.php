@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\TestModalPageController;
 use App\Http\Controllers\AccessoriesController;
 use App\Http\Controllers\DataEntryController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\TechniciansController;
 use App\Http\Controllers\DevicesController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\RepairsController;
@@ -15,6 +19,7 @@ use App\Http\Controllers\Default\RoleController;
 use App\Http\Controllers\Default\SettingController;
 use App\Http\Controllers\Default\UserController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // define module as main route
 // Route::get('/', [App\Module\Shortlink\Controllers\HomeController::class, 'index'])->name('home');
@@ -52,33 +57,48 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Repairs
-    Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
-    Route::get('/repairs/overview', [RepairsController::class, 'overview'])->name('repairs.overview');
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('repairs', RepairsController::class);
+        Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
+        Route::get('/repairs/overview', [RepairsController::class, 'overview'])->name('repairs.overview');
+        Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('repairs.show');
 
-    // Devices
-    Route::get('/devices/dashboard', [DevicesController::class, 'dashboard'])->name('devices.dashboard');
-    Route::get('/devices/overview', [DevicesController::class, 'overview'])->name('devices.overview');
+        Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
 
-    // Accessories
-    Route::get('/accessories/dashboard', [AccessoriesController::class, 'dashboard'])->name('accessories.dashboard');
-    Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
+        Route::get('/technicians', [TechniciansController::class, 'index'])->name('api.technicians.index');
 
-    // Spare Parts
-    Route::get('/spare-parts/dashboard', [SparePartsController::class, 'dashboard'])->name('spare-parts.dashboard');
-    Route::get('/spare-parts/overview', [SparePartsController::class, 'overview'])->name('spare-parts.overview');
+        Route::resource('devices', DevicesController::class);
+        Route::get('/devices/dashboard', [DevicesController::class, 'dashboard'])->name('devices.dashboard');
+        Route::get('/devices/overview', [DevicesController::class, 'overview'])->name('devices.overview');
 
-    // Tools
-    Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
-    Route::get('/tools/overview', [ToolsController::class, 'overview'])->name('tools.overview');
+        Route::resource('accessories', AccessoriesController::class);
+        Route::get('/accessories/dashboard', [AccessoriesController::class, 'dashboard'])->name('accessories.dashboard');
+        Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
 
-    // Products
-    Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
-    Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
+        Route::resource('spare_parts', SparePartsController::class);
+        Route::get('/spare-parts/dashboard', [SparePartsController::class, 'dashboard'])->name('spare-parts.dashboard');
+        Route::get('/spare-parts/overview', [SparePartsController::class, 'overview'])->name('spare-parts.overview');
 
-    // Data Entry
-    Route::get('/data-entries/input', [DataEntryController::class, 'input'])->name('data-entries.input');
-    Route::get('/data-entries/customer-input', [DataEntryController::class, 'customerInput'])->name('data-entries.customer-input');
+        Route::resource('tools', ToolsController::class);
+        Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
+        Route::get('/tools/overview', [ToolsController::class, 'overview'])->name('tools.overview');
+
+        Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
+        Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
+    });
+    Route::middleware(['auth'])->group(function () {Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
+        Route::get('/data-entries/bulk-input', [DataEntryController::class, 'bulkInput'])->name('data-entries.bulk-input');
+        Route::post('/data-entries', [DataEntryController::class, 'store'])->name('data-entries.store');
+        Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
+        Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
+        Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
+        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('api.categories.fields');
+    });
+
+    Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');
+    Route::put('test-modal-pages/{testModalPage}', [TestModalPageController::class,'update'])->name('test-modal-pages.update');
+    Route::post('test-modal-pages', [TestModalPageController::class,'store'])->name('test-modal-pages.store');
+    Route::get('test-modal-pages', [TestModalPageController::class,'index'])->name('test-modal-pages.index');
 
     // Setting
     Route::get('/settings', [SettingController::class, 'index'])->name('setting.index');

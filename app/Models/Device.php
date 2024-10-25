@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
-use App\Models\Default\Model;
+use Illuminate\Database\Eloquent\Model;
 
 class Device extends Model
-{
-    protected $fillable = [
-        'name',
-    ];
+{    protected $fillable = [
+    'brand',        // Brand of the device
+    'type',         // Type of device
+    'model',        // Model of the device
+    'sn',           // Serial number
+    'imei_1',      // IMEI 1
+    'imei_2',      // IMEI 2
+    'price',        // Price of the device
+];
 }

@@ -3,74 +3,39 @@
 namespace App\Http\Controllers;
 
 use App\Models\Device;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Product;
+use App\Models\Category; // Import the Category model
 use Illuminate\Http\Request;
-use Inertia\Response;
 
 class DevicesController extends Controller
 {
-    public function index(Request $request): Response
-    {
-        $query = Device::query();
-
-        if ($request->q) {
-            $query->where('name', 'like', "%{$request->q}%");
-        }
-
-        $query->orderBy('created_at', 'desc');
-
-        return inertia('Device/Index', [
-            'data' => $query->paginate(10),
-        ]);
-    }
-
-    public function create(): Response
-    {
-        return inertia('Device/Form');
-    }
-
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'sn' => 'required|string|max:255',
+            'imei_1' => 'nullable|string|max:255',
+            'imei_2' => 'nullable|string|max:255',
+            'price' => 'required|numeric',
+            'description' => 'nullable|string',
         ]);
 
-        Device::create([
-            'name' => $request->name
+        // Create the device
+        $device = Device::create($request->all());
+
+        // Find the category for 'Devices'
+        $category = Category::where('name', 'Devices')->first();
+
+        // Create a product entry for the device
+        Product::create([
+            'category_id' => $category->id, // Set the category_id
+            'type' => $category->name, // Set the type to the category name
+            'price' => $request->price,
+            'description' => $request->description,
         ]);
 
-        return redirect()->route('devices.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed created']);
-    }
-
-    public function edit(Device $device): Response
-    {
-        return inertia('Device/Form', [
-            'device' => $device,
-        ]);
-    }
-
-    public function update(Request $request, Device $device): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $device->fill([
-            'name' => $request->name,
-        ]);
-
-        $device->save();
-
-        return redirect()->route('devices.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed updated']);
-    }
-
-    public function destroy(Device $device): RedirectResponse
-    {
-        $device->delete();
-
-        return redirect()->route('devices.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed deleted']);
+        return redirect()->back()->with('success', 'Device created successfully.');
     }
 }

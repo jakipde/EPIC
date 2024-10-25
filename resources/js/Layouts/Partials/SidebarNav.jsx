@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     HiXMark,
@@ -11,13 +11,12 @@ import {
     HiClipboardDocumentList,
     HiWrenchScrewdriver,
     HiDevicePhoneMobile,
-    HiCpuChip ,
-
+    HiCpuChip,
 } from 'react-icons/hi2';
+
 import { IoMdHeadset } from 'react-icons/io';
 import { GiSolderingIron } from "react-icons/gi";
 import { FaToolbox } from "react-icons/fa";
-
 
 import { filterAllowedMenu } from './helpers.cjs';
 
@@ -37,47 +36,41 @@ const Icons = {
     GiSolderingIron,
     FaToolbox,
 };
+
 const ItemIcon = ({ icon, ...rest }) => {
     const Component = Icons[icon];
     return <Component {...rest} />;
 };
 
-const SidebarItem = ({ item }) => {
-    return (
-        <li>
-            <Link
-                href={item.route}
-                className={`${route().current(item.active) ? 'active' : ''}`}
-            >
-                {item.icon && (
-                    <ItemIcon
-                        icon={item.icon}
-                        className="h-5 w-5"
-                        aria-hidden="true"
-                    />
-                )}
-                {item.name}
-            </Link>
-        </li>
-    );
-};
+const SidebarItem = memo(({ item }) => (
+    <li>
+        <Link
+            href={item.route}
+            className={route().current(item.active) ? 'active' : ''}
+        >
+            {item.icon && (
+                <ItemIcon
+                    icon={item.icon}
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                />
+            )}
+            {item.name}
+        </Link>
+    </li>
+));
 
-const SidebarItemGroup = ({ item }) => {
+const SidebarItemGroup = memo(({ item }) => {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        item.items.some((subItem) => {
-            if (route().current(subItem.active)) {
-                setOpen(true);
-                return true;
-            }
-            return false;
-        });
+        const isActive = item.items.some(subItem => route().current(subItem.active));
+        setOpen(isActive);
     }, [item.items]);
 
     return (
         <li>
-            <details open={open}>
+            <details open={open} aria-expanded={open}>
                 <summary>
                     {item.icon && (
                         <ItemIcon
@@ -89,27 +82,25 @@ const SidebarItemGroup = ({ item }) => {
                     {item.name}
                 </summary>
                 <ul>
-                    {item.items.map((subItem) => (
+                    {item.items.map(subItem => (
                         <SidebarItem key={subItem.name} item={subItem} />
                     ))}
                 </ul>
             </details>
         </li>
     );
-};
+});
 
 export default function SidebarNav({ user, show, setShow }) {
     const {
         props: {
             app: { app_name },
-            navigation, // Get navigation directly from props
+            navigation,
         },
     } = usePage();
 
     return (
-        <div className={`${
-            show ? 'block' : 'hidden'
-        } flex flex-col h-screen overflow-y-auto transition-all duration-300 transform fixed top-0 start-0 bottom-0 z-[50] w-full md:w-64 bg-base-200 md:block md:translate-x-0 md:end-auto md:bottom-0`}>
+        <div className={`flex flex-col h-screen overflow-y-auto transition-all duration-300 fixed top-0 start-0 bottom-0 z-[50] w-full md:w-64 bg-base-200 ${show ? 'block' : 'hidden'} md:block`}>
             <div className="flex flex-col justify-between flex-1">
                 <div>
                     <div className="flex flex-row justify-between md:justify-center p-6">
@@ -120,7 +111,7 @@ export default function SidebarNav({ user, show, setShow }) {
                             {app_name}
                         </Link>
                         <div
-                            className="block md:hidden"
+                            className="block md:hidden cursor-pointer"
                             onClick={() => setShow(false)}
                         >
                             <HiXMark className="w-5 h-5" />
@@ -128,7 +119,7 @@ export default function SidebarNav({ user, show, setShow }) {
                     </div>
                     <nav className="w-full">
                         <ul className="menu rounded-box">
-                            {navigation.map((item) => (
+                            {navigation.map(item => (
                                 <div key={`item-${item.name}`}>
                                     {item.items ? (
                                         <SidebarItemGroup item={item} />
@@ -151,7 +142,7 @@ export default function SidebarNav({ user, show, setShow }) {
                 </div>
             </div>
             <div className="p-6">
-                <p className="text-sm font-light text-center bottom-4 left-4 text-base-content">
+                <p className="text-sm font-light text-center text-base-content">
                     {app_name} &copy; {new Date().getFullYear()}
                 </p>
             </div>

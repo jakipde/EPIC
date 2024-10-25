@@ -2,31 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tools;
+use App\Models\Tool ;
+use App\Models\Product;
+use App\Models\Category; // Import the Category model
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ToolsController extends Controller
 {
-    public function index()
-    {
-        return inertia('Tools/Index', [
-            'tools' => Tools::first(),
-        ]);
-    }
-
-    public function update(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'description' => 'nullable|string',
         ]);
 
-        Tools::updateOrCreate(
-            ['name' => $request->name],
-            ['name' => $request->name],
-        );
+        // Create the tool
+        $tool = Tool::create($request->all());
 
-        return redirect()->route('tools.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed updated']);
+        // Find the category for 'Tools'
+        $category = Category::where('name', 'Tools')->first();
+
+        // Create a product entry for the tool
+        Product::create([
+            'category_id' => $category->id, // Set the category_id
+            'type' => $category->name, // Set the type to the category name
+            'price' => $request->price,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->back()->with('success', 'Tool created successfully.');
     }
 }
