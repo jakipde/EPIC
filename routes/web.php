@@ -64,8 +64,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('repairs.show');
 
         Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
-
+        Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');
         Route::get('/technicians', [TechniciansController::class, 'index'])->name('api.technicians.index');
+        Route::post('/technicians', [TechniciansController::class, 'store'])->name('technicians.store');
+
 
         Route::resource('devices', DevicesController::class);
         Route::get('/devices/dashboard', [DevicesController::class, 'dashboard'])->name('devices.dashboard');

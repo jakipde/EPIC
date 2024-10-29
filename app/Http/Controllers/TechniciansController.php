@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Technician;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class TechniciansController extends Controller
 {
@@ -23,10 +24,7 @@ class TechniciansController extends Controller
 
         $technician = Technician::create($request->all());
 
-        return response()->json([
-            'message' => 'Technician created successfully.',
-            'technician' => $technician,
-        ], 201); // 201 Created
+        return redirect()->back()->with('success', 'Technician created successfully.');
     }
 
     public function update(Request $request, $id)

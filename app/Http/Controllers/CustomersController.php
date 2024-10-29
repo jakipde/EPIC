@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CustomersController extends Controller
 {
@@ -23,10 +24,7 @@ class CustomersController extends Controller
 
         $customer = Customer::create($request->all());
 
-        return response()->json([
-            'message' => 'Customer created successfully.',
-            'customer' => $customer,
-        ], 201); // 201 Created
+        return redirect()->back()->with('success', 'Customer created successfully.');
     }
 
     public function update(Request $request, $id)
