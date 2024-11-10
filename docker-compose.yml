@@ -1,109 +1,26 @@
+version: '3.8'
+
 services:
-  app:
-      image: ajikamaludin/php83user:latest
-      container_name: template-app
-      working_dir: /var/www/
-      volumes:
-        - ./:/var/www
-        - /etc/timezone:/etc/timezone:ro
-        - /etc/localtime:/etc/localtime:ro
-      mem_limit: 512m
-      mem_reservation: 128M
-      cpus: 0.5
-      networks:
-        - template
+  backend:
+    build:
+      context: .  # Build context for the Laravel backend and React frontend
+      dockerfile: Dockerfile  # Specify the Dockerfile
+    volumes:
+    - .:/var/www:cached
+    networks:
+      - my-network
+
   nginx:
-    image: nginx:1.17-alpine
-    container_name: template-nginx
-    ports:
-      - 8000:80
+    image: nginx:alpine
     volumes:
-      - ./:/var/www
       - ./default.conf:/etc/nginx/conf.d/default.conf
-    mem_limit: 512m
-    mem_reservation: 128M
-    cpus: 0.5
-    networks:
-      - template
-  mariadb:
-    image: mariadb:latest
-    container_name: template-mariadb
     ports:
-      - 3306:3306
-    volumes:
-      - mariadb:/var/lib/mysql
-      - ./database:/database
-    environment:
-      MARIADB_DATABASE: app
-      MARIADB_USER: app
-      MARIADB_PASSWORD: password
-      MARIADB_ROOT_PASSWORD: password
-    mem_limit: 512m
-    mem_reservation: 128M
-    cpus: 0.5
-    networks:
-      template:
-        ipv4_address: 10.255.255.99
-  phpmyadmin:
-    container_name: template-phpmyadmin
+      - "80:80"
     depends_on:
-      - mariadb
-    image: phpmyadmin
-    ports:
-      - "8090:80"
-    environment:
-      PMA_HOST: mariadb
-      MYSQL_ROOT_PASSWORD: password
-      UPLOAD_LIMIT: '2048M'
+      - backend
     networks:
-      - template
-  postgresql:
-    # image: postgres:latest
-    image: postgres:14-alpine3.17
-    container_name: template-postgres
-    restart: always
-    ports:
-      - 5432:5432
-    volumes:
-      - postgres:/var/lib/postgresql/data
-      - ./database:/database
-    environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: password
-    mem_limit: 512m
-    mem_reservation: 128M
-    cpus: 0.5
-    networks:
-      template:
-        ipv4_address: 10.255.255.96
-
-  build:
-    image: node:20-alpine
-    container_name: template-build
-    ports:
-      - 5173:5173
-    volumes:
-      - ./:/var/www
-    working_dir: /var/www
-    entrypoint: ["npm","run", "dev"]
-    mem_limit: 1024m
-    mem_reservation: 128M
-    cpus: 1
-    networks:
-      - template
-
-volumes:
-  mariadb: 
-    driver: local
-  postgres:
-    driver: local
+      - my-network
 
 networks:
-  template:
+  my-network:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-          - subnet: 10.255.255.0/24
-            gateway: 10.255.255.1

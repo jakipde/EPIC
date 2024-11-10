@@ -8,7 +8,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import ErrorBoundary from './Components/ErrorBaundry'
 
 const appName =
-    window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel'
+    window.document.getElementsByTagName('title')[0]?.innerText || 'Point Management'
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -7,7 +7,9 @@ export function ThemeSwitch() {
         'cupcake',
         'corporate',
         'lofi',
-    ]
+        'aqua',
+        'retro',
+    ];
 
     return (
         <div>

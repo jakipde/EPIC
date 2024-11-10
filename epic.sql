@@ -720,7 +720,7 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `key`, `value`, `type`, `deleted_at`, `created_at`, `updated_at`) VALUES
-('01JB1FG6SK7XNVJ7EEEPSR6BGH', 'app_name', 'Daisy UI App', 'text', NULL, NULL, NULL),
+('01JB1FG6SK7XNVJ7EEEPSR6BGH', 'app_name', 'Point Management', 'text', NULL, NULL, NULL),
 ('01JB1FG6T5ZG18V19TQY5QWJDZ', 'app_logo', '', 'image', NULL, NULL, NULL);
 
 -- --------------------------------------------------------

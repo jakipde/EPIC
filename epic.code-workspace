@@ -1,0 +1,9 @@
+{
+	"folders": [
+		{
+			"uri": "vscode-remote://wsl+ubuntu-24.04/var/www/epic"
+		}
+	],
+	"remoteAuthority": "wsl+ubuntu-24.04",
+	"settings": {}
+}
