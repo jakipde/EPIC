@@ -1,6 +1,6 @@
 import TextInput from '@/Components/DaisyUI/TextInput'
 import Checkbox from '@/Components/DaisyUI/Checkbox'
-import TextareaInput from '@/Components/DaisyUI/TextareaInput'
+import TextAreaInput from '@/Components/DaisyUI/TextAreaInput'
 import { SelectOptionArray } from '@/Components/DaisyUI/SelectInput'
 import { InputTypes } from '../constants'
 import FormInputDate from '@/Components/DaisyUI/FormInputDate'
