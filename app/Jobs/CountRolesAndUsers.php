@@ -14,23 +14,12 @@ class CountRolesAndUsers implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public $role_count;
+    public $user_count;
 
-    /**
-     * Execute the job.
-     */
-    public function handle(): void
+    public function handle()
     {
-        $role_count = Role::count();
-        $user_count = User::count();
-
-        // Store the counts in a cache or database for later retrieval
-        cache(['role_count' => $role_count, 'user_count' => $user_count]);
+        $this->role_count = Role::count();
+        $this->user_count = User::count();
     }
 }

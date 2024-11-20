@@ -7,7 +7,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import TextInput from '@/Components/DaisyUI/TextInput'
 import Button from '@/Components/DaisyUI/Button'
 import Card from '@/Components/DaisyUI/Card'
-import TextareaInput from '@/Components/DaisyUI/TextareaInput'
+import TextAreaInput from '@/Components/DaisyUI/TextAreaInput'
 import { SelectOptionObject } from '@/Components/DaisyUI/SelectInput'
 import { InputTypes, RequiredOptions } from '../constants'
 
