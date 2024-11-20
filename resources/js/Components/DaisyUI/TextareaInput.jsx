@@ -25,7 +25,7 @@ const BottomTextHelper = ({ error }) => {
  *     onChange={(e) => onChange(input, e.target.value)}
  * />
  */
-const TextareaInput = forwardRef((props, ref) => {
+const TextAreaInput = forwardRef((props, ref) => {
     const { label, error, ...inputProps } = props
 
     const defaultClassName = `textarea textarea-bordered w-full`
@@ -49,4 +49,4 @@ const TextareaInput = forwardRef((props, ref) => {
     )
 })
 
-export default TextareaInput
+export default TextAreaInput
