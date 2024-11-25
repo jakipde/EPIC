@@ -10,15 +10,24 @@ use Inertia\Inertia;
 
 class RepairsController extends Controller
 {
-    public function index()
+    public function dashboard()
     {
-        // Fetch all repairs from the database
-        $repairs = Repair::all(); // You can also use pagination if needed
+        // Fetch repairs data, you might want to paginate or filter this
+        $repairs = Repair::all(); // Adjust this as needed
 
-        // Return an Inertia response with the repairs data
+        // Render the dashboard view using Inertia
         return Inertia::render('Repairs/Dashboard', [
             'repairs' => $repairs,
         ]);
+    }
+
+    public function overview()
+    {
+        // Fetch any necessary data for the overview
+        $repairs = Repair::all(); // Example: Fetch all repairs
+
+        // Return the Inertia response with the overview data
+        return redirect()->route('repairs.overview')->with('success', 'Overview loaded successfully.');
     }
 
     public function create()
@@ -28,61 +37,61 @@ class RepairsController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'entry_date' => 'required|date',
-            'customer_id' => 'required|exists:customers,id',
-            'cashier' => 'required|string|max:255',
-            'phone_brand' => 'required|string|max:255',
-            'imei_sn_1' => 'nullable|string|max:255',
-            'imei_sn_2' => 'nullable|string|max:255',
-            'damage_description' => 'required|string',
-            'phone_accessories' => 'nullable|string',
-            'technician_id' => 'required|exists:technicians,id',
-            'under_warranty' => 'required|in:Yes,No', // Accepts "Yes" or "No"
-            'warranty_duration' => 'nullable|integer',
-            'exit_date' => 'nullable|date',
-            'print_type' => 'required|string|max:255',
+{
+    $request->validate([
+        'entry_date' => 'required|date',
+        'customer_id' => 'required|exists:customers,id',
+        'cashier' => 'required|string|max:255',
+        'phone_brand' => 'required|string|max:255',
+        'imei_sn_1' => 'nullable|string|max:255',
+        'imei_sn_2' => 'nullable|string|max:255',
+        'damage_description' => 'required|string',
+        'phone_accessories' => 'nullable|string',
+        'technician_id' => 'required|exists:technicians,id',
+        'under_warranty' => 'required|in:Yes,No',
+        'warranty_duration' => 'nullable|integer',
+        'exit_date' => 'nullable|date',
+        'print_type' => 'required|string|max:255',
+    ]);
+
+    try {
+        // Generate a unique invoice number
+        $invoiceNumber = strtoupper(uniqid('INV-'));
+
+        // Log the invoice data before creating it
+        Log::info('Creating invoice with data:', [
+            'date' => now(),
+            'customer_id' => $request->input('customer_id'),
+            'description' => 'Repair for ' . $request->input('phone_brand'),
+            'amount' => 0,
+            'invoice_number' => $invoiceNumber,
         ]);
 
-        try {
-            // Generate a unique invoice number
-            $invoiceNumber = strtoupper(uniqid('INV-'));
+        // Create the invoice
+        $invoice = Invoice::create([
+            'date' => now(),
+            'customer_id' => $request->input('customer_id'),
+            'description' => 'Repair for ' . $request->input('phone_brand'),
+            'amount' => 0,
+            'invoice_number' => $invoiceNumber,
+        ]);
 
-            // Log the invoice data before creating it
-            Log::info('Creating invoice with data:', [
-                'date' => now(),
-                'customer_id' => $request->input('customer_id'),
-                'description' => 'Repair for ' . $request->input('phone_brand'),
-                'amount' => 0,
-                'invoice_number' => $invoiceNumber, // Set the invoice number here
-            ]);
+        // Prepare repair data
+        $repairData = $request->all();
+        $repairData['invoice_number'] = $invoiceNumber;
+        $repairData['invoice_id'] = $invoice->id;
+        $repairData['under_warranty'] = $repairData['under_warranty'] === 'Yes';
 
-            // Create the invoice
-            $invoice = Invoice::create([
-                'date' => now(),
-                'customer_id' => $request->input('customer_id'),
-                'description' => 'Repair for ' . $request->input('phone_brand'),
-                'amount' => 0,
-                'invoice_number' => $invoiceNumber, // Ensure this is set
-            ]);
+        // Create the repair
+        $repair = Repair::create($repairData);
 
-            // Prepare repair data
-            $repairData = $request->all();
-            $repairData['invoice_number'] = $invoiceNumber; // Ensure this is set for the repair
-            $repairData['invoice_id'] = $invoice->id; // If you have a foreign key in the repairs table
-            $repairData['under_warranty'] = $repairData['under_warranty'] === 'Yes'; // Convert to boolean
-
-            // Create the repair
-            $repair = Repair::create($repairData);
-
-            // Return a valid Inertia response
-            return redirect()->route('repairs.dashboard')->with('success', 'Repair created successfully.');
-        } catch (\Exception $e) {
-            Log::error('Error saving repair: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Failed to save repair.']);
-        }
+        // Redirect to the dashboard after successful creation
+        return redirect()->route('repairs.dashboard')->with('success', 'Repair created successfully.');
+    } catch (\Exception $e) {
+        Log::error('Error saving repair: ' . $e->getMessage());
+        return redirect()->back()->withErrors(['error' => 'Failed to save repair.']);
     }
+}
 
     public function show($id)
     {
@@ -94,5 +103,4 @@ class RepairsController extends Controller
             'repair' => $repair,
         ]);
     }
-
 }

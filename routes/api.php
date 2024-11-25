@@ -3,14 +3,22 @@
 use App\Http\Controllers\Default\Api\SelectTableController;
 use App\Http\Controllers\Default\FileController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CustomersController; // Assuming you have this controller
-use App\Http\Controllers\TechniciansController; // Assuming you have this controller
+use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\RepairsController;
+use App\Http\Controllers\TechniciansController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // API routes
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+
+Route::group([], function () {
+    Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('api.repairs.dashboard'); // Dashboard route
+    Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store');
+    Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show'); // Show a specific repair
 });
 
 // Group for default API routes with JWT verification

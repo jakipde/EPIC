@@ -9,79 +9,38 @@ import Breadcrumb from '@/Components/DaisyUI/Breadcrumb'
 import Button from '@/Components/DaisyUI/Button'
 import Chart from 'react-apexcharts'
 
+const sparePartsData = [
+    { id: 1, name: 'Battery', quantity: 10, price: '$30' },
+    { id: 2, name: 'Screen', quantity: 5, price: '$100' },
+    { id: 3, name: 'Motherboard', quantity: 2, price: '$200' },
+];
 
-export default function Page(action = '',) {
-
-        {!isEmpty(action) && (
-        <>
-            {isArray(action) ? (
-                action.map((a, i) => (
-                    <Breadcrumb.Item key={i}>
-                        {a}
-                    </Breadcrumb.Item>
-                ))
-            ) : (
-                <Breadcrumb.Item>{action}</Breadcrumb.Item>
-            )}
-        </>
-    )}
+export default function SparePartsPage() {
     return (
-        <AuthenticatedLayout page={'System'} action={'Repairs'}>
-            <Head title="Repairs" />
-
-            <div>
+        <div className="w-full flex flex-col gap-2">
             <Card>
-                        <div className="font-bold text-2xl">
-                            Sales Performance
-                        </div>
-                        <Chart
-                            options={{
-                                chart: {
-                                    type: 'area',
-                                },
-                                dataLabels: {
-                                    enabled: false,
-                                },
-                                stroke: {
-                                    curve: 'smooth',
-                                },
-                                grid: {
-                                    show: false,
-                                },
-                                xaxis: {
-                                    type: 'datetime',
-                                    categories: [
-                                        '2024-09-19T00:00:00.000Z',
-                                        '2024-09-19T01:30:00.000Z',
-                                        '2024-09-19T02:30:00.000Z',
-                                        '2024-09-19T03:30:00.000Z',
-                                        '2024-09-19T04:30:00.000Z',
-                                        '2024-09-19T05:30:00.000Z',
-                                        '2024-09-19T06:30:00.000Z',
-                                    ],
-                                },
-                                tooltip: {
-                                    x: {
-                                        format: 'dd/MM/yy HH:mm',
-                                    },
-                                },
-                            }}
-                            series={[
-                                {
-                                    name: 'Team A',
-                                    data: [31, 40, 28, 51, 42, 109, 100],
-                                },
-                                {
-                                    name: 'Team B',
-                                    data: [11, 32, 45, 32, 34, 52, 41],
-                                },
-                            ]}
-                            type="area"
-                            width="100%"
-                            height="235px"
-                        />
-                    </Card>
-            </div>
-        </AuthenticatedLayout>
-    )
+                <div className="font-bold text-2xl">Spare Parts Inventory</div>
+                <table className="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr>
+                            <th className="border border-gray-300 p-2">ID</th>
+                            <th className="border border-gray-300 p-2">Name</th>
+                            <th className="border border-gray-300 p-2">Quantity</th>
+                            <th className="border border-gray-300 p-2">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {sparePartsData.map((part) => (
+                            <tr key={part.id}>
+                                <td className="border border-gray-300 p-2">{part.id}</td>
+                                <td className="border border-gray-300 p-2">{part.name}</td>
+                                <td className="border border-gray-300 p-2">{part.quantity}</td>
+                                <td className="border border-gray-300 p-2">{part.price}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Card>
+        </div>
+    );
 }

@@ -58,7 +58,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::middleware(['auth'])->group(function () {
-        Route::resource('repairs', RepairsController::class);
+        Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
+        Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
         Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
         Route::get('/repairs/overview', [RepairsController::class, 'overview'])->name('repairs.overview');
         Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('repairs.show');
