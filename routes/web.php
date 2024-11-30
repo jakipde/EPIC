@@ -64,7 +64,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/repairs/overview', [RepairsController::class, 'overview'])->name('repairs.overview');
         Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('repairs.show');
 
-        Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
         Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');
         Route::get('/technicians', [TechniciansController::class, 'index'])->name('api.technicians.index');
         Route::post('/technicians', [TechniciansController::class, 'store'])->name('technicians.store');
