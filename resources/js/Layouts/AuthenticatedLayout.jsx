@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
-import { Toaster } from 'sonner';
-import { isArray, isEmpty } from 'lodash';
-import { themeChange } from 'theme-change';
-import { HiBars3 } from 'react-icons/hi2';
+import React, { useState, useEffect } from 'react'
+import { Link, router, usePage } from '@inertiajs/react'
+import { Toaster } from 'sonner'
+import { isArray, isEmpty } from 'lodash'
+import { themeChange } from 'theme-change'
+import { HiBars3 } from 'react-icons/hi2'
 
-import SidebarNav from './Partials/SidebarNav';
-import Breadcrumb from '@/Components/DaisyUI/Breadcrumb';
-import { ThemeSwitch, DarkSwitch } from '@/Components/DaisyUI/ThemeSwitch';
-import { showToast } from '@/utils';
-import Modal from './ShortcutModal';
+import SidebarNav from './Partials/SidebarNav'
+import Breadcrumb from '@/Components/DaisyUI/Breadcrumb'
+import { ThemeSwitch, DarkSwitch } from '@/Components/DaisyUI/ThemeSwitch'
+import { showToast } from '@/utils'
 
 export default function AuthenticatedLayout({
     children,
@@ -18,20 +17,20 @@ export default function AuthenticatedLayout({
 }) {
     const {
         props: { auth, flash },
-    } = usePage();
-    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+    } = usePage()
+    const [showingNavigationDropdown, setShowingNavigationDropdown] =
+        useState(false)
 
     useEffect(() => {
         if (flash.message !== null) {
-            showToast(flash.message.message, flash.message.type);
+            showToast(flash.message.message, flash.message.type)
         }
-    }, [flash]);
+    }, [flash])
 
     useEffect(() => {
-        themeChange(false);
+        themeChange(false)
         // 👆 false parameter is required for react project
-    }, []);
+    }, [])
 
     return (
         <div className="min-h-screen">
@@ -127,13 +126,6 @@ export default function AuthenticatedLayout({
                 <div className="p-4">{children}</div>
                 <div className="mb-4"></div>
             </main>
-            <button
-                onClick={() => setIsModalOpen(true)} // Open modal on click
-                className="fixed bottom-4 right-4 p-4 rounded-full bg-blue-500 text-white shadow-lg"
-            >
-                +
-            </button>
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} /> {/* Modal component */}
             <Toaster
                 theme="system"
                 richColors="true"
@@ -143,5 +135,5 @@ export default function AuthenticatedLayout({
                 }}
             />
         </div>
-    );
+    )
 }
