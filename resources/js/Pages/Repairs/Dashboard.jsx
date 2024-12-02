@@ -3,11 +3,14 @@ import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
+import axios from 'axios';
+import EditRepairModal from './EditRepairModal'; // Import the modal component
 
-const Dashboard = ({ repairs }) => {
+const Dashboard = ({ repairs, categories }) => {
     const [search, setSearch] = useState('');
+    const [selectedRepair, setSelectedRepair] = useState(null); // State to hold the selected repair for editing
+    const [isModalOpen, setModalOpen] = useState(false); // State to control modal visibility
 
-    // Filter repairs based on search input
     const filteredRepairs = repairs.filter(repair => {
         const customerId = repair.customer_id ? String(repair.customer_id).toLowerCase() : '';
         const phoneBrand = repair.phone_brand ? String(repair.phone_brand).toLowerCase() : '';
@@ -19,6 +22,32 @@ const Dashboard = ({ repairs }) => {
             damageDescription.includes(search.toLowerCase())
         );
     });
+
+    const handleEdit = (repair) => {
+        setSelectedRepair(repair); // Set the selected repair for editing
+        setModalOpen(true); // Open the modal
+    };
+
+    const handleCloseModal = () => {
+        setModalOpen(false); // Close the modal
+        setSelectedRepair(null); // Reset selected repair
+    };
+
+    const handleDelete = async (repair) => {
+        const confirmDelete = window.confirm(`Are you sure you want to delete repair with ID: ${repair.id}?`);
+        if (confirmDelete) {
+            try {
+                const response = await axios.delete(`/api/repairs/${repair.id}`); // Ensure this URL is correct
+                if (response.data.success) {
+                    alert('Repair deleted successfully');
+                    // Optionally, update the state to remove the deleted repair
+                }
+            } catch (error) {
+                console.error('Error deleting repair:', error);
+                alert('Failed to delete repair.');
+            }
+        }
+    };
 
     return (
         <AuthenticatedLayout page={'Repairs'} action={'Dashboard'}>
@@ -50,6 +79,7 @@ const Dashboard = ({ repairs }) => {
                                 <th>Damage Description</th>
                                 <th>Technician ID</th>
                                 <th>Invoice Number</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,12 +92,25 @@ const Dashboard = ({ repairs }) => {
                                     <td>{repair.damage_description}</td>
                                     <td>{repair.technician_id}</td>
                                     <td>{repair.invoice_number}</td>
+                                    <td>
+                                        <Button size="sm" onClick={() => handleEdit(repair)}>Edit</Button>
+                                        <Button size="sm" onClick={() => handleDelete(repair)} type="danger">Delete</Button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* Edit Repair Modal */}
+            {isModalOpen && (
+                <EditRepairModal
+                    modalState={{ isOpen: isModalOpen, data: selectedRepair }}
+                    categories={categories}
+                    onClose={handleCloseModal}
+                />
+            )}
         </AuthenticatedLayout>
     );
 };

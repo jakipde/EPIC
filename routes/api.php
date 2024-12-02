@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::group([], function () {
     Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('api.repairs.dashboard'); // Dashboard route
     Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store');
+    Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.destroy');
     Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show'); // Show a specific repair
 });
 

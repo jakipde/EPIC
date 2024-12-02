@@ -63,6 +63,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
         Route::get('/repairs/overview', [RepairsController::class, 'overview'])->name('repairs.overview');
         Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('repairs.show');
+        Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
+        Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.destroy');
 
         Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
         Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');
