@@ -42,10 +42,15 @@ module.exports = {
         './resources/views/**/*.blade.php',
         './resources/js/**/*.jsx',
         './node_modules/react-tailwindcss-datepicker/dist/index.esm.js',
+        "./resources/**/*.{html,js,jsx,ts,tsx}",
+        "./node_modules/flowbite/**/*.js",
     ],
 
     theme: {
         extend: {
+            colors: {
+                'scrollbar': '#003bf1',
+            },
             fontFamily: {
                 sans: ['figtree', ...defaultTheme.fontFamily.sans],
             },
@@ -56,6 +61,7 @@ module.exports = {
         require('@tailwindcss/typography'),
         require('@tailwindcss/forms'),
         require('daisyui'),
+        require('tailwind-scrollbar'),
     ],
 
     daisyui: {
@@ -69,3 +75,4 @@ module.exports = {
         themeRoot: ':root',
     },
 }
+

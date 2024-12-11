@@ -59,7 +59,7 @@ class PermissionConstant
         // Product Permissions
         ['label' => 'View Products', 'name' => 'view-products'],
         ['label' => 'View Tools', 'name' => 'view-tools'],
-        ['label' => 'View Spare Parts', 'name' => 'view-spare-parts'],
+        ['label' => 'View Spare Parts Dashboard', 'name' => 'view-repairs-dashboard'],
 
         // Accessories Permissions
         ['label' => 'Create Accessories', 'name' => 'create-accessories'],

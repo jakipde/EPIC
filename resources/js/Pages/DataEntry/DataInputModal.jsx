@@ -92,7 +92,7 @@ export default function DataInputModal(props) {
                 break;
             case '6':
                 action = modalState.data ? put : post;
-                routePath = modalState.data ? route('spare_parts.update', modalState.data.id) : route('spare_parts.store');
+                routePath = modalState.data ? route('spareparts.update', modalState.data.id) : route('spareparts.store');
                 break;
             case '7':
                 action = modalState.data ? put : post;

@@ -6,11 +6,32 @@ use App\Models\SparePart;
 use App\Models\Product;
 use App\Models\Category; // Import the Category model
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class SparePartsController extends Controller
 {
+
+public function dashboard()
+{
+    // Custom dashboard logic for listing spare parts
+    $spareparts = SparePart::all();
+    return Inertia::render('SparePart/Dashboard', [
+        'spareparts' => $spareparts,
+    ]);
+}
+
+    public function show($id)
+    {
+    $spareparts = SparePart::findOrFail($id); // Fetch the spare part by ID
+
+    return Inertia::render('SparePart/Dashboard', [
+        'spareparts' => $spareparts,
+    ]);
+    }
+
     public function store(Request $request)
     {
+        // Validation for creating a new spare part
         $request->validate([
             'name' => 'required|string|max:255',
             'brand' => 'required|string|max:255',
@@ -28,12 +49,12 @@ class SparePartsController extends Controller
 
         // Create a product entry for the spare part
         Product::create([
-            'category_id' => $category->id, // Set the category_id
-            'type' => $category->name, // Set the type to the category name
+            'category_id' => $category->id,
+            'type' => $category->name,
             'price' => $request->price,
             'description' => $request->description,
         ]);
 
-        return redirect()->back()->with('success', 'Spare part created successfully.');
+return redirect()->route('sparepart.dashboard')->with('success', 'Spare part created successfully.');
     }
 }

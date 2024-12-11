@@ -5,6 +5,7 @@ import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import axios from 'axios';
 import EditRepairModal from './EditRepairModal'; // Import the modal component
+import Accordion from '@/Components/DaisyUI/Accordion'; // Import the Accordion component
 
 const Dashboard = ({ repairs, categories }) => {
     const [search, setSearch] = useState('');
@@ -68,6 +69,8 @@ const Dashboard = ({ repairs, categories }) => {
                         />
                     </div>
                 </div>
+
+                {/* Repairs Table */}
                 <div className="overflow-x-auto">
                     <table className="table mb-4">
                         <thead>
@@ -94,23 +97,53 @@ const Dashboard = ({ repairs, categories }) => {
                                     <td>{repair.invoice_number}</td>
                                     <td>
                                         <Button size="sm" onClick={() => handleEdit(repair)}>Edit</Button>
-                                        <Button size="sm" onClick={() => handleDelete(repair)} type="danger">Delete</Button>
+                                        <Button size="sm" type="danger" onClick={() => handleDelete(repair)}>Delete</Button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-            </div>
 
-            {/* Edit Repair Modal */}
-            {isModalOpen && (
-                <EditRepairModal
-                    modalState={{ isOpen: isModalOpen, data: selectedRepair }}
-                    categories={categories}
-                    onClose={handleCloseModal}
-                />
-            )}
+                {/* Categories Accordion */}
+                {Array.isArray(categories) && categories.length > 0 ? (
+                    <Accordion>
+                        {categories.map((category) => (
+                            <Accordion.Item key={category.id} title={category.name}>
+                                {filteredRepairs
+                                    .filter(repair => repair.category_id === category.id)
+                                    .map(repair => (
+                                        <div key={repair.id} className="p-2 border-b">
+                                            <p>{repair.damage_description}</p>
+                                            <Button size="sm" onClick={() => handleEdit(repair)}>Edit</Button>
+                                            <Button size="sm" type="danger" onClick={() => handleDelete(repair)}>Delete</Button>
+                                        </div>
+                                    ))}
+                                {/* Displaying additional information for the category */}
+                                <div className="mt-2">
+                                    <p>Additional Info:</p>
+                                    <ul>
+                                        <li>Pengeluaran Sparepart Toko: 0.00</li>
+                                        <li>Pengeluaran Sparepart Luar: 0.00</li>
+                                        <li>Penghasilan: 0.00</li>
+                                        <li>Laba: 0.00</li>
+                                    </ul>
+                                </div>
+                            </Accordion.Item>
+                        ))}
+                    </Accordion>
+                ) : (
+                    <p>No categories available.</p>
+                )}
+
+                {/* Modal for Editing Repair */}
+                {isModalOpen && (
+                    <EditRepairModal
+                        repair={selectedRepair}
+                        onClose={handleCloseModal}
+                    />
+                )}
+            </div>
         </AuthenticatedLayout>
     );
 };

@@ -80,9 +80,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/accessories/dashboard', [AccessoriesController::class, 'dashboard'])->name('accessories.dashboard');
         Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
 
-        Route::resource('spare_parts', SparePartsController::class);
-        Route::get('/spare-parts/dashboard', [SparePartsController::class, 'dashboard'])->name('spare-parts.dashboard');
-        Route::get('/spare-parts/overview', [SparePartsController::class, 'overview'])->name('spare-parts.overview');
+        Route::get('/spareparts/dashboard', [SparePartsController::class, 'dashboard'])->name('spareparts.dashboard');
+        Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
+        Route::resource('spareparts', SparePartsController::class);
 
         Route::resource('tools', ToolsController::class);
         Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
@@ -97,7 +97,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
         Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
         Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
-        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('api.categories.fields');
+Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
     });
 
     Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');

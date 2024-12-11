@@ -16,9 +16,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::group([], function () {
-    Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('api.repairs.dashboard'); // Dashboard route
     Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store');
-    Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.destroy');
+Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete');
     Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show'); // Show a specific repair
 });
 
@@ -34,7 +33,3 @@ Route::middleware(['JwtCustomApiVerification::class'])
 Route::group([], function () {
     Route::get('/categories/{id}/fields', [CategoryController::class, 'getFields'])->name('api.categories.fields');
 });
-
-// Additional routes for customers and technicians
-Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
-Route::get('/technicians', [TechniciansController::class, 'index'])->name('api.technicians.index');

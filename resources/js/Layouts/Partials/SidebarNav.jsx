@@ -63,15 +63,17 @@ const SidebarItem = memo(({ item }) => (
 const SidebarItemGroup = memo(({ item }) => {
     const [open, setOpen] = useState(false);
 
+    // This effect ensures the parent (level 1) is open based on route activity
     useEffect(() => {
         const isActive = item.items.some(subItem => route().current(subItem.active));
-        setOpen(isActive);
+        setOpen(isActive); // Open if any subitem is active
     }, [item.items]);
 
     return (
         <li>
-            <details open={open} aria-expanded={open}>
-                <summary>
+            {/* Avoid toggling the parent onClick */}
+            <details open={open}>
+                <summary className="cursor-pointer">
                     {item.icon && (
                         <ItemIcon
                             icon={item.icon}
@@ -79,11 +81,18 @@ const SidebarItemGroup = memo(({ item }) => {
                             aria-hidden="true"
                         />
                     )}
-                    {item.name}
+                    <span>{item.name}</span>
                 </summary>
-                <ul>
+                <ul className="pl-4">
                     {item.items.map(subItem => (
-                        <SidebarItem key={subItem.name} item={subItem} />
+                        <div key={subItem.name}>
+                            {/* Recursively render child items */}
+                            {subItem.items ? (
+                                <SidebarItemGroup item={subItem} />
+                            ) : (
+                                <SidebarItem item={subItem} />
+                            )}
+                        </div>
                     ))}
                 </ul>
             </details>
@@ -100,7 +109,7 @@ export default function SidebarNav({ user, show, setShow }) {
     } = usePage();
 
     return (
-        <div className={`flex flex-col h-screen overflow-y-auto transition-all duration-300 fixed top-0 start-0 bottom-0 z-[50] w-full md:w-64 bg-base-200 ${show ? 'block' : 'hidden'} md:block`}>
+        <div className={`flex flex-col h-screen overflow-y-auto transition-all duration-300 fixed top-0 start-0 bottom-0 z-[50] w-full md:w-64 bg-base-200 ${show ? 'block' : 'hidden'} md:block scrollbar-thin custom-scrollbar`}>
             <div className="flex flex-col justify-between flex-1">
                 <div>
                     <div className="flex flex-row justify-between md:justify-center p-6">
