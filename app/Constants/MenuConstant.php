@@ -74,9 +74,9 @@ class MenuConstant
                             [
                                 'name' => 'Warranty & Reporting',
                                 'show' => true,
-                                'route' => route('spareparts.dashboard'),
-                                'active' => 'spareparts.dashboard',
-                                'permission' => 'view-spareparts-dashboard',
+                                'route' => route('dashboard'),
+                                'active' => 'dashboard',
+                                'permission' => 'dashboard',
                             ],
                         ],
                     ],

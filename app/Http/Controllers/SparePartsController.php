@@ -10,23 +10,27 @@ use Inertia\Inertia;
 
 class SparePartsController extends Controller
 {
+    public function dashboard()
+    {
+        // Fetch all spare parts
+        $spareparts = SparePart::all();
 
-public function dashboard()
-{
-    // Custom dashboard logic for listing spare parts
-    $spareparts = SparePart::all();
-    return Inertia::render('SparePart/Dashboard', [
-        'spareparts' => $spareparts,
-    ]);
-}
+        // Fetch all categories
+        $categories = Category::all();
+
+        return Inertia::render('SparePart/Dashboard', [
+            'spareparts' => $spareparts,
+            'categories' => $categories, // Pass categories to the view
+        ]);
+    }
 
     public function show($id)
     {
-    $spareparts = SparePart::findOrFail($id); // Fetch the spare part by ID
+        $spareparts = SparePart::findOrFail($id); // Fetch the spare part by ID
 
-    return Inertia::render('SparePart/Dashboard', [
-        'spareparts' => $spareparts,
-    ]);
+        return Inertia::render('SparePart/Dashboard', [
+            'spareparts' => $spareparts,
+        ]);
     }
 
     public function store(Request $request)
@@ -55,6 +59,6 @@ public function dashboard()
             'description' => $request->description,
         ]);
 
-return redirect()->route('sparepart.dashboard')->with('success', 'Spare part created successfully.');
+        return redirect()->route('sparepart.dashboard')->with('success', 'Spare part created successfully.');
     }
 }

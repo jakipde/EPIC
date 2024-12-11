@@ -56,6 +56,11 @@ const Dashboard = ({ repairs, categories }) => {
 
             <div>
                 <div className="flex flex-row justify-between mb-4">
+                    <div className="flex flex-row gap-1">
+                        <Button size="sm" type="primary">
+                            Add Repair
+                        </Button>
+                    </div>
                     <div className="flex items-center">
                         <SearchInput
                             onChange={(e) => setSearch(e.target.value)}

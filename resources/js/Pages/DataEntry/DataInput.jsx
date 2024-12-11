@@ -12,7 +12,7 @@ import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import Dropdown from '@/Components/DaisyUI/Dropdown';
 import Card from '@/Components/DaisyUI/Card';
-import DataInputModal from './DataInputModal';
+import DataInputModal from '../../Components/DaisyUI/DataInputModal';
 
 export default function DataInput(props) {
     const {
