@@ -65,14 +65,14 @@ class MenuConstant
                         'icon' => 'HiCpuChip',
                         'items' => [
                             [
-                                'name' => 'Dashboard',
+                                'name' => 'Data Insights',
                                 'show' => true,
                                 'route' => route('spareparts.dashboard'),
                                 'active' => 'spareparts.dashboard',
                                 'permission' => 'view-spareparts-dashboard',
                             ],
                             [
-                                'name' => 'List',
+                                'name' => 'Warranty & Reporting',
                                 'show' => true,
                                 'route' => route('spareparts.dashboard'),
                                 'active' => 'spareparts.dashboard',
