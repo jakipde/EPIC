@@ -81,8 +81,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
 
         Route::get('/spareparts/dashboard', [SparePartsController::class, 'dashboard'])->name('spareparts.dashboard');
-        Route::resource('spareparts', SparePartsController::class)->except(['index', 'create']); // Exclude index and create if you don't need them
-                Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
+        Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
+        Route::resource('spareparts', SparePartsController::class);
 
         Route::resource('tools', ToolsController::class);
         Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
@@ -97,8 +97,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
         Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
         Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
-        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
-        Route::get('/categories/{categoryId}/fields', [CategoryController::class, 'getFields']);
+Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
     });
 
     Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');

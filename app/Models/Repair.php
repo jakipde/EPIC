@@ -25,9 +25,4 @@ class Repair extends Model
         'print_type',
         'invoice_number'
     ];
-
-    public function category()
-    {
-        return $this->morphOne(Category::class, 'categoryData');
-    }
 }
