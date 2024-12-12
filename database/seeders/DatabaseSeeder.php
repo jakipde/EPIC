@@ -16,6 +16,8 @@ public function run()
 {
     $this->call([
         DefaultSeeder::class,
+        CategorySeeder::class,
+        CategoryFieldSeeder::class,
     ]);
 }
 }

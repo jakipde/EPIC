@@ -6,32 +6,39 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::create('repairs', function (Blueprint $table) {
-            $table->id();
-            $table->date('entry_date');
-            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
-            $table->string('invoice_number')->nullable();
-            $table->foreignId('cashier_id')->constrained('employees')->onDelete('cascade');
-            $table->string('phone_brand');
-            $table->string('imei_sn_1')->nullable();
-            $table->string('imei_sn_2')->nullable();
-            $table->text('damage_description');
-            $table->text('phone_accessories')->nullable();
-            $table->foreignId('technician_id')->constrained('employees')->onDelete('cascade');
-            $table->boolean('under_warranty')->default(false);
-            $table->integer('warranty_duration')->nullable()->default(0);
-            $table->decimal('cost_estimate', 10, 2)->nullable();
-            $table->string('repair_status')->default('pending');
-            $table->date('exit_date')->nullable();
-            $table->text('notes')->nullable();
-            $table->string('print_type')->nullable();
-            $table->softDeletes();
-            $table->timestamps();
+            $table->id(); // Auto-incrementing primary key
+            $table->date('entry_date'); // Entry date of the repair
+            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade'); // Foreign key to customers
+            $table->string('invoice_number')->nullable(); // Invoice number associated with the repair
+            $table->string('cashier'); // Cashier's name
+            $table->string('phone_brand'); // Brand of the phone
+            $table->string('imei_sn_1')->nullable(); // IMEI number 1
+            $table->string('imei_sn_2')->nullable(); // IMEI number 2
+            $table->text('damage_description'); // Damage description
+            $table->text('phone_accessories')->nullable(); // Phone accessories
+            $table->foreignId('technician_id')->constrained('technicians')->onDelete('cascade'); // Technician's name
+            $table->boolean('under_warranty'); // Under warranty status
+            $table->integer('warranty_duration')->nullable(); // Warranty duration
+            $table->date('exit_date')->nullable(); // Exit date
+            $table->string('print_type'); // Print type
+            $table->softDeletes(); // This adds the deleted_at column
+            $table->timestamps(); // created_at and updated_at
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
         Schema::dropIfExists('repairs');

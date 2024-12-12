@@ -6,18 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $table = 'data_entries_category';
+    protected $table = 'data_entries_category'; // Specify the table name if not following conventions
 
-    protected $fillable = ['name'];
-
-    // Polymorphic relationship to category-specific data (e.g., repairs, devices)
-    public function categoryData()
+    public function dataEntries()
     {
-        return $this->morphTo();
+        return $this->hasMany(DataEntry::class, 'data_entries_category_id');
     }
 
     public function fields()
     {
-        return $this->hasMany(CategoryField::class, 'data_entries_category_id');
+        return $this->hasMany(CategoryField::class, 'data_entries_category_id'); // Ensure the foreign key is correct
     }
 }
