@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { router, Head } from '@inertiajs/react';
-import { usePrevious } from 'react-use';
-import { HiPencil, HiTrash } from 'react-icons/hi2';
 import { useModalState } from '@/hooks';
+import { HiPencil, HiTrash } from 'react-icons/hi2';
 
-import HasPermission from '@/Components/Common/HasPermission';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Pagination from '@/Components/DaisyUI/Pagination';
 import ModalConfirm from '@/Components/DaisyUI/ModalConfirm';
@@ -12,22 +10,16 @@ import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import Dropdown from '@/Components/DaisyUI/Dropdown';
 import Card from '@/Components/DaisyUI/Card';
-import DataInputModal from '../../Components/DaisyUI/DataInputModal';
+import DataInputModal from '@/Components/DaisyUI/DataInputModal';
 
-export default function DataInput(props) {
-    const {
-        data: { links, data },
-        categories,
-    } = props;
-
+export default function DataInput({ data: { links, data }, categories }) {
     const [search, setSearch] = useState('');
-    const preValue = usePrevious(search);
-
     const confirmModal = useModalState();
     const formModal = useModalState();
 
     const toggleFormModal = (dataEntry = null) => {
-        formModal.toggle(); // Open the modal
+        formModal.setData(dataEntry);
+        formModal.toggle();
     };
 
     const handleDeleteClick = (dataEntry) => {
@@ -46,65 +38,77 @@ export default function DataInput(props) {
     const params = { q: search };
 
     useEffect(() => {
-        if (preValue !== search && search !== '') {
-            router.get(route(route().current()), { q: search }, {
-                replace: true,
-                preserveState: true,
-            });
-        }
-    }, [search, preValue]);
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('/categories');
+                const categoryData = await response.json();
+                setCategories(categoryData);
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     return (
-        <AuthenticatedLayout page={'Data Entry'} action={'Data Input'}>
+        <AuthenticatedLayout page="Data Entry" action="Data Input">
             <Head title="Data Input" />
-
-            <div>
-                <Card>
-                    <div className="flex justify-between mb-4">
-                        <HasPermission p="create-data-entry">
-                            <Button size="sm" onClick={() => toggleFormModal()} type="primary">
-                                Add Entry
-                            </Button>
-                        </HasPermission>
-                        <div className="flex items-center">
-                            <SearchInput onChange={(e) => setSearch(e.target.value)} value={search} />
-                        </div>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="table mb-4">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th />
+            <Card>
+                <div className="flex justify-between mb-4">
+                    <Button size="sm" onClick={() => toggleFormModal()} type="primary">
+                        Add Entry
+                    </Button>
+                    <SearchInput value={search} onChange={(e) => setSearch(e.target.value)} />
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="table mb-4">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map((entry) => (
+                                <tr key={entry.id}>
+                                    <td>{entry.name}</td>
+                                    <td>{entry.category?.name || 'N/A'}</td>
+                                    <td className="text-end">
+                                        <Dropdown>
+                                            <Dropdown.Item onClick={() => toggleFormModal(entry)}>
+                                                <HiPencil /> Edit
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => handleDeleteClick(entry)}>
+                                                <HiTrash /> Delete
+                                            </Dropdown.Item>
+                                        </Dropdown>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                            {data.map((entry) => {
-                                console.log("Entry being rendered:", entry); // Log each entry
-                                return (
-                                    <tr key={entry.id}>
-                                        <td>{entry.name}</td>
-                                        <td>{entry.category?.name || 'N/A'}</td>
-                                        <td className="text-end">
-                                            <Dropdown>
-                                                <Dropdown.Item onClick={() => toggleFormModal(entry)}>
-                                                    <div className="flex space-x-1 items-center">
-                                                        <HiPencil />
-                                                        <div>Edit</div>
-                                                    </div>
-                                                </Dropdown.Item>
-                                            </Dropdown>
-                                        </td>
-                                    </tr> ); })}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="w-full overflow-x-auto flex lg:justify-center">
-                        <Pagination links={links} params={params} />
-                    </div>
-                </Card>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <Pagination links={links} params={params} />
+            </Card>
+
+            {/* Display the fetched categories as a list */}
+            <div className="mt-6">
+                <h3 className="text-lg font-bold mb-4">Fetched Categories:</h3>
+                <ul>
+                    {categories.length > 0 ? (
+                        categories.map((category) => (
+                            <li key={category.id}>
+                                <strong>{category.name}</strong> (ID: {category.id})
+                            </li>
+                        ))
+                    ) : (
+                        <p>No categories found.</p>
+                    )}
+                </ul>
             </div>
+
             <ModalConfirm onConfirm={onDelete} modalState={confirmModal} />
             <DataInputModal modalState={formModal} categories={categories} />
         </AuthenticatedLayout>
