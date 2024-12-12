@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
-            $table->foreignId('category_id')->nullable()->constrained('data_entries_category')->onDelete('set null'); // Foreign key to categories
             $table->string('type'); // Type of product (e.g., device, accessory, etc.)
             $table->decimal('price', 10, 2); // Price of the product
             $table->text('description')->nullable(); // Description of the product
