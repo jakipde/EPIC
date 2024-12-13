@@ -17,4 +17,6 @@ class Category extends Model
     {
         return $this->hasMany(CategoryField::class, 'data_entries_category_id'); // Ensure the foreign key is correct
     }
+
 }
+
