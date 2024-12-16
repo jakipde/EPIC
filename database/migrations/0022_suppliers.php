@@ -8,15 +8,17 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('data_entries_category', function (Blueprint $table) {
+        Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
+            $table->string('address');
+            $table->string('phone_number');
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('data_entries_category');
+        Schema::dropIfExists('suppliers');
     }
 };

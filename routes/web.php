@@ -57,7 +57,6 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::middleware(['auth'])->group(function () {
         Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
         Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
         Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
@@ -91,15 +90,14 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
         Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
-    });
-    Route::middleware(['auth'])->group(function () {Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
+      
+        Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
         Route::get('/data-entries/bulk-input', [DataEntryController::class, 'bulkInput'])->name('data-entries.bulk-input');
         Route::post('/data-entries', [DataEntryController::class, 'store'])->name('data-entries.store');
         Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
         Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
         Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
-Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
-    });
+        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
 
     Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');
     Route::put('test-modal-pages/{testModalPage}', [TestModalPageController::class,'update'])->name('test-modal-pages.update');

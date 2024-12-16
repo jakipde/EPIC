@@ -8,9 +8,10 @@ class Category extends Model
 {
     protected $table = 'data_entries_category'; // Specify the table name if not following conventions
 
-    public function dataEntries()
+    // Polymorphic relationship to category-specific data (e.g., repairs, devices)
+    public function categoryData()
     {
-        return $this->hasMany(DataEntry::class, 'data_entries_category_id');
+        return $this->morphTo();
     }
 
     public function fields()

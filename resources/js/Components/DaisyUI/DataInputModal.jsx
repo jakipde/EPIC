@@ -50,6 +50,35 @@ export default function DataInputModal(props) {
         modalState.toggle();
     };
 
+    const fetchFields = async (categoryId) => {
+        console.log('Fetching fields for category:', categoryId);
+        setIsLoading(true);
+        try {
+            const response = await fetch(`api/categories/${categoryId}/fields`);
+            const fieldData = await response.json();
+            if (Array.isArray(fieldData)) {
+                setFields(fieldData);
+            } else {
+                throw new Error('Invalid fields data received.');
+            }
+            setFetchError(null);
+        } catch (err) {
+            console.error(err);
+            setFetchError('Failed to load fields. Please try again.');
+            setFields([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCategoryChange = (e) => {
+        const categoryId = e.target.value;
+        console.log('Category selected:', categoryId);
+        setData('category', categoryId);
+        if (categoryId) fetchFields(categoryId);
+        else setFields([]);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -132,12 +161,9 @@ export default function DataInputModal(props) {
 
     useEffect(() => {
         if (modalState.isOpen) {
-            if (!isEmpty(modalState.data)) {
-                setData({
-                    category: modalState.data.category?.id || '',
-                    invoice_number: modalState.data.invoice_number || '',
-                    ...modalState.data,
-                });
+            if (modalState.data) {
+                setData(modalState.data);
+                if (modalState.data.category) fetchFields(modalState.data.category);
             } else {
                 setData({
                     category: '',
@@ -148,57 +174,17 @@ export default function DataInputModal(props) {
         }
     }, [modalState]);
 
-    useEffect(() => {
-        if (modalState.isOpen) {
-            fetch('/customers')
-                .then(response => response.json())
-                .then(data => setCustomers(data))
-                .catch(error => console.error('Error fetching customers:', error));
-
-            fetch('/technicians')
-                .then(response => response.json())
-                .then(data => setTechnicians(data))
-                .catch(error => console.error('Error fetching technicians:', error));
-        }
-    }, [modalState]);
-
-    useEffect(() => {
-        if (data.category) {
-            setIsLoading(true);
-            fetch(`/data-entries/categories/${data.category}/fields`)
-                .then(response => response.json())
-                .then(data => {
-                    if (Array.isArray(data) && data.length > 0) {
-                        setFields(data);
-                    } else {
-                        setFetchError('No fields available for the selected category.');
-                        setFields([]);
-                    }
-                    setFetchError(null);
-                })
-                .catch(error => {
-                    console.error('Error fetching fields:', error);
-                    setFields([]);
-                    setFetchError('Failed to fetch fields. Please try again.');
-                })
-                .finally(() => {
-                    setIsLoading(false);
-                });
-        } else {
-            setFields([]);
-        }
-    }, [data.category]);
-
     return (
         <dialog className={`modal ${modalState.isOpen ? 'modal-open' : ''}`}>
-            <div ref={modalRef} className="modal-box max-w-lg mx-auto">
+            <div className="modal-box">
                 <h3 className="text-lg font-bold">Input Data</h3>
-                <form onSubmit={handleSubmit} className="space-y-2.5">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <SelectInput
                         name="category"
+                        id="category-select"
+                        label="Category"
                         value={data.category}
                         onChange={handleOnChange}
-                        label="Select Category"
                         error={errors.category}
                     >
                         <option value="">-- Select Category --</option>
@@ -337,15 +323,14 @@ export default function DataInputModal(props) {
                             </div>
                         ))
                     ) : (
-                        <p>No fields available for the selected category.</p>
+                        <p>No fields available for this category.</p>
                     )}
-
                     <div className="modal-action">
-                        <button type="submit" className={`btn ${processing ? 'loading' : ''}`}>
-                            Simpan
+                        <button type="submit" className="btn btn-primary">
+                            Save
                         </button>
-                        <button type="button" onClick={handleClose} className="btn btn-secondary">
-                            Batal
+                        <button type="button" className="btn" onClick={() => modalState.toggle()}>
+                            Cancel
                         </button>
                     </div>
                 </form>

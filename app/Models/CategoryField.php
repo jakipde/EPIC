@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CategoryField extends Model
@@ -10,6 +11,6 @@ class CategoryField extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class, 'data_entries_category_id'); // Ensure the foreign key is correct
+        return $this->belongsTo(Category::class, 'data_entries_category_id');
     }
 }
