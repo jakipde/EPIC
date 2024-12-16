@@ -49,6 +49,36 @@ export default function DataInputModal(props) {
     const handleClose = () => {
         handleReset();
         modalState.toggle();
+    const fetchFields = async (categoryId) => {
+        console.log('Fetching fields for category:', categoryId); // Debug
+        setLoading(true);
+        try {
+            const response = await fetch(`api//categories/${categoryId}/fields`);
+            const fieldData = await response.json();
+        console.log('Fetched fields:', fieldData); // Debug
+        console.log('Response status:', response.status); // Log response status
+        console.log('Response headers:', response.headers.get('Content-Type')); // Log content type
+            if (Array.isArray(fieldData)) {
+                setFields(fieldData);
+            } else {
+                throw new Error('Invalid fields data received.');
+            }
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError('Failed to load fields. Please try again.');
+            setFields([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCategoryChange = (e) => {
+        const categoryId = e.target.value; // Get the selected category ID
+        console.log('Category selected:', categoryId); // Debug log for selected category
+        setData('category', categoryId);
+        if (categoryId) fetchFields(categoryId);
+        else setFields([]);
     };
 
     const handleSubmit = (e) => {

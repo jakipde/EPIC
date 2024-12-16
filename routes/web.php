@@ -91,13 +91,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
         Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
     });
-    Route::middleware(['auth'])->group(function () {Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
         Route::get('/data-entries/bulk-input', [DataEntryController::class, 'bulkInput'])->name('data-entries.bulk-input');
         Route::post('/data-entries', [DataEntryController::class, 'store'])->name('data-entries.store');
         Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
         Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
         Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
-Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
+        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
     });
 
     Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DataEntry;
 use App\Models\Category;
+use App\Models\CategoryField;
 use App\Models\Repair;
 use App\Models\Device;
 use App\Models\Accessory;
@@ -14,11 +15,16 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
 
 class DataEntryController extends Controller
 {
     public function dataInput(Request $request)
     {
+        // Eager load 'fields' and 'categoryData' (polymorphic data) for each category
+        $categories = Category::with(['fields', 'categoryData'])->get();
+
+        // Get data entries with category details
         $dataEntries = DataEntry::with('category')->paginate(10);
         $categories = Category::all();
 
@@ -26,23 +32,6 @@ class DataEntryController extends Controller
             'data' => $dataEntries,
             'categories' => $categories,
         ]);
-    }
-
-    public function getFields($categoryId)
-    {
-        $category = Category::find($categoryId);
-
-        if (!$category) {
-            return response()->json(['message' => 'Category not found.'], 404);
-        }
-
-        $fields = $category->fields;
-
-        if ($fields->isEmpty()) {
-            return response()->json(['message' => 'No fields found for this category.'], 404);
-        }
-
-        return response()->json($fields);
     }
 
     public function bulkInput(Request $request)
@@ -175,12 +164,34 @@ class DataEntryController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            // Add more fields if needed
+            'entry_type' => 'required|string',
+            'data' => 'required|array',
         ]);
 
-        $dataEntry = DataEntry::findOrFail($id);
-        $dataEntry->update($validatedData);
+        $entryType = $validatedData['entry_type'];
+        $data = $validatedData['data'];
+
+        switch ($entryType) {
+            case 'repairs':
+                $entry = Repair::findOrFail($id);
+                break;
+            case 'devices':
+                $entry = Device::findOrFail($id);
+                break;
+            case 'accessories':
+                $entry = Accessory::findOrFail($id);
+                break;
+            case 'spare_parts':
+                $entry = SparePart::findOrFail($id);
+                break;
+            case 'tools':
+                $entry = Tool::findOrFail($id);
+                break;
+            default:
+                throw new \Exception('Invalid entry type.');
+        }
+
+        $entry->update($data);
 
         return redirect()->route('data-entries.data-input')->with('success', 'Data entry updated successfully.');
     }
@@ -191,5 +202,23 @@ class DataEntryController extends Controller
         $dataEntry->delete();
 
         return redirect()->route('data-entries.data-input')->with('success', 'Data entry deleted successfully.');
+    }
+
+    public function getFields($categoryId)
+    {
+        $fields = CategoryField::where('data_entries_category_id', $categoryId)->get();
+
+        // Convert fields to XML
+        $xml = new \SimpleXMLElement('<fields/>');
+        foreach ($fields as $field) {
+            $fld = $xml->addChild('field');
+            $fld->addChild('id', $field->id);
+            $fld->addChild('field_name', $field->field_name);
+            $fld->addChild('label', $field->label);
+            $fld->addChild('field_type', $field->field_type);
+        }
+
+        return response($xml->asXML(), Response::HTTP_OK)
+            ->header('Content-Type', 'application/xml');
     }
 }
