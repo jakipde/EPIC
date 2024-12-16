@@ -11,8 +11,6 @@ class DataEntry extends Model
 
     protected $fillable = ['entry_type', 'data', 'data_entries_category_id']; // Make sure to include the category ID
 
-    ];
-
     public function category()
     {
         return $this->belongsTo(Category::class, 'data_entries_category_id');

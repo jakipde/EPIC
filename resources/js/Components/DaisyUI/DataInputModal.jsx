@@ -5,19 +5,129 @@ import SelectInput from '@/Components/DaisyUI/SelectInput';
 import TextInput from '@/Components/DaisyUI/TextInput';
 import TextAreaInput from '@/Components/DaisyUI/TextAreaInput';
 
+const CATEGORY_IDS = {
+    CUSTOMERS: '1',
+    TECHNICIANS: '2',
+    REPAIRS: '3',
+    DEVICES: '4',
+    ACCESSORIES: '5',
+    SPAREPARTS: '6',
+    TOOLS: '7',
+};
+
+const FieldRenderer = ({ field, data, handleOnChange, errors, customers, technicians }) => {
+    switch (field.field_name) {
+        case 'customer_id':
+            return (
+                <SelectInput
+                    id={field.field_name}
+                    name={field.field_name}
+                    value={data[field.field_name]}
+                    onChange={handleOnChange}
+                    label={field.label}
+                    error={errors[field.field_name]}
+                >
+                    <option value="">-- Select Customer --</option>
+                    {customers.length > 0 ? (
+                        customers.map(customer => (
+                            <option key={customer.id} value={customer.id}>
+                                {customer.name}
+                            </option>
+                        ))
+                    ) : (
+                        <option value="">No customers available</option>
+                    )}
+                    <option value="add_new">Add New Customer</option>
+                </SelectInput>
+            );
+        case 'cashier':
+        case 'technician_id':
+            return (
+                <SelectInput
+                    id={field.field_name}
+                    name={field.field_name}
+                    value={data[field.field_name]}
+                    onChange={handleOnChange}
+                    label={field.label}
+                    error={errors[field.field_name]}
+                >
+                    <option value="">-- Select Technician --</option>
+                    {technicians.length > 0 ? (
+                        technicians.map(technician => (
+                            <option key={technician.id} value={technician.id}>
+                                {technician.name}
+                            </option>
+                        ))
+                    ) : (
+                        <option value="">No technicians available</option>
+                    )}
+                </SelectInput>
+            );
+        case 'print_type':
+        case 'under_warranty':
+            return (
+                <SelectInput
+                    id={field.field_name}
+                    name={field.field_name}
+                    value={data[field.field_name]}
+                    onChange={handleOnChange}
+                    label={field.label}
+                    error={errors[field.field_name]}
+                >
+                    <option value="">-- Select --</option>
+                    {field.field_name === 'print_type' ? (
+                        <>
+                            <option value="JET">JET</option>
+                            <option value="Blank">Blank</option>
+                            <option value="Laser">Laser</option>
+                            <option value="Inkjet">Inkjet</option>
+                        </>
+                    ) : (
+                        <>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </>
+                    )}
+                </SelectInput>
+            );
+        case 'textarea':
+            return (
+                <TextAreaInput
+                    id={field.field_name}
+ name={field.field_name}
+                    value={data[field.field_name]}
+                    onChange={handleOnChange}
+                    label={field.label}
+                    error={errors[field.field_name]}
+                />
+            );
+        default:
+            return (
+                <TextInput
+                    id={field.field_name}
+                    type={field.field_type}
+                    name={field.field_name}
+                    value={data[field.field_name]}
+                    onChange={handleOnChange}
+                    label={field.label}
+                    error={errors[field.field_name]}
+                />
+            );
+    }
+};
+
 export default function DataInputModal(props) {
     const { modalState, categories } = props;
 
-    // Define the function to generate a random invoice number
     const generateInvoiceNumber = () => {
         const prefix = 'INV-';
-        const randomNumber = Math.floor(Math.random() * 1000000); // Generates a random number between 0 and 999999
+        const randomNumber = Math.floor(Math.random() * 1000000);
         return `${prefix}${randomNumber}`;
     };
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         category: '',
-        invoice_number: generateInvoiceNumber(), // Set the initial invoice number
+        invoice_number: generateInvoiceNumber(),
     });
 
     const [fields, setFields] = useState([]);
@@ -43,39 +153,38 @@ export default function DataInputModal(props) {
         setIsLoading(false);
         setWarningCategory('');
         setWarningForm('');
-        setData({ ...data, invoice_number: generateInvoiceNumber() }); // Reset invoice number
+        setData({ ...data, invoice_number: generateInvoiceNumber() });
     };
 
     const handleClose = () => {
         handleReset();
         modalState.toggle();
+    };
+
     const fetchFields = async (categoryId) => {
-        console.log('Fetching fields for category:', categoryId); // Debug
-        setLoading(true);
+        console.log('Fetching fields for category:', categoryId);
+        setIsLoading(true);
         try {
-            const response = await fetch(`api//categories/${categoryId}/fields`);
+            const response = await fetch(`api/categories/${categoryId}/fields`);
             const fieldData = await response.json();
-        console.log('Fetched fields:', fieldData); // Debug
-        console.log('Response status:', response.status); // Log response status
-        console.log('Response headers:', response.headers.get('Content-Type')); // Log content type
             if (Array.isArray(fieldData)) {
                 setFields(fieldData);
             } else {
                 throw new Error('Invalid fields data received.');
             }
-            setError(null);
+            setFetchError(null);
         } catch (err) {
             console.error(err);
-            setError('Failed to load fields. Please try again.');
+            setFetchError('Failed to load fields. Please try again.');
             setFields([]);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     const handleCategoryChange = (e) => {
-        const categoryId = e.target.value; // Get the selected category ID
-        console.log('Category selected:', categoryId); // Debug log for selected category
+        const categoryId = e.target.value;
+        console.log('Category selected:', categoryId);
         setData('category', categoryId);
         if (categoryId) fetchFields(categoryId);
         else setFields([]);
@@ -100,31 +209,31 @@ export default function DataInputModal(props) {
 
         let action, routePath;
         switch (data.category) {
-            case '1':
+            case CATEGORY_IDS.CUSTOMERS:
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('customers.update', modalState.data.id) : route('customers.store');
                 break;
-            case '2':
+            case CATEGORY_IDS.TECHNICIANS:
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('technicians.update', modalState.data.id) : route('technicians.store');
                 break;
-            case '3':
+            case CATEGORY_IDS.REPAIRS:
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('repairs.update', modalState.data.id) : route('repairs.store');
                 break;
-            case '4':
+            case CATEGORY_IDS.DEVICES:
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('devices.update', modalState.data.id) : route('devices.store');
                 break;
-            case '5':
+            case CATEGORY_IDS.ACCESSORIES:
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('accessories.update', modalState.data.id) : route('accessories.store');
                 break;
-            case '6':
+            case CATEGORY_IDS.SPAREPARTS:
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('spareparts.update', modalState.data.id) : route('spareparts.store');
                 break;
-            case '7':
+            case CATEGORY_IDS.TOOLS:
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('tools.update', modalState.data.id) : route('tools.store');
                 break;
@@ -134,12 +243,12 @@ export default function DataInputModal(props) {
                 return;
         }
 
-        const underWarrantyValue = data.under_warranty === 'Yes'; // This will be true or false
+        const underWarrantyValue = data.under_warranty === 'Yes';
 
         const submitData = {
             ...data,
-            invoice_number: data.invoice_number, // Ensure this is included
-            under_warranty: underWarrantyValue, // Set the converted value
+            invoice_number: data.invoice_number,
+            under_warranty: underWarrantyValue,
             ...fields.reduce((acc, field) => ({ ...acc, [field.field_name]: data[field.field_name] }), {})
         };
 
@@ -155,7 +264,6 @@ export default function DataInputModal(props) {
                 }
             },
             onError: (errors) => {
-                // Handle errors if needed
                 console.error('Submission error:', errors);
             },
         });
@@ -172,7 +280,7 @@ export default function DataInputModal(props) {
             } else {
                 setData({
                     category: '',
-                    invoice_number: generateInvoiceNumber(), // Generate a new invoice number
+                    invoice_number: generateInvoiceNumber(),
                 });
                 handleReset();
             }
@@ -228,7 +336,7 @@ export default function DataInputModal(props) {
                     <SelectInput
                         name="category"
                         value={data.category}
-                        onChange={handleOnChange}
+                        onChange={handleCategoryChange}
                         label="Select Category"
                         error={errors.category}
                     >
@@ -255,115 +363,14 @@ export default function DataInputModal(props) {
                     {fields.length > 0 ? (
                         fields.map(field => (
                             <div key={field.field_name}>
-                                {field.field_name === 'customer_id' ? (
-                                    <SelectInput
-                                        id={field.field_name}
-                                        name={field.field_name}
-                                        value={data[field.field_name]}
-                                        onChange={handleOnChange}
-                                        label={field.label}
-                                        error={errors[field.field_name]}
-                                    >
-                                        <option value="">-- Select Customer --</option>
-                                        {Array.isArray(customers) && customers.length > 0 ? (
-                                            customers.map(customer => (
-                                                <option key={customer.id} value={customer.id}>
-                                                    {customer.name}
-                                                </option>
-                                            ))
-                                        ) : (
-                                            <option value="">No customers available</option>
-                                        )}
-                                        <option value="add_new">Add New Customer</option>
-                                    </SelectInput>
-                                ) : field.field_name === 'cashier' ? (
-                                    <SelectInput
-                                        id={field.field_name}
-                                        name={field.field_name}
-                                        value={data[field.field_name]}
-                                        onChange={handleOnChange}
-                                        label={field.label}
-                                        error={errors[field.field_name]}
-                                    >
-                                        <option value="">-- Select Technician --</option>
-                                        {Array.isArray(technicians) && technicians.length > 0 ? (
-                                            technicians.map(technician => (
-                                                <option key={technician.id} value={technician.id}>
-                                                    {technician.name}
-                                                </option>
-                                            ))
-                                        ) : (
-                                            <option value="">No technicians available</option>
-                                        )}
-                                    </SelectInput>
-                                ) : field.field_name === 'technician_id' ? (
-                                    <SelectInput
-                                        id={field.field_name}
-                                        name={field.field_name}
-                                        value={data[field.field_name]}
-                                        onChange={handleOnChange}
-                                        label={field.label}
-                                        error={errors[field.field_name]}
-                                    >
-                                        <option value="">-- Select Technician --</option>
-                                        {Array.isArray(technicians) && technicians.length > 0 ? (
-                                            technicians.map(technician => (
-                                                <option key={technician.id} value={technician.id}>
-                                                    {technician.name}
- </option>
-                                            ))
-                                        ) : (
-                                            <option value="">No technicians available</option>
-                                        )}
-                                    </SelectInput>
-                                ) : field.field_name === 'print_type' ? (
-                                    <SelectInput
-                                        id={field.field_name}
-                                        name={field.field_name}
-                                        value={data[field.field_name]}
-                                        onChange={handleOnChange}
-                                        label={field.label}
-                                        error={errors[field.field_name]}
-                                    >
-                                        <option value="">-- Select Print Type --</option>
-                                        <option value="JET">JET</option>
-                                        <option value="Blank">Blank</option>
-                                        <option value="Laser">Laser</option>
-                                        <option value="Inkjet">Inkjet</option>
-                                    </SelectInput>
-                                ) : field.field_name === 'under_warranty' ? (
-                                    <SelectInput
-                                        id={field.field_name}
-                                        name={field.field_name}
-                                        value={data[field.field_name]}
-                                        onChange={handleOnChange}
-                                        label={field.label}
-                                        error={errors[field.field_name]}
-                                    >
-                                        <option value="">-- Select Warranty Status --</option>
-                                        <option value="Yes">Yes</option>
-                                        <option value="No">No</option>
-                                    </SelectInput>
-                                ) : field.field_type === 'textarea' ? (
-                                    <TextAreaInput
-                                        id={field.field_name}
-                                        name={field.field_name}
-                                        value={data[field.field_name]}
-                                        onChange={handleOnChange}
-                                        label={field.label}
-                                        error={errors[field.field_name]}
-                                    />
-                                ) : (
-                                    <TextInput
-                                        id={field.field_name}
-                                        type={field.field_type}
-                                        name={field.field_name}
-                                        value={data[field.field_name]}
-                                        onChange={handleOnChange}
-                                        label={field.label}
-                                        error={errors[field.field_name]}
-                                    />
-                                )}
+                                <FieldRenderer
+                                    field={field}
+                                    data={data}
+                                    handleOnChange={handleOnChange}
+                                    errors={errors}
+                                    customers={customers}
+                                    technicians={technicians}
+                                />
                                 {errors[field.field_name] && <p className="text-error">{errors[field.field_name]}</p>}
                             </div>
                         ))

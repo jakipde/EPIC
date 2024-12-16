@@ -91,7 +91,6 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
         Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
-    });
 
     Route::middleware(['auth'])->group(function () {
         Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
