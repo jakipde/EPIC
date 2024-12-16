@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from '@inertiajs/react';
+import { isEmpty } from 'lodash';
 import SelectInput from '@/Components/DaisyUI/SelectInput';
 import TextInput from '@/Components/DaisyUI/TextInput';
-import TextAreaInput from '@/Components/DaisyUI/TextareaInput';
+import TextAreaInput from '@/Components/DaisyUI/TextAreaInput';
 
 export default function DataInputModal(props) {
     const { modalState, categories } = props;
@@ -265,7 +266,7 @@ export default function DataInputModal(props) {
                                             technicians.map(technician => (
                                                 <option key={technician.id} value={technician.id}>
                                                     {technician.name}
-                                                </option>
+ </option>
                                             ))
                                         ) : (
                                             <option value="">No technicians available</option>
