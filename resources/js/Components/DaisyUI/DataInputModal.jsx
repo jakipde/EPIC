@@ -1,133 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { isEmpty } from 'lodash';
 import SelectInput from '@/Components/DaisyUI/SelectInput';
 import TextInput from '@/Components/DaisyUI/TextInput';
 import TextAreaInput from '@/Components/DaisyUI/TextAreaInput';
 
-const CATEGORY_IDS = {
-    CUSTOMERS: '1',
-    TECHNICIANS: '2',
-    REPAIRS: '3',
-    DEVICES: '4',
-    ACCESSORIES: '5',
-    SPAREPARTS: '6',
-    TOOLS: '7',
-};
-
-const FieldRenderer = ({ field, data, handleOnChange, errors, customers, technicians }) => {
-    switch (field.field_name) {
-        case 'customer_id':
-            return (
-                <SelectInput
-                    id={field.field_name}
-                    name={field.field_name}
-                    value={data[field.field_name]}
-                    onChange={handleOnChange}
-                    label={field.label}
-                    error={errors[field.field_name]}
-                >
-                    <option value="">-- Select Customer --</option>
-                    {customers.length > 0 ? (
-                        customers.map(customer => (
-                            <option key={customer.id} value={customer.id}>
-                                {customer.name}
-                            </option>
-                        ))
-                    ) : (
-                        <option value="">No customers available</option>
-                    )}
-                    <option value="add_new">Add New Customer</option>
-                </SelectInput>
-            );
-        case 'cashier':
-        case 'technician_id':
-            return (
-                <SelectInput
-                    id={field.field_name}
-                    name={field.field_name}
-                    value={data[field.field_name]}
-                    onChange={handleOnChange}
-                    label={field.label}
-                    error={errors[field.field_name]}
-                >
-                    <option value="">-- Select Technician --</option>
-                    {technicians.length > 0 ? (
-                        technicians.map(technician => (
-                            <option key={technician.id} value={technician.id}>
-                                {technician.name}
-                            </option>
-                        ))
-                    ) : (
-                        <option value="">No technicians available</option>
-                    )}
-                </SelectInput>
-            );
-        case 'print_type':
-        case 'under_warranty':
-            return (
-                <SelectInput
-                    id={field.field_name}
-                    name={field.field_name}
-                    value={data[field.field_name]}
-                    onChange={handleOnChange}
-                    label={field.label}
-                    error={errors[field.field_name]}
-                >
-                    <option value="">-- Select --</option>
-                    {field.field_name === 'print_type' ? (
-                        <>
-                            <option value="JET">JET</option>
-                            <option value="Blank">Blank</option>
-                            <option value="Laser">Laser</option>
-                            <option value="Inkjet">Inkjet</option>
-                        </>
-                    ) : (
-                        <>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </>
-                    )}
-                </SelectInput>
-            );
-        case 'textarea':
-            return (
-                <TextAreaInput
-                    id={field.field_name}
- name={field.field_name}
-                    value={data[field.field_name]}
-                    onChange={handleOnChange}
-                    label={field.label}
-                    error={errors[field.field_name]}
-                />
-            );
-        default:
-            return (
-                <TextInput
-                    id={field.field_name}
-                    type={field.field_type}
-                    name={field.field_name}
-                    value={data[field.field_name]}
-                    onChange={handleOnChange}
-                    label={field.label}
-                    error={errors[field.field_name]}
-                />
-            );
-    }
-};
-
 export default function DataInputModal(props) {
     const { modalState, categories } = props;
 
+    // Define the function to generate a random invoice number
     const generateInvoiceNumber = () => {
         const prefix = 'INV-';
-        const randomNumber = Math.floor(Math.random() * 1000000);
+        const randomNumber = Math.floor(Math.random() * 1000000); // Generates a random number between 0 and 999999
         return `${prefix}${randomNumber}`;
     };
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         category: '',
-        invoice_number: generateInvoiceNumber(),
+        invoice_number: generateInvoiceNumber(), // Set the initial invoice number
     });
 
     const [fields, setFields] = useState([]);
@@ -153,7 +42,7 @@ export default function DataInputModal(props) {
         setIsLoading(false);
         setWarningCategory('');
         setWarningForm('');
-        setData({ ...data, invoice_number: generateInvoiceNumber() });
+        setData({ ...data, invoice_number: generateInvoiceNumber() }); // Reset invoice number
     };
 
     const handleClose = () => {
@@ -209,31 +98,31 @@ export default function DataInputModal(props) {
 
         let action, routePath;
         switch (data.category) {
-            case CATEGORY_IDS.CUSTOMERS:
+            case '1':
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('customers.update', modalState.data.id) : route('customers.store');
                 break;
-            case CATEGORY_IDS.TECHNICIANS:
+            case '2':
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('technicians.update', modalState.data.id) : route('technicians.store');
                 break;
-            case CATEGORY_IDS.REPAIRS:
+            case '3':
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('repairs.update', modalState.data.id) : route('repairs.store');
                 break;
-            case CATEGORY_IDS.DEVICES:
+            case '4':
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('devices.update', modalState.data.id) : route('devices.store');
                 break;
-            case CATEGORY_IDS.ACCESSORIES:
+            case '5':
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('accessories.update', modalState.data.id) : route('accessories.store');
                 break;
-            case CATEGORY_IDS.SPAREPARTS:
+            case '6':
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('spareparts.update', modalState.data.id) : route('spareparts.store');
                 break;
-            case CATEGORY_IDS.TOOLS:
+            case '7':
                 action = modalState.data ? put : post;
                 routePath = modalState.data ? route('tools.update', modalState.data.id) : route('tools.store');
                 break;
@@ -243,12 +132,12 @@ export default function DataInputModal(props) {
                 return;
         }
 
-        const underWarrantyValue = data.under_warranty === 'Yes';
+        const underWarrantyValue = data.under_warranty === 'Yes'; // This will be true or false
 
         const submitData = {
             ...data,
-            invoice_number: data.invoice_number,
-            under_warranty: underWarrantyValue,
+            invoice_number: data.invoice_number, // Ensure this is included
+            under_warranty: underWarrantyValue, // Set the converted value
             ...fields.reduce((acc, field) => ({ ...acc, [field.field_name]: data[field.field_name] }), {})
         };
 
@@ -264,6 +153,7 @@ export default function DataInputModal(props) {
                 }
             },
             onError: (errors) => {
+                // Handle errors if needed
                 console.error('Submission error:', errors);
             },
         });
@@ -271,73 +161,30 @@ export default function DataInputModal(props) {
 
     useEffect(() => {
         if (modalState.isOpen) {
-            if (!isEmpty(modalState.data)) {
-                setData({
-                    category: modalState.data.category?.id || '',
-                    invoice_number: modalState.data.invoice_number || '',
-                    ...modalState.data,
-                });
+            if (modalState.data) {
+                setData(modalState.data);
+                if (modalState.data.category) fetchFields(modalState.data.category);
             } else {
                 setData({
                     category: '',
-                    invoice_number: generateInvoiceNumber(),
+                    invoice_number: generateInvoiceNumber(), // Generate a new invoice number
                 });
                 handleReset();
             }
         }
     }, [modalState]);
 
-    useEffect(() => {
-        if (modalState.isOpen) {
-            fetch('/customers')
-                .then(response => response.json())
-                .then(data => setCustomers(data))
-                .catch(error => console.error('Error fetching customers:', error));
-
-            fetch('/technicians')
-                .then(response => response.json())
-                .then(data => setTechnicians(data))
-                .catch(error => console.error('Error fetching technicians:', error));
-        }
-    }, [modalState]);
-
-    useEffect(() => {
-        if (data.category) {
-            setIsLoading(true);
-            fetch(`/data-entries/categories/${data.category}/fields`)
-                .then(response => response.json())
-                .then(data => {
-                    if (Array.isArray(data) && data.length > 0) {
-                        setFields(data);
-                    } else {
-                        setFetchError('No fields available for the selected category.');
-                        setFields([]);
-                    }
-                    setFetchError(null);
-                })
-                .catch(error => {
-                    console.error('Error fetching fields:', error);
-                    setFields([]);
-                    setFetchError('Failed to fetch fields. Please try again.');
-                })
-                .finally(() => {
-                    setIsLoading(false);
-                });
-        } else {
-            setFields([]);
-        }
-    }, [data.category]);
-
     return (
         <dialog className={`modal ${modalState.isOpen ? 'modal-open' : ''}`}>
-            <div ref={modalRef} className="modal-box max-w-lg mx-auto">
+            <div className="modal-box">
                 <h3 className="text-lg font-bold">Input Data</h3>
-                <form onSubmit={handleSubmit} className="space-y-2.5">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <SelectInput
                         name="category"
+                        id="category-select"
+                        label="Category"
                         value={data.category}
-                        onChange={handleCategoryChange}
-                        label="Select Category"
+                        onChange={handleOnChange}
                         error={errors.category}
                     >
                         <option value="">-- Select Category --</option>
@@ -363,27 +210,127 @@ export default function DataInputModal(props) {
                     {fields.length > 0 ? (
                         fields.map(field => (
                             <div key={field.field_name}>
-                                <FieldRenderer
-                                    field={field}
-                                    data={data}
-                                    handleOnChange={handleOnChange}
-                                    errors={errors}
-                                    customers={customers}
-                                    technicians={technicians}
-                                />
+                                {field.field_name === 'customer_id' ? (
+                                    <SelectInput
+                                        id={field.field_name}
+                                        name={field.field_name}
+                                        value={data[field.field_name]}
+                                        onChange={handleOnChange}
+                                        label={field.label}
+                                        error={errors[field.field_name]}
+                                    >
+                                        <option value="">-- Select Customer --</option>
+                                        {Array.isArray(customers) && customers.length > 0 ? (
+                                            customers.map(customer => (
+                                                <option key={customer.id} value={customer.id}>
+                                                    {customer.name}
+                                                </option>
+                                            ))
+                                        ) : (
+                                            <option value="">No customers available</option>
+                                        )}
+                                        <option value="add_new">Add New Customer</option>
+                                    </SelectInput>
+                                ) : field.field_name === 'cashier' ? (
+                                    <SelectInput
+                                        id={field.field_name}
+                                        name={field.field_name}
+                                        value={data[field.field_name]}
+                                        onChange={handleOnChange}
+                                        label={field.label}
+                                        error={errors[field.field_name]}
+                                    >
+                                        <option value="">-- Select Technician --</option>
+                                        {Array.isArray(technicians) && technicians.length > 0 ? (
+                                            technicians.map(technician => (
+                                                <option key={technician.id} value={technician.id}>
+                                                    {technician.name}
+                                                </option>
+                                            ))
+                                        ) : (
+                                            <option value="">No technicians available</option>
+                                        )}
+                                    </SelectInput>
+                                ) : field.field_name === 'technician_id' ? (
+                                    <SelectInput
+                                        id={field.field_name}
+                                        name={field.field_name}
+                                        value={data[field.field_name]}
+                                        onChange={handleOnChange}
+                                        label={field.label}
+                                        error={errors[field.field_name]}
+                                    >
+                                        <option value="">-- Select Technician --</option>
+                                        {Array.isArray(technicians) && technicians.length > 0 ? (
+                                            technicians.map(technician => (
+                                                <option key={technician.id} value={technician.id}>
+                                                    {technician.name}
+ </option>
+                                            ))
+                                        ) : (
+                                            <option value="">No technicians available</option>
+                                        )}
+                                    </SelectInput>
+                                ) : field.field_name === 'print_type' ? (
+                                    <SelectInput
+                                        id={field.field_name}
+                                        name={field.field_name}
+                                        value={data[field.field_name]}
+                                        onChange={handleOnChange}
+                                        label={field.label}
+                                        error={errors[field.field_name]}
+                                    >
+                                        <option value="">-- Select Print Type --</option>
+                                        <option value="JET">JET</option>
+                                        <option value="Blank">Blank</option>
+                                        <option value="Laser">Laser</option>
+                                        <option value="Inkjet">Inkjet</option>
+                                    </SelectInput>
+                                ) : field.field_name === 'under_warranty' ? (
+                                    <SelectInput
+                                        id={field.field_name}
+                                        name={field.field_name}
+                                        value={data[field.field_name]}
+                                        onChange={handleOnChange}
+                                        label={field.label}
+                                        error={errors[field.field_name]}
+                                    >
+                                        <option value="">-- Select Warranty Status --</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </SelectInput>
+                                ) : field.field_type === 'textarea' ? (
+                                    <TextAreaInput
+                                        id={field.field_name}
+                                        name={field.field_name}
+                                        value={data[field.field_name]}
+                                        onChange={handleOnChange}
+                                        label={field.label}
+                                        error={errors[field.field_name]}
+                                    />
+                                ) : (
+                                    <TextInput
+                                        id={field.field_name}
+                                        type={field.field_type}
+                                        name={field.field_name}
+                                        value={data[field.field_name]}
+                                        onChange={handleOnChange}
+                                        label={field.label}
+                                        error={errors[field.field_name]}
+                                    />
+                                )}
                                 {errors[field.field_name] && <p className="text-error">{errors[field.field_name]}</p>}
                             </div>
                         ))
                     ) : (
-                        <p>No fields available for the selected category.</p>
+                        <p>No fields available for this category.</p>
                     )}
-
                     <div className="modal-action">
-                        <button type="submit" className={`btn ${processing ? 'loading' : ''}`}>
-                            Simpan
+                        <button type="submit" className="btn btn-primary">
+                            Save
                         </button>
-                        <button type="button" onClick={handleClose} className="btn btn-secondary">
-                            Batal
+                        <button type="button" className="btn" onClick={() => modalState.toggle()}>
+                            Cancel
                         </button>
                     </div>
                 </form>

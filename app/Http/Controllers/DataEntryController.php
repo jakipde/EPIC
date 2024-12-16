@@ -11,7 +11,6 @@ use App\Models\Accessory;
 use App\Models\SparePart;
 use App\Models\Tool;
 use App\Models\Product;
-use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +25,6 @@ class DataEntryController extends Controller
 
         // Get data entries with category details
         $dataEntries = DataEntry::with('category')->paginate(10);
-        $categories = Category::all();
 
         return Inertia::render('DataEntry/DataInput', [
             'data' => $dataEntries,
@@ -44,121 +42,44 @@ class DataEntryController extends Controller
         Log::info('Incoming request data:', $request->all());
 
         $validatedData = $request->validate([
-            'data_entries_category_id' => 'required|exists:data_entries_category,id',
-            'name' => 'required|string|max:255',
-            'device' => 'nullable|array',
-            'accessories' => 'nullable|array',
-            'spare_parts' => 'nullable|array',
-            'tools' => 'nullable|array',
+            'entry_type' => 'required|string',
+            'data' => 'required|array',
         ]);
 
         try {
-            $invoiceNumber = strtoupper(uniqid('INV-'));
+            $entryType = $validatedData['entry_type'];
+            $data = $validatedData['data'];
 
-            $invoice = Invoice::create([
-                'date' => now(),
-                'customer_id' => $request->input('customer_id'),
-                'description' => 'Invoice for products and repairs',
-                'amount' => 0,
-            ]);
-
-            $dataEntry = DataEntry::create([
-                'data_entries_category_id' => $validatedData['data_entries_category_id'],
-                'name' => $validatedData['name'],
-                'invoice_number' => $invoiceNumber,
-            ]);
-
-            Log::info('DataEntry created:', $dataEntry->toArray());
-
-            $totalAmount = 0;
-
-            // Store related devices, accessories, spare parts, and tools
-            $totalAmount += $this->storeRelatedItems($request, $dataEntry, $invoiceNumber);
-
-            $invoice->amount = $totalAmount;
-            $invoice->save();
+            switch ($entryType) {
+                case 'repairs':
+                    $repair = Repair::create($data);
+                    Log::info('Repair created:', $repair->toArray());
+                    break;
+                case 'devices':
+                    $device = Device::create($data);
+                    Log::info('Device created:', $device->toArray());
+                    break;
+                case 'accessories':
+                    $accessory = Accessory::create($data);
+                    Log::info('Accessory created:', $accessory->toArray());
+                    break;
+                case 'spare_parts':
+                    $sparePart = SparePart::create($data);
+                    Log::info('Spare part created:', $sparePart->toArray());
+                    break;
+                case 'tools':
+                    $tool = Tool::create($data);
+                    Log::info('Tool created:', $tool->toArray());
+                    break;
+                default:
+                    throw new \Exception('Invalid entry type.');
+            }
 
             return redirect()->route('data-entries.data-input')->with('success', 'Data entry created successfully.');
         } catch (\Exception $e) {
             Log::error('Error saving data entry: ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Failed to save data entry.']);
         }
-    }
-
-    private function storeRelatedItems(Request $request, DataEntry $dataEntry, $invoiceNumber)
-    {
-        $totalAmount = 0;
-
-        if ($request->has('repair')) {
-            $repairData = $request->input('repair');
-            $repairData['data_entry_id'] = $dataEntry->id;
-            $repairData['invoice_number'] = $invoiceNumber;
-            Repair::create($repairData);
-        }
-
-        if ($request->has('device')) {
-            $deviceData = $request->input('device');
-            $deviceData['data_entry_id'] = $dataEntry->id;
-            $device = Device::create($deviceData);
-
-            $product = Product::create([
-                'device_id' => $device->id,
-                'type' => 'device',
-                'price' => $deviceData['price'] ?? 0,
-                'invoice_number' => $invoiceNumber,
-            ]);
-            $totalAmount += $product->price;
-        }
-
-        // Store related accessories
-        if ($request->has('accessories')) {
-            foreach ($request->input('accessories') as $accessoryData) {
-                $accessoryData['data_entry_id'] = $dataEntry->id;
-                $accessory = Accessory::create($accessoryData);
-
-                $product = Product::create([
-                    'accessory_id' => $accessory->id,
-                    'type ' => 'accessory',
-                    'price' => $accessoryData['price'] ?? 0,
-                    'invoice_number' => $invoiceNumber,
-                ]);
-                $totalAmount += $product->price;
-            }
-        }
-
-        // Store related spare parts
-        if ($request->has('spare_parts')) {
-            foreach ($request->input('spare_parts') as $sparePartData) {
-                $sparePartData['data_entry_id'] = $dataEntry->id;
-                $sparePart = SparePart::create($sparePartData);
-
-                $product = Product::create([
-                    'sparepart_id' => $sparePart->id,
-                    'type' => 'spare_part',
-                    'price' => $sparePartData['price'] ?? 0,
-                    'invoice_number' => $invoiceNumber,
-                ]);
-                $totalAmount += $product->price;
-            }
-        }
-
-        // Store related tools
-        if ($request->has('tools')) {
-            foreach ($request->input('tools') as $toolData) {
-                $toolData['data_entry_id'] = $dataEntry->id;
-                $tool = Tool::create($toolData);
-
-                $product = Product::create([
-                    'tool_id' => $tool->id,
-                    'type' => 'tool',
-                    'price' => $toolData['price'] ?? 0,
-                    'invoice_number' => $invoiceNumber,
-                ]);
-                $totalAmount += $product->price;
-            }
-        }
-
-        return $totalAmount;
     }
 
     public function update(Request $request, $id)

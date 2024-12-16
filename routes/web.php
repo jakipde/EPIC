@@ -82,7 +82,6 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/spareparts/dashboard', [SparePartsController::class, 'dashboard'])->name('spareparts.dashboard');
         Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
-        Route::get('/spareparts/warranty-report', [SparePartsController::class, 'warrantyreport'])->name('spareparts.warranty-report');
         Route::resource('spareparts', SparePartsController::class);
 
         Route::resource('tools', ToolsController::class);
@@ -99,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
         Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
         Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
-        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
+Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
     });
 
     Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');

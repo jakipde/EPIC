@@ -1,5 +1,6 @@
 <?php
 
+// data_entries migration
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('data_entries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('data_entries_category_id')->constrained('data_entries_category')->onDelete('cascade'); // Add this line
+            $table->foreignId('data_entries_category_id')->constrained('data_entries_category')->onDelete('cascade');
             $table->enum('entry_type', ['customers', 'technician', 'repairs', 'devices', 'accessories', 'spare_parts', 'tools']);
             $table->json('data')->nullable();
             $table->timestamps();
