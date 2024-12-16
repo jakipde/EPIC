@@ -56,8 +56,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-    Route::middleware(['auth'])->group(function () {
         Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
         Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
         Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
@@ -82,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/spareparts/dashboard', [SparePartsController::class, 'dashboard'])->name('spareparts.dashboard');
         Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
+        Route::get('/spareparts/warranty-report', [SparePartsController::class, 'warrantyreport'])->name('spareparts.warranty-report');
         Route::resource('spareparts', SparePartsController::class);
 
         Route::resource('tools', ToolsController::class);
@@ -115,4 +116,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+
+    Route::get('/test-warranty-report', function () {
+        return 'Test route is working!';
+    });

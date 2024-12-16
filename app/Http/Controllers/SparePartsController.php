@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\SparePart;
 use App\Models\Product;
-use App\Models\Category; // Import the Category model
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class SparePartsController extends Controller
 {
@@ -22,6 +23,12 @@ class SparePartsController extends Controller
             'spareparts' => $spareparts,
             'categories' => $categories, // Pass categories to the view
         ]);
+    }
+
+    public function warrantyreport()
+    {
+        // Render the Inertia page
+        return Inertia::render('SparePart/WarrantyReport');
     }
 
     public function show($id)
