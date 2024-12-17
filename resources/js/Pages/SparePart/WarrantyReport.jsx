@@ -10,42 +10,40 @@ import { CurrencyDollarIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react
 const WarrantyReport = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [searchWarranty, setSearchWarranty] = useState('');
+    const [itemsPerPageWarranty, setItemsPerPageWarranty] = useState(10);
+    const [currentPageWarranty, setCurrentPageWarranty] = useState(1);
+    const [searchSpareParts, setSearchSpareParts] = useState('');
+    const [itemsPerPageSpareParts, setItemsPerPageSpareParts] = useState(10);
+    const [currentPageSpareParts, setCurrentPageSpareParts] = useState(1);
+    const [income, setIncome] = useState(5000000);
+    const [outcome, setOutcome] = useState(2000000);
+    const profit = income - outcome;
 
-    const [warrantyReports, setWarrantyReports] = useState([
+    const formatCurrency = (amount) => `Rp${amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+
+    // Sample data
+    const warrantyReports = [
         { customer: 'Customer A', status: 'Active' },
         { customer: 'Customer B', status: 'Expired' },
         { customer: 'Customer C', status: 'Active' },
         { customer: 'Customer D', status: 'Pending' },
-    ]);
+    ];
 
-    const [searchWarranty, setSearchWarranty] = useState('');
-    const [itemsPerPageWarranty, setItemsPerPageWarranty] = useState(10);
-    const [currentPageWarranty, setCurrentPageWarranty] = useState(1);
-
-    const [sparePartsData, setSparePartsData] = useState([
+    const sparePartsData = [
         { date: '2024-12-01', invoice: 'INV-001', customer: 'Customer A', hargaModal: 2500, hargaJual: 4000, profit: 1500, payment: 'Cash', admin: 'Admin A' },
         { date: '2024-12-02', invoice: 'INV-002', customer: 'Customer B', hargaModal: 3000, hargaJual: 5000, profit: 2000, payment: 'Credit', admin: 'Admin B' },
         { date: '2024-12-03', invoice: 'INV-003', customer: 'Customer C', hargaModal: 1500, hargaJual: 2500, profit: 1000, payment: 'Cash', admin: 'Admin C' },
         { date: '2024-12-04', invoice: 'INV-004', customer: 'Customer D', hargaModal: 2000, hargaJual: 3500, profit: 1500, payment: 'Debit', admin: 'Admin D' },
-    ]);
-
-    const [searchSpareParts, setSearchSpareParts] = useState('');
-    const [itemsPerPageSpareParts, setItemsPerPageSpareParts] = useState(10);
-    const [currentPageSpareParts, setCurrentPageSpareParts] = useState(1);
-
-    const [income, setIncome] = useState(5000000);
-    const [outcome, setOutcome] = useState(2000000);
-    const [profit, setProfit] = useState(income - outcome);
-
-    const formatCurrency = (amount) => `Rp${amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+    ];
 
     const warrantyHeaders = ['No', 'Customer', 'Warranty Status'];
     const sparePartsHeaders = ['No', 'Date', 'Invoice', 'Customer', 'Harga Modal', 'Harga Jual', 'Profit', 'Payment', 'Admin'];
 
-    const filteredWarrantyReports = warrantyReports.filter(report => {
-        return report.customer.toLowerCase().includes(searchWarranty.toLowerCase()) ||
-            report.status.toLowerCase().includes(searchWarranty.toLowerCase());
-    });
+    const filteredWarrantyReports = warrantyReports.filter(report =>
+        report.customer.toLowerCase().includes(searchWarranty.toLowerCase()) ||
+        report.status.toLowerCase().includes(searchWarranty.toLowerCase())
+    );
 
     const filteredSparePartsData = sparePartsData.filter(part => {
         const partDate = new Date(part.date);
@@ -100,7 +98,10 @@ const WarrantyReport = () => {
                             value={searchWarranty}
                             placeholder="Search warranty reports ..."
                         />
-                        <select onChange={(e) => setItemsPerPageWarranty(Number(e.target.value))} className="select select-bordered ml-2">
+                        <select
+                            onChange={(e) => setItemsPerPageWarranty(Number(e.target.value))}
+                            className="select select-bordered ml-2"
+                        >
                             <option value={10}>10</option>
                             <option value={20}>20</option>
                             <option value={50}>50</option>
@@ -127,6 +128,7 @@ const WarrantyReport = () => {
                     </div>
                 </div>
 
+                {/* Data Report Area */}
                 <div className="mb-8">
                     <h3 className="text-lg font-bold mb-2">Data Report Area</h3>
                     <div className="grid grid-cols-3 gap-4 mb-4">
@@ -144,22 +146,6 @@ const WarrantyReport = () => {
                             title="Profit"
                             value={formatCurrency(profit)}
                             icon={<ArrowUpIcon className="h-8 w-8 text-green-500" />}
-                        />
-                    </div>
-                                        <div className="flex items-center mb-4">
-                        <label className="mr-2">Start Date:</label>
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className="input input-bordered mr-4"
-                        />
-                        <label className="mr-2">End Date:</label>
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className="input input-bordered"
                         />
                     </div>
                     <div className="flex items-center mb-4">
@@ -209,4 +195,6 @@ const WarrantyReport = () => {
             </div>
         </AuthenticatedLayout>
     );
-}
+};
+
+export default WarrantyReport;
