@@ -21,16 +21,16 @@ const Dashboard = ({ spareparts, categories = [] }) => {
 
     const [income, setIncome] = useState(5000000);
     const [outcome, setOutcome] = useState(2000000);
-    const [profit, setProfit] = useState(income - outcome);
+    const profit = income - outcome;
 
     const formatCurrency = (amount) => `Rp${amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
 
     const warrantyHeaders = ['No', 'Customer', 'Warranty Status'];
 
-    const filteredWarrantyReports = warrantyReports.filter(report => {
-        return report.customer.toLowerCase().includes(searchWarranty.toLowerCase()) ||
-            report.status.toLowerCase().includes(searchWarranty.toLowerCase());
-    });
+    const filteredWarrantyReports = warrantyReports.filter(report =>
+        report.customer.toLowerCase().includes(searchWarranty.toLowerCase()) ||
+        report.status.toLowerCase().includes(searchWarranty.toLowerCase())
+    );
 
     const paginatedWarrantyReports = filteredWarrantyReports.slice(
         (currentPageWarranty - 1) * itemsPerPageWarranty,
@@ -69,12 +69,18 @@ const Dashboard = ({ spareparts, categories = [] }) => {
                             value={searchWarranty}
                             placeholder="Search warranty reports ..."
                         />
-                        <select onChange={(e) => setItemsPerPageWarranty(Number(e.target.value))} className="select select-bordered ml-2">
+                        <select
+                            onChange={(e) => setItemsPerPageWarranty(Number(e.target.value))}
+                            className="select select-bordered ml-2"
+                        >
                             <option value={10}>10</option>
                             <option value={20}>20</option>
                             <option value={50}>50</option>
                         </select>
                     </div>
+                    <Button size="sm" type="primary" onClick={() => { /* Add your handler here */ }}>
+                        Add Spare Part
+                    </Button>
                     <DataTable
                         headers={warrantyHeaders}
                         data={paginatedWarrantyReports.map((report, index) => ({
@@ -96,40 +102,17 @@ const Dashboard = ({ spareparts, categories = [] }) => {
                     </div>
                 </div>
 
-               {/* Most Used Parts Section */}
+                {/* Most Used Parts Section */}
                 <div className="mb-8">
                     <h3 className="text-lg font-bold mb-2">Most Used Parts</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                            <p className="text-sm font-medium mb-1">Connector</p>
-                            <progress className="progress progress-success w-56" value="4" max="100"></progress>
-                            <p className="text-xs mt-1">Used: 4 times</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium mb-1">LCD</p>
-                            <progress className="progress progress-success w-56" value="10" max="100"></progress>
-                            <p className="text-xs mt-1">Used: 10 times</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium mb-1">Battery</p>
-                            <progress className="progress progress-success w-56" value="40" max="100"></progress>
-                            <p className="text-xs mt-1">Used: 40 times</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium mb-1">Bacjdoor</p>
-                            <progress className="progress progress-success w-56" value="70" max="100"></progress>
-                            <p className="text-xs mt-1">Used: 70 times</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium mb-1">IC EMMC</p>
-                            <progress className="progress progress-success w-56" value="66" max="100"></progress>
-                            <p className="text-xs mt-1">Used: 66 times</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium mb-1">Buzzer</p>
-                            <progress className="progress progress-success w-56" value="20" max="100"></progress>
-                            <p className="text-xs mt-1">Used: 20 times</p>
-                        </div>
+                        {['Connector', 'LCD', 'Battery', 'Backdoor', 'IC EMMC', 'Buzzer'].map((part, index) => (
+                            <div key={index}>
+                                <p className="text-sm font-medium mb-1">{part}</p>
+                                <progress className="progress progress-success w-56" value={Math.random() * 100} max="100"></progress>
+                                <p className="text-xs mt-1">Used: {Math.floor(Math.random() * 100)} times</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
