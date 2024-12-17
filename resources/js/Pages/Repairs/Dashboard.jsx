@@ -1,16 +1,40 @@
 import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import axios from 'axios';
-import EditRepairModal from './EditRepairModal'; // Import the modal component
-import Accordion from '@/Components/DaisyUI/Accordion'; // Import the Accordion component
+import Accordion from '@/Components/DaisyUI/Accordion';
+import Stat from '@/Components/DaisyUI/Stat';
+import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import DataTable from '@/Components/DaisyUI/DataTable';
+import Chart from 'react-apexcharts';
+import Card from '@/Components/DaisyUI/Card';
 
-const Dashboard = ({ repairs, categories }) => {
+const generateRandomRepairs = (num) => {
+    const repairs = [];
+    for (let i = 0; i < num; i++) {
+        repairs.push({
+            entry_date: new Date(Date.now() - Math.random() * 10000000000).toLocaleDateString(),
+            customer_id: `CUST${Math.floor(Math.random() * 1000)}`,
+            cashier: `Cashier ${Math.floor(Math.random() * 10)}`,
+            phone_brand: `Brand ${Math.floor(Math.random() * 5)}`,
+            damage_description: `Damage ${Math.floor(Math.random() * 10)}`,
+            technician_id: `Tech ${Math.floor(Math.random() * 5)}`,
+            invoice_number: `INV${Math.floor(Math.random() * 10000)}`,
+        });
+    }
+    return repairs;
+};
+
+const Dashboard = ({ categories }) => {
     const [search, setSearch] = useState('');
-    const [selectedRepair, setSelectedRepair] = useState(null); // State to hold the selected repair for editing
-    const [isModalOpen, setModalOpen] = useState(false); // State to control modal visibility
+    const [selectedRepair, setSelectedRepair] = useState(null);
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(5); // Set items per page
+
+    // Generate random repairs data
+    const repairs = generateRandomRepairs(20);
 
     const filteredRepairs = repairs.filter(repair => {
         const customerId = repair.customer_id ? String(repair.customer_id).toLowerCase() : '';
@@ -24,24 +48,13 @@ const Dashboard = ({ repairs, categories }) => {
         );
     });
 
-    const handleEdit = (repair) => {
-        setSelectedRepair(repair); // Set the selected repair for editing
-        setModalOpen(true); // Open the modal
-    };
-
-    const handleCloseModal = () => {
-        setModalOpen(false); // Close the modal
-        setSelectedRepair(null); // Reset selected repair
-    };
-
     const handleDelete = async (repair) => {
         const confirmDelete = window.confirm(`Are you sure you want to delete repair with ID: ${repair.id}?`);
         if (confirmDelete) {
             try {
-                const response = await axios.delete(`/api/repairs/${repair.id}`); // Ensure this URL is correct
+                const response = await axios.delete(`/api/repairs/${repair.id}`);
                 if (response.data.success) {
                     alert('Repair deleted successfully');
-                    // Optionally, update the state to remove the deleted repair
                 }
             } catch (error) {
                 console.error('Error deleting repair:', error);
@@ -50,59 +63,109 @@ const Dashboard = ({ repairs, categories }) => {
         }
     };
 
+    const revenue = Math.floor(Math.random() * 1000000) + 1000000;
+    const storeSparepartExpenses = Math.floor(Math.random() * (revenue / 2));
+    const externalSparepartExpenses = Math.floor(Math.random() * (revenue / 2));
+    const profit = revenue - (storeSparepartExpenses + externalSparepartExpenses);
+
     return (
         <AuthenticatedLayout page={'Repairs'} action={'Dashboard'}>
             <Head title="Repairs Dashboard" />
 
-            <div>
-                <div className="flex flex-row justify-between mb-4">
-                    <div className="flex flex-row gap-1">
-                        <Button size="sm" type="primary">
-                            Add Repair
-                        </Button>
-                    </div>
-                    <div className="flex items-center">
-                        <SearchInput
-                            onChange={(e) => setSearch(e.target.value)}
-                            value={search}
-                            placeholder="Search repairs..."
+            <div className="p-6">
+
+                {/* Service Category Stats */}
+                <div className="grid grid-cols-4 gap-4 mb-4">
+                    <Stat title="Store Sparepart Expenses" value={`Rp${storeSparepartExpenses.toLocaleString()}`} icon={<CurrencyDollarIcon className="h-8 w-8 text-blue-500" />} />
+                    <Stat title="External Sparepart Expenses" value={`Rp${externalSparepartExpenses.toLocaleString()}`} icon={<CurrencyDollarIcon className="h-8 w-8 text-blue-500" />} />
+                    <Stat title="Revenue" value={`Rp${revenue.toLocaleString()}`} icon={<CurrencyDollarIcon className="h-8 w -8 text-blue-500" />} />
+                    <Stat title="Profit" value={`Rp${profit.toLocaleString()}`} icon={<CurrencyDollarIcon className="h-8 w-8 text-blue-500" />} />
+                </div>
+
+                {/* Current Year Service Graph */}
+                <Card className="mb-8">
+                    <div className="font-bold text-2xl mb-4">Current Year Service Analytics</div>
+                    <Chart
+                        options={{
+                            chart: {
+                                id: 'service-bar',
+                                toolbar: {
+                                    show: false,
+                                },
+                            },
+                            grid: {
+                                show: false,
+                            },
+                            xaxis: {
+                                categories: Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('default', { month: 'long' })),
+                                lines: {
+                                    show: false,
+                                },
+                            },
+                            yaxis: {
+                                lines: {
+                                    show: false,
+                                },
+                            },
+                        }}
+                        series={[
+                            {
+                                name: 'Services',
+                                data: Array.from({ length: 12 }).map(() => Math.floor(Math.random() * 100)),
+                            },
+                        ]}
+                        type="bar"
+                        width="100%"
+                        height="200px"
+                    />
+                </Card>
+
+                {/* Space between graph and table */}
+                <div className="mb-8"></div>
+
+                {/* Technician Profit Table */}
+                <div className="mb-8">
+                    <h3 className="text-lg font-bold mb-4">Technician Profit Table</h3>
+                    <div className="overflow-x-auto">
+                        <DataTable
+                            headers={['Entry Date', 'Customer ID', 'Cashier', 'Phone Brand', 'Damage Description', 'Technician ID', 'Invoice Number']}
+                            data={filteredRepairs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((repair) => ({
+                                entry_date: repair.entry_date,
+                                customer_id: repair.customer_id,
+                                cashier: repair.cashier,
+                                phone_brand: repair.phone_brand,
+                                damage_description: repair.damage_description,
+                                technician_id: repair.technician_id,
+                                invoice_number: repair.invoice_number,
+                            }))}
                         />
+                    </div>
+                    <div className="flex justify-center mt-4">
+                        {Array.from({ length: Math.ceil(filteredRepairs.length / itemsPerPage) }, (_, index) => (
+                            <Button
+                                key={index + 1}
+                                size="sm"
+                                onClick={() => setCurrentPage(index + 1)}
+                                className={`mx-1 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : ''}`}
+                            >
+                                {index + 1}
+                            </Button>
+                        ))}
                     </div>
                 </div>
 
-                {/* Repairs Table */}
-                <div className="overflow-x-auto">
-                    <table className="table mb-4">
-                        <thead>
-                            <tr>
-                                <th>Entry Date</th>
-                                <th>Customer ID</th>
-                                <th>Cashier</th>
-                                <th>Phone Brand</th>
-                                <th>Damage Description</th>
-                                <th>Technician ID</th>
-                                <th>Invoice Number</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredRepairs.map((repair) => (
-                                <tr key={repair.id}>
-                                    <td>{repair.entry_date}</td>
-                                    <td>{repair.customer_id}</td>
-                                    <td>{repair.cashier}</td>
-                                    <td>{repair.phone_brand}</td>
-                                    <td>{repair.damage_description}</td>
-                                    <td>{repair.technician_id}</td>
-                                    <td>{repair.invoice_number}</td>
-                                    <td>
-                                        <Button size="sm" onClick={() => handleEdit(repair)}>Edit</Button>
-                                        <Button size="sm" type="danger" onClick={() => handleDelete(repair)}>Delete</Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                {/* Sparepart Usage Progress */}
+                <div className="mb-8">
+                    <h3 className="text-lg font-bold mb-2">Sparepart Usage Progress</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {['Connector', 'LCD', 'Battery', 'Backdoor', 'IC EMMC', 'Buzzer'].map((part, index) => (
+                            <div key={index}>
+                                <p className="text-sm font-medium mb-1">{part}</p>
+                                <progress className="progress progress-success w-56" value={Math.random() * 100} max="100"></progress>
+                                <p className="text-xs mt-1">Used: {Math.floor(Math.random() * 100)} times</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Categories Accordion */}
@@ -119,14 +182,12 @@ const Dashboard = ({ repairs, categories }) => {
                                             <Button size="sm" type="danger" onClick={() => handleDelete(repair)}>Delete</Button>
                                         </div>
                                     ))}
-                                {/* Displaying additional information for the category */}
-                                <div className="mt-2">
-                                    <p>Additional Info:</p>
+                                <div className="mt-2"> <p>Additional Info:</p>
                                     <ul>
-                                        <li>Pengeluaran Sparepart Toko: 0.00</li>
-                                        <li>Pengeluaran Sparepart Luar: 0.00</li>
-                                        <li>Penghasilan: 0.00</li>
-                                        <li>Laba: 0.00</li>
+                                        <li>Pengeluaran Sparepart Toko: Rp0.00</li>
+                                        <li>Pengeluaran Sparepart Luar: Rp0.00</li>
+                                        <li>Penghasilan: Rp0.00</li>
+                                        <li>Laba: Rp0.00</li>
                                     </ul>
                                 </div>
                             </Accordion.Item>

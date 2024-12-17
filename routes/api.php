@@ -24,7 +24,9 @@ Route::group([], function () {
 Route::group([], routes: function () {
     Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store');
     Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete');
-    Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show'); // Show a specific repair
+    Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show');
+    Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
+
 });
 
 // Group for default API routes with JWT verification

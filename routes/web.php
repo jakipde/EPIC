@@ -58,13 +58,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-        Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
-        Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
         Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
-        Route::get('/repairs/overview', [RepairsController::class, 'overview'])->name('repairs.overview');
-        Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('repairs.show');
+        Route::get('/repairs/data-management', [RepairsController::class, 'datamanagement'])->name('repairs.data-management');
+        Route::get('/repairs/reports', [RepairsController::class, 'reports'])->name('repairs.reports');
+        Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
         Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
-        Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.destroy');
 
         Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
         Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');

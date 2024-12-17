@@ -21,13 +21,26 @@ class RepairsController extends Controller
         ]);
     }
 
-    public function overview()
+    public function datamanagement()
     {
-        // Fetch any necessary data for the overview
-        $repairs = Repair::all(); // Example: Fetch all repairs
+        // Fetch repairs data, you might want to paginate or filter this
+        $repairs = Repair::all(); // Adjust this as needed
 
-        // Return the Inertia response with the overview data
-        return redirect()->route('repairs.overview')->with('success', 'Overview loaded successfully.');
+        // Render the dashboard view using Inertia
+        return Inertia::render('Repairs/DataManagement', [
+            'repairs' => $repairs,
+        ]);
+    }
+
+    public function reports()
+    {
+        // Fetch repairs data, you might want to paginate or filter this
+        $repairs = Repair::all(); // Adjust this as needed
+
+        // Render the dashboard view using Inertia
+        return Inertia::render('Repairs/UsageReports', [
+            'repairs' => $repairs,
+        ]);
     }
 
     public function create()
