@@ -26,26 +26,35 @@ class DefaultSeeder extends Seeder
             Permission::insert(['id' => Str::ulid(), ...$permission]);
         }
 
-        $role = Role::create(['name' => 'admin']);
+        // Create the technician role
+        $technicianRole = Role::create(['name' => 'technician']);
 
+        // Create the admin role
+        $adminRole = Role::create(['name' => 'admin']);
+
+        // Assign all permissions to the technician role
         $permissions = Permission::all();
         foreach ($permissions as $permission) {
-            $role->rolePermissions()->create(['permission_id' => $permission->id]);
+            $technicianRole->rolePermissions()->create(['permission_id' => $permission->id]);
         }
 
+        // Create the user "Zaky P" with the technician role
         User::create([
-            'name' => 'Super Administrator',
-            'email' => 'root@admin.com',
-            'password' => bcrypt('password'),
+            'name' => 'Zaky P',
+            'email' => 'zakypde@gmail.com',
+            'password' => bcrypt('erytchandra12'),
+            'role_id' => $technicianRole->id, // Assigning technician role
         ]);
 
+        // Create the admin user
         User::create([
-            'name' => 'Administator',
+            'name' => 'Administrator',
             'email' => 'admin@admin.com',
             'password' => bcrypt('password'),
-            'role_id' => $role->id,
+            'role_id' => $adminRole->id, // Assigning admin role
         ]);
 
+        // Create the guest role and assign permissions
         $guest = Role::create(['name' => Role::GUEST]);
         $permission = Permission::where('name', 'view-shortlink')->first();
         $guest->rolePermissions()->create(['permission_id' => $permission->id]);

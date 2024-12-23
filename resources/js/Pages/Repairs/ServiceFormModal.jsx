@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import CompletenessModal from "./CompletenessModal";
+import { HiXMark } from 'react-icons/hi2';
 
 const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     const [entryDate, setEntryDate] = useState('');
@@ -33,6 +34,27 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
         const currentDate = new Date().toISOString().split('T')[0];
         setEntryDate(currentDate);
     }, []);
+
+    const generateInvoiceNumber = () => {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const year = now.getFullYear();
+
+        // Get hours, minutes, and seconds
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+
+        // Convert time to ASCII values
+        const asciiTime = [
+            hours.toString().split('').map(char => char.charCodeAt(0)).join(''),
+            minutes.toString().split('').map(char => char.charCodeAt(0)).join(''),
+            seconds.toString().split('').map(char => char.charCodeAt(0)).join('')
+        ].join('');
+
+        return `INV-${day}${month}${year}${asciiTime}`;
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -74,15 +96,26 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
 
         onClose();
     };
+    const handleNewCustomer = () => {
+        console.log("New Customer button clicked");
+    };
 
     if (!isOpen) return null;
 
     return (
         <div className={`modal ${isOpen ? "modal-open" : ""}`}>
-            <div className="modal-box max-w-5xl" ref={modalRef}>
-                <h3 className="font-bold text-lg mb-4">Add New Repair</h3>
+            <div className="modal-box max-w-5xl w-full p-4" ref={modalRef}>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-lg">{generateInvoiceNumber()}</h3>
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleNewCustomer}
+                    >
+                        New Customer
+                    </button>
+                </div>
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Left Column */}
                         <div>
                             <div className="form-control mb-3">
@@ -110,7 +143,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     <option value="">-- Select Cashier --</option>
                                     <option value="1">Cashier 1</option>
                                     <option value="2">Cashier 2</option>
-                                    {/* Add more cashiers as needed */}
                                 </select>
                             </div>
                             <div className="form-control mb-3">
@@ -210,7 +242,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     <option value="">-- Select Customer --</option>
                                     <option value="1">Customer 1</option>
                                     <option value="2">Customer 2</option>
-                                    {/* Add more customers as needed */}
                                 </select>
                             </div>
                             <div className="form-control mb-3">
@@ -226,7 +257,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     <option value="">-- Select Technician --</option>
                                     <option value="1">Technician 1</option>
                                     <option value="2">Technician 2</option>
-                                    {/* Add more technicians as needed */}
                                 </select>
                             </div>
                             <div className="form-control mb-3">
