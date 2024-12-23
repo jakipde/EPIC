@@ -1,70 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import DataTable from '@/Components/DaisyUI/DataTable';
-import Modal from '@/Components/DaisyUI/Modal'; // Assuming you have a Modal component
-
-const statuses = ['Queued', 'In Process', 'Completed', 'Canceled', 'Collected', 'Refunded'];
-
-const getRandomStatus = () => {
-    return statuses[Math.floor(Math.random() * statuses.length)];
-};
-
-const generateRandomRepairs = (num) => {
-    const repairs = [];
-    for (let i = 0; i < num; i++) {
-        repairs.push({
-            entry_date: new Date(Date.now() - Math.random() * 10000000000).toLocaleDateString(),
-            invoice_number: `INV${Math.floor(Math.random() * 10000)}`,
-            customer_id: `CUST${Math.floor(Math.random() * 1000)}`,
-            phone_brand: `Brand ${Math.floor(Math.random() * 5)}`,
-            type: `Type ${Math.floor(Math.random() * 3)}`,
-            damage_description: `Damage ${Math.floor(Math.random() * 10)}`,
-            description: `Description ${Math.floor(Math.random() * 10)}`,
-            price: Math.floor(Math.random() * 100000),
-            payment: Math.random() > 0.5 ? 'Cash' : 'Credit',
-            exit_date: new Date(Date.now() - Math.random() * 10000000000).toLocaleDateString(),
-            admin: `Admin ${Math.floor(Math.random() * 5)}`,
-            technician_id: `Tech ${Math.floor(Math.random() * 5)}`,
-            status: getRandomStatus(), // Add status here
-        });
-    }
-    return repairs;
-};
-
-const getStatusColor = (status) => {
-    switch (status) {
-        case 'Queued':
-            return 'bg-yellow-500';
-        case 'In Process':
-            return 'bg-blue-500';
-        case 'Completed':
-            return 'bg-green-500';
-        case 'Canceled':
-            return 'bg-red-500';
-        case 'Collected':
-            return 'bg-purple-500';
-        case 'Refunded':
-            return 'bg-gray-500';
-        default:
-            return '';
-    }
-};
+import ServiceFormModal from './ServiceFormModal'; // Import the modal
 
 const DataManagement = () => {
     const [search, setSearch] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5); // Set items per page
-    const [selectedRepair, setSelectedRepair] = useState(null);
+    const [itemsPerPage] = useState(5);
+    const [repairs, setRepairs] = useState([]); // Initialize with an empty array
     const [isModalOpen, setModalOpen] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState(''); // New state for status filter
 
-    // Generate random repairs data
-    const repairs = generateRandomRepairs(20);
+    // Fetch repairs data from the API
+    useEffect(() => {
+        const fetchRepairs = async () => {
+            try {
+                const response = await fetch('/api/repairs'); // Adjust the URL to your API endpoint
+                const data = await response.json();
+                setRepairs(data); // Assuming the API returns an array of repairs
+            } catch (error) {
+                console.error('Error fetching repairs:', error);
+            }
+        };
+
+        fetchRepairs();
+    }, []);
 
     const filteredRepairs = repairs.filter(repair => {
         const matchesSearch = repair.customer_id.toString().includes(search) ||
@@ -74,33 +38,11 @@ const DataManagement = () => {
         const matchesDateRange = (!startDate || new Date(repair.entry_date) >= new Date(startDate)) &&
                                   (!endDate || new Date(repair.entry_date) <= new Date(endDate));
 
-        const matchesStatus = !selectedStatus || repair.status === selectedStatus; // Check status filter
-
-        return matchesSearch && matchesDateRange && matchesStatus; // Include status in the filter
+        return matchesSearch && matchesDateRange;
     });
 
-    const paginatedRepairs = filteredRepairs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    const handlePrint = (invoice) => {
-        console.log(`Print bill for ${invoice}`);
-    };
-
-    const handleEdit = (repair) => {
-        console.log(`Edit repair with ID: ${repair.invoice_number}`);
-    };
-
-    const handleDelete = (repair) => {
-        console.log(`Delete repair with ID: ${repair.invoice_number}`);
-    };
-
-    const openModal = (repair) => {
-        setSelectedRepair(repair);
-        setModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setSelectedRepair(null);
-        setModalOpen(false);
+    const handleAddRepair = (newRepair) => {
+        setRepairs(prevRepairs => [...prevRepairs, newRepair]);
     };
 
     return (
@@ -109,7 +51,7 @@ const DataManagement = () => {
             <div className="p-6">
                 <h1 className="text-2xl font-bold mb-4">Data Management</h1>
 
-                {/* Date Filter */}
+                {/* Date Filter and Search Input */}
                 <div className="flex mb-4">
                     <input
                         type="date"
@@ -127,65 +69,43 @@ const DataManagement = () => {
                         onChange={(e) => setSearch(e.target.value)}
                         value={search} placeholder="Search repairs..."
                     />
-                    <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="input input-bordered ml-2">
-                        <option value="">All Statuses</option>
-                        {statuses.map((status) => (
-                            <option key={status} value={status}>{status}</option>
-                        ))}
-                    </select>
-                    <Button size="sm" type="primary" className="ml-2">Add Data</Button>
+                    <Button size="sm" type="primary" className="ml-2" onClick={() => setModalOpen(true)}>Add Data</Button>
                 </div>
 
                 {/* Data Table */}
                 <DataTable
-                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone', 'Brand', 'Type', 'Damage', 'Description', 'Price', 'Payment', 'Exit Date', 'Admin', 'Technician', 'Status']}
-                    data={paginatedRepairs.map((repair) => ({
+                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status']}
+                    data={filteredRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
                         customer: repair.customer_id,
-                        phone: repair.phone_brand,
-                        brand: repair.phone_brand,
-                        type: repair.type,
+                        phone_brand: repair.phone_brand,
+                        phone_model: repair.phone_model,
                         damage: repair.damage_description,
-                        description: repair.description,
-                        price: `Rp${repair.price.toLocaleString()}`,
-                        payment: repair.payment,
-                        exit_date: repair.exit_date,
-                        admin: repair.admin,
+                        description: repair.notes, // Assuming you want to show notes here
                         technician: repair.technician_id,
-                        status: <span className={`text-white font-bold py-1 px-2 rounded ${getStatusColor(repair.status)}`}>{repair.status}</span>, // Add status with color
+                        under_warranty: repair.under_warranty ? 'Yes' : 'No',
+                        warranty_duration: repair.warranty_duration,
+                        repair_type: repair.repair_type,
+                        status: repair.repair_status, // Add the status field here
                     }))}
                 />
 
                 {/* Pagination */}
-                <div className="flex justify-center mt-4">
-                    {Array.from({ length: Math.ceil(filteredRepairs.length / itemsPerPage) }, (_, index) => (
-                        <Button
-                            key={index + 1}
-                            size="sm"
+                <div className="mt-4">
+                    {Array(Math.ceil(filteredRepairs.length / itemsPerPage)).fill(null).map((_, index) => (
+                        <button
+                            key={index}
+                            className={`btn btn-sm ${currentPage === index + 1 ? 'btn-primary' : ''}`}
                             onClick={() => setCurrentPage(index + 1)}
-                            className={`mx-1 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : ''}`}
                         >
                             {index + 1}
-                        </Button>
+                        </button>
                     ))}
                 </div>
 
-                {/* Modal for Edit, Delete, and Print Buttons */}
-                {isModalOpen && selectedRepair && (
-                    <Modal onClose={closeModal}>
-                        <h2 className="text-lg font-bold">Actions for {selectedRepair.invoice_number}</h2>
-                        <p>Customer: {selectedRepair.customer_id}</p>
-                        <p>Price: {`Rp${selectedRepair.price.toLocaleString()}`}</p>
-                        <p>Status: <span className={`text-white font-bold py-1 px-2 rounded ${getStatusColor(selectedRepair.status)}`}>{selectedRepair.status}</span></p>
-                        <div className="flex justify-between mt-4">
-                            <Button size="sm" onClick={() => handleEdit(selectedRepair)}>Edit</Button>
-                            <Button size="sm" onClick={() => handleDelete(selectedRepair)}>Delete</Button>
-                            <Button size="sm" onClick={() => handlePrint(selectedRepair.invoice_number)}>Print</Button>
-                        </div>
-                        <Button size="sm" onClick={closeModal} className="mt-2">Close</Button>
-                    </Modal>
-                )}
+                {/* Service Form Modal */}
+                <ServiceFormModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} onAddRepair={handleAddRepair} />
             </div>
         </AuthenticatedLayout>
     );

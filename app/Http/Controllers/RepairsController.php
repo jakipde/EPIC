@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Repair;
-use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -12,8 +11,8 @@ class RepairsController extends Controller
 {
     public function dashboard()
     {
-        // Fetch repairs data, you might want to paginate or filter this
-        $repairs = Repair::all(); // Adjust this as needed
+        // Fetch repairs data
+        $repairs = Repair::all(); // You might want to paginate or filter this
 
         // Render the dashboard view using Inertia
         return Inertia::render('Repairs/Dashboard', [
@@ -23,10 +22,10 @@ class RepairsController extends Controller
 
     public function datamanagement()
     {
-        // Fetch repairs data, you might want to paginate or filter this
-        $repairs = Repair::all(); // Adjust this as needed
+        // Fetch repairs data
+        $repairs = Repair::all(); // You might want to paginate or filter this
 
-        // Render the dashboard view using Inertia
+        // Render the data management view using Inertia
         return Inertia::render('Repairs/DataManagement', [
             'repairs' => $repairs,
         ]);
@@ -34,10 +33,10 @@ class RepairsController extends Controller
 
     public function reports()
     {
-        // Fetch repairs data, you might want to paginate or filter this
-        $repairs = Repair::all(); // Adjust this as needed
+        // Fetch repairs data
+        $repairs = Repair::all(); // You might want to paginate or filter this
 
-        // Render the dashboard view using Inertia
+        // Render the reports view using Inertia
         return Inertia::render('Repairs/UsageReports', [
             'repairs' => $repairs,
         ]);
@@ -54,49 +53,22 @@ class RepairsController extends Controller
         $request->validate([
             'entry_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
-            'cashier' => 'required|string|max:255',
+            'cashier_id' => 'required|exists:admins,id',
             'phone_brand' => 'required|string|max:255',
+            'phone_model' => 'required|string|max:255',
             'imei_sn_1' => 'nullable|string|max:255',
             'imei_sn_2' => 'nullable|string|max:255',
             'damage_description' => 'required|string',
-            'phone_accessories' => 'nullable|string',
             'technician_id' => 'required|exists:technicians,id',
-            'under_warranty' => 'required|in:Yes,No',
+            'under_warranty' => 'required|boolean',
             'warranty_duration' => 'nullable|integer',
-            'exit_date' => 'nullable|date',
-            'print_type' => 'required|string|max:255',
+            'notes' => 'nullable|string',
+            'repair_type' => 'required|string|max:255',
         ]);
 
         try {
-            // Generate a unique invoice number
-            $invoiceNumber = strtoupper(uniqid('INV-'));
-
-            // Log the invoice data before creating it
-            Log::info('Creating invoice with data:', [
-                'date' => now(),
-                'customer_id' => $request->input('customer_id'),
-                'description' => 'Repair for ' . $request->input('phone_brand'),
-                'amount' => 0,
-                'invoice_number' => $invoiceNumber,
-            ]);
-
-            // Create the invoice
-            $invoice = Invoice::create([
-                'date' => now(),
-                'customer_id' => $request->input('customer_id'),
-                'description' => 'Repair for ' . $request->input('phone_brand'),
-                'amount' => 0,
-                'invoice_number' => $invoiceNumber,
-            ]);
-
-            // Prepare repair data
-            $repairData = $request->all();
-            $repairData['invoice_number'] = $invoiceNumber;
-            $repairData['invoice_id'] = $invoice->id;
-            $repairData['under_warranty'] = $repairData['under_warranty'] === 'Yes';
-
             // Create the repair
-            $repair = Repair::create($repairData);
+            $repair = Repair::create($request->all());
 
             // Redirect to the dashboard after successful creation
             return redirect()->route('repairs.dashboard')->with('success', 'Repair created successfully.');
@@ -123,18 +95,22 @@ class RepairsController extends Controller
         $request->validate([
             'entry_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
-            'cashier' => 'required|string|max:255',
+            'cashier_id' => 'required|exists:admins,id',
             'phone_brand' => 'required|string|max:255',
+            'phone_model' => 'required|string|max:255',
             'damage_description' => 'required|string',
             'technician_id' => 'required|exists:technicians,id',
-            // Add other validation rules as necessary
+            'under_warranty' => 'required|boolean',
+            'warranty_duration' => 'nullable|integer',
+            'notes' => 'nullable|string',
+            'repair_type' => 'required|string|max:255',
         ]);
 
         try {
             // Find the repair by ID
             $repair = Repair::findOrFail($id);
             // Update the repair record
-            $repair->update($request-> all());
+            $repair->update($request->all());
 
             // Redirect to the dashboard after successful update
             return redirect()->route('repairs.dashboard')->with('success', 'Repair updated successfully.');
@@ -148,7 +124,7 @@ class RepairsController extends Controller
     {
         try {
             // Find the repair by ID
-            $repair = Repair::findOrFail($id);
+ $repair = Repair::findOrFail($id);
             // Delete the repair record
             $repair->delete();
 

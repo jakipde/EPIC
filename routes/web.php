@@ -61,8 +61,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
         Route::get('/repairs/data-management', [RepairsController::class, 'datamanagement'])->name('repairs.data-management');
         Route::get('/repairs/reports', [RepairsController::class, 'reports'])->name('repairs.reports');
-        Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
-        Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
 
         Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
         Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');

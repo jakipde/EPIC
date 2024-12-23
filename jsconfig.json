@@ -2,7 +2,7 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "@/*": ["resources/js/*"]
+            "*": ["resources/js/*"] // Correcting the quotation marks
         }
     },
     "exclude": ["node_modules", "public"]

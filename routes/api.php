@@ -21,12 +21,12 @@ Route::group([], function () {
     Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show'); // Ensure this method exists
     Route::get('/categories/{categoryId}/fields', [CategoryController::class, 'getFields']); // This should be in CategoryController
 });
-Route::group([], routes: function () {
-    Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store');
-    Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete');
-    Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show');
-    Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
 
+Route::group([], function () {
+    Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store'); // Create a new repair
+    Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete'); // Delete a repair
+    Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show'); // Show a specific repair
+    Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update'); // Update a repair
 });
 
 // Group for default API routes with JWT verification
