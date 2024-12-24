@@ -151,7 +151,7 @@ class ScaffoldGenerator
 
     public string $Model;
 
-    public bool $adminAccess = false;
+    public bool $ownerAccess = false;
 
     public array $defaultDestinations;
 
@@ -159,7 +159,7 @@ class ScaffoldGenerator
 
     public function __construct(
         string $model,
-        bool $adminAccess = false,
+        bool $ownerAccess = false,
         array $fields = [],
         public $createModelClass = false,
     ) {
@@ -167,7 +167,7 @@ class ScaffoldGenerator
         $this->models = Str::plural(str(splitPascalCase($model))->lower());
         $this->Model = $model;
 
-        $this->adminAccess = $adminAccess;
+        $this->ownerAccess = $ownerAccess;
         $this->fields = $fields;
 
         $this->defaultDestinations = [
@@ -186,9 +186,9 @@ class ScaffoldGenerator
         return File::exists(app_path('Models/' . $this->Model . '.php'));
     }
 
-    public function withProtectedAdminAccess($adminAccess)
+    public function withProtectedOwnerAccess($ownerAccess)
     {
-        $this->adminAccess = $adminAccess;
+        $this->ownerAccess = $ownerAccess;
 
         return $this;
     }
@@ -216,7 +216,7 @@ class ScaffoldGenerator
             FileGenerator::new($this->Model, $replaces)->ScaffoldModal();
 
             // Web Router
-            $positionName = $this->adminAccess ? '// #Admin' : null;
+            $positionName = $this->ownerAccess ? '// #owner' : null;
             RouteGenerator::new()
                 ->addWebUse($this->Model)
                 ->addMenu($this->Model, $this->models, 'view-' . $this->model)
@@ -252,7 +252,7 @@ class ScaffoldGenerator
             FileGenerator::new($this->Model, $replaces)->ScaffoldPage();
 
             // Web Router
-            $positionName = $this->adminAccess ? '// #Admin' : null;
+            $positionName = $this->ownerAccess ? '// #Owner' : null;
             RouteGenerator::new()
                 ->addWebUse($this->Model)
                 ->addMenu($this->Model, $this->models, 'view-' . $this->model)
@@ -283,7 +283,7 @@ class ScaffoldGenerator
             FileGenerator::new($this->Model, $replaces)->ScaffoldSinglePage();
 
             // Web Router
-            $positionName = $this->adminAccess ? '// #Admin' : null;
+            $positionName = $this->ownerAccess ? '// #Owner' : null;
             RouteGenerator::new()
                 ->addWebUse($this->Model)
                 ->addMenu($this->Model, $this->models, 'view-' . $this->model)

@@ -2,16 +2,58 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Device extends Model
-{    protected $fillable = [
-    'brand',        // Brand of the device
-    'type',         // Type of device
-    'model',        // Model of the device
-    'sn',           // Serial number
-    'imei_1',      // IMEI 1
-    'imei_2',      // IMEI 2
-    'price',        // Price of the device
-];
+{
+    use HasFactory, SoftDeletes;
+
+    /**
+     * @var string
+     */
+    protected $table = 'devices';
+
+    /**
+     * @var string[]
+     */
+    protected $fillable = [
+        'url_hash',
+        'url',
+        'brand_id',
+        'name',
+        'picture',
+        'released_at',
+        'body',
+        'os',
+        'storage',
+        'display_size',
+        'display_resolution',
+        'camera_pixels',
+        'video_pixels',
+        'ram',
+        'chipset',
+        'battery_size',
+        'battery_type',
+        'specifications',
+    ];
+
+    /**
+     * @var string[]
+     */
+    protected $casts = [
+        'specifications' => 'array'
+    ];
+
+    /**
+     * Returns devices of brand.
+     *
+     * @return BelongsTo
+     */
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo('App\Models\Device');
+    }
 }

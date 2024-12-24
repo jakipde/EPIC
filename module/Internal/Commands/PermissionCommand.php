@@ -19,7 +19,7 @@ class PermissionCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Sync any changes LIST in PermissionConstant and attach to `admin` role is exists';
+    protected $description = 'Sync any changes LIST in PermissionConstant and attach to `owner` role is exists';
 
     /**
      * Configure the command.

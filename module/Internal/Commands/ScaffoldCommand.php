@@ -81,8 +81,8 @@ class ScaffoldCommand extends Command implements PromptsForMissingInput
             );
         }
 
-        $_ = $scaffold->withProtectedAdminAccess(
-            $_ = confirm('Only admin allowed ?')
+        $_ = $scaffold->withProtectedOwnerAccess(
+            $_ = confirm('Only owner allowed ?')
         );
 
         $type = select(
