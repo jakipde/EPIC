@@ -25,13 +25,13 @@ class PermissionService
             Permission::where('name', $name)->delete();
         }
 
-        $ownerRole = Role::where('name', 'owner')->first();
+        $adminRole = Role::where('name', 'admin')->first();
         // add new permission to database
         $to_add = array_diff($lists, $permissions);
         foreach ($to_add as $index => $name) {
             $np = Permission::create(['id' => Str::ulid(), ...PermissionConstant::LIST[$index]]);
-            if ($ownerRole != null) {
-                $ownerRole->rolePermissions()->create(['permission_id' => $np->id]);
+            if ($adminRole != null) {
+                $adminRole->rolePermissions()->create(['permission_id' => $np->id]);
             }
         }
 

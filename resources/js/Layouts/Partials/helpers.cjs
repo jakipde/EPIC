@@ -1,8 +1,8 @@
 export const filterAllowedMenu = (user, item) => {
-    const isOwner = user.role === null
+    const isAdmin = user.role === null
     if ('items' in item) {
         let items = []
-        if (isOwner) {
+        if (isAdmin) {
             items = item.items
         } else {
             items = item.items.filter((item) =>
@@ -19,7 +19,7 @@ export const filterAllowedMenu = (user, item) => {
             return item
         }
     }
-    if (isOwner) {
+    if (isAdmin) {
         return item
     }
 }
