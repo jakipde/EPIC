@@ -9,10 +9,6 @@ use App\Console\Commands\CreateCategories;
 
 class Kernel extends ConsoleKernel
 {
-    protected $commands = [
-        // Register your custom command here
-        CreateCategories::class,
-    ];
 
     protected function schedule(Schedule $schedule)
     {
