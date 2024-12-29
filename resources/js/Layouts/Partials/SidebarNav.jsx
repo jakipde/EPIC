@@ -63,10 +63,9 @@ const SidebarItem = memo(({ item }) => (
 const SidebarItemGroup = memo(({ item }) => {
     const [open, setOpen] = useState(false);
 
-    // This effect ensures the parent (level 1) is open based on route activity
     useEffect(() => {
         const isActive = item.items.some(subItem => route().current(subItem.active));
-        setOpen(isActive); // Open if any subitem is active
+        setOpen(isActive ? false : open);
     }, [item.items]);
 
     return (

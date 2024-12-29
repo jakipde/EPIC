@@ -76,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/accessories/dashboard', [AccessoriesController::class, 'dashboard'])->name('accessories.dashboard');
         Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
 
-        Route::get('/spareparts/dashboard', [SparePartsController::class, 'dashboard'])->name('spareparts.dashboard');
+        Route::get('/spareparts/datainsights', [SparePartsController::class, 'datainsights'])->name('spareparts.datainsights');
         Route::get('/spareparts/warranty-report', [SparePartsController::class, 'warrantyreport'])->name('spareparts.warranty-report');
         Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
         Route::resource('spareparts', SparePartsController::class);

@@ -1,3 +1,4 @@
+// DataInsights.js
 import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '../../Layouts/AuthenticatedLayout';
@@ -6,22 +7,22 @@ import Button from '../../Components/DaisyUI/Button';
 import DataTable from '../../Components/DaisyUI/DataTable';
 import Stat from '../../Components/DaisyUI/Stat';
 import { CurrencyDollarIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
+import SparePartsFormModal from './SparePartsFormModal'; // Import the new modal
 
-const Dashboard = ({ spareparts, categories = [] }) => {
+const DataInsights = ({ spareparts, categories = [] }) => {
     const [searchWarranty, setSearchWarranty] = useState('');
     const [itemsPerPageWarranty, setItemsPerPageWarranty] = useState(10);
     const [currentPageWarranty, setCurrentPageWarranty] = useState(1);
-
     const [warrantyReports, setWarrantyReports] = useState([
         { customer: 'Customer A', status: 'Active' },
         { customer: 'Customer B', status: 'Expired' },
         { customer: 'Customer C', status: 'Active' },
         { customer: 'Customer D', status: 'Pending' },
     ]);
-
     const [income, setIncome] = useState(5000000);
     const [outcome, setOutcome] = useState(2000000);
     const profit = income - outcome;
+    const [isSparePartsModalOpen, setSparePartsModalOpen] = useState(false);
 
     const formatCurrency = (amount) => `Rp${amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
 
@@ -37,11 +38,17 @@ const Dashboard = ({ spareparts, categories = [] }) => {
         currentPageWarranty * itemsPerPageWarranty
     );
 
+    const handleAddSparePart = (newSparePart) => {
+        // Logic to add the new spare part to the state or send to the server
+        console.log('New Spare Part Added:', newSparePart);
+        setSparePartsModalOpen(false); // Close the modal after adding
+    };
+
     return (
-        <AuthenticatedLayout page="Dashboard">
-            <Head title="Dashboard" />
+        <AuthenticatedLayout page="Data Insights">
+            <Head title="Data Insights" />
             <div className="p-6">
-                <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+                <h1 className="text-2xl font-bold mb-4">Data Insights</h1>
 
                 <div className="grid grid-cols-3 gap-4 mb-4">
                     <Stat
@@ -78,7 +85,7 @@ const Dashboard = ({ spareparts, categories = [] }) => {
                             <option value={50}>50</option>
                         </select>
                     </div>
-                    <Button size="sm" type="primary" onClick={() => { /* Add your handler here */ }}>
+                    <Button size="sm" type="primary" onClick={() => setSparePartsModalOpen(true)}>
                         Add Spare Part
                     </Button>
                     <DataTable
@@ -102,6 +109,13 @@ const Dashboard = ({ spareparts, categories = [] }) => {
                     </div>
                 </div>
 
+                {/* Spare Parts Form Modal */}
+                <SparePartsFormModal
+                    isOpen={isSparePartsModalOpen}
+                    onClose={() => setSparePartsModalOpen(false)}
+                    onAddSparePart={handleAddSparePart}
+                />
+
                 {/* Most Used Parts Section */}
                 <div className="mb-8">
                     <h3 className="text-lg font-bold mb-2">Most Used Parts</h3>
@@ -120,4 +134,4 @@ const Dashboard = ({ spareparts, categories = [] }) => {
     );
 };
 
-export default Dashboard;
+export default DataInsights;

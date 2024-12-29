@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import CompletenessModal from "./CompletenessModal";
-import PrintModal from "./PrintModal"; // Import the PrintModal
 import { HiXMark } from 'react-icons/hi2';
 
 const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
@@ -17,7 +16,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     const [warrantyDuration, setWarrantyDuration] = useState(0);
     const [notes, setNotes] = useState('');
     const [repairType, setRepairType] = useState('');
-    const [serviceType, setServiceType] = useState(''); // New state for Service Type
     const [deviceBrandOther, setDeviceBrandOther] = useState('');
     const [isOtherBrand, setIsOtherBrand] = useState(false);
     const [completeness, setCompleteness] = useState({
@@ -30,24 +28,12 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     });
 
     const [isCompletenessModalOpen, setCompletenessModalOpen] = useState(false);
-    const [isPrintModalOpen, setPrintModalOpen] = useState(false); // State for Print Modal
     const modalRef = useRef(null); // Ref for the main modal
-
-    // New state variables for additional fields
-    const [subTotal, setSubTotal] = useState(0);
-    const [voucher, setVoucher] = useState('');
-    const [downPayment, setDownPayment] = useState(0);
-    const [total, setTotal] = useState(0);
-    const [paymentType, setPaymentType] = useState('');
 
     useEffect(() => {
         const currentDate = new Date().toISOString().split('T')[0];
         setEntryDate(currentDate);
     }, []);
-
-    const formatCurrency = (value) => {
-        return `Rp${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
-    };
 
     const generateInvoiceNumber = () => {
         const now = new Date();
@@ -87,12 +73,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
             warranty_duration: warrantyDuration,
             notes: notes,
             repair_type: repairType,
-            service_type: serviceType,
-            sub_total: subTotal,
-            voucher: voucher ,
-            down_payment: downPayment,
-            total: total,
-            payment_type: paymentType,
             completeness: completeness,
         };
 
@@ -112,27 +92,10 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
         setWarrantyDuration(0);
         setNotes('');
         setRepairType('');
-        setServiceType('');
         setDeviceBrandOther('');
-        setSubTotal(0);
-        setVoucher('');
-        setDownPayment(0);
-        setTotal(0);
-        setPaymentType('');
 
         onClose();
     };
-
-    const calculateTotal = () => {
-        const calculatedTotal = Math.max(0, subTotal - downPayment);
-        setTotal(calculatedTotal);
-    };
-
-    const handlePrint = (type) => {
-        console.log(`Printing with ${type} printer...`);
-        // Here you can add the logic to handle the actual printing
-    };
-
     const handleNewCustomer = () => {
         console.log("New Customer button clicked");
     };
@@ -227,7 +190,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
-                                    <span className="label-text">IMEI 1 / SN</span>
+                                    <span className="label-text">IMEI / SN 1</span>
                                 </label>
                                 <input
                                     type="text"
@@ -240,7 +203,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
-                                    <span className="label-text">IMEI 2 / SN (Optional)</span>
+                                    <span className="label-text">IMEI / SN 2 (Optional)</span>
                                 </label>
                                 <input
                                     type="text"
@@ -351,133 +314,23 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     <option value="other">Other</option>
                                 </select>
                             </div>
+
+                            {/* Completeness Modal Button */}
                             <div className="form-control mb-3">
-                                <label className="label">
-                                    <span className="label-text">Service Type</span>
-                                </label>
-                                <select
-                                    value={serviceType}
-                                    onChange={(e) => setServiceType(e.target.value)}
-                                    className="select select-bordered"
-                                    required
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setCompletenessModalOpen(true)}
                                 >
-                                    <option value="">-- Select Service Type --</option>
-                                    <option value="Hardware">Hardware</option>
-                                    <option value="Software">Software</option>
-                                    <option value="Diagnostic">Diagnostic</option>
-                                </select>
+                                    Devices Completeness Details
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* Spacing for separation */}
-                    <div className="my-4 border-t border-gray-200"></div>
-
-                    {/* Payment Section */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Sub Total</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={formatCurrency(subTotal)}
-                                onChange={(e) => {
-                                    const value = Math.max(0, parseInt(e.target.value.replace(/[^0-9]/g, ''), 10) || 0);
-                                    setSubTotal(value);
-                                }}
-                                className="input input-bordered"
-                                required
-                            />
-                        </div>
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Voucher</span>
-                            </label>
-                            <select
-                                value={voucher}
-                                onChange={(e) => setVoucher(e.target.value)}
-                                className="select select-bordered"
-                            >
-                                <option value="">-- Select Voucher --</option>
-                                <option value="Voucher 1">Voucher 1</option>
-                                <option value="Voucher 2">Voucher 2</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Down Payment</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={formatCurrency(downPayment)}
-                                onChange={(e) => {
-                                    const value = Math.max(0, parseInt(e.target.value.replace(/[^0-9]/g, ''), 10) || 0);
-                                    setDownPayment(value);
-                                }}
-                                className="input input-bordered"
-                            />
-                        </div>
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Total</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={formatCurrency(total)}
-                                readOnly
-                                className="input input-bordered"
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div className="form-control mb-3">
-                        <label className="label">
-                            <span className="label-text text-green-600">Payment Type</span>
-                        </label>
-                        <select
-                            value={paymentType}
-                            onChange={(e) => setPaymentType(e.target.value)}
-                            className="select select-bordered"
-                            required
-                        >
-                            <option value="">-- Select Payment Type --</option>
-                            <option value="Cash">Cash</option>
-                            <option value="Credit Card">Credit Card</option>
-                            <option value="Debit Card">Debit Card</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    {/* Completeness Modal Button */}
-                    <div className="form-control mb-3">
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={() => setCompletenessModalOpen(true)}
-                        >
-                            Devices Completeness Details
-                        </button>
-                    </div>
-
-                    {/* Print Modal Button */}
-                    <div className="form-control mb-3">
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={() => setPrintModalOpen(true)}
-                        >
-                            Print
-                        </button>
-                    </div>
-
-                    <div className="modal-action flex justify-between">
-                        <div className="flex space-x-2">
-                            <button type="button" onClick={onClose} className="btn">Close</button>
-                            <button type="submit" className="btn btn-primary">Submit</button>
-                        </div>
+                    <div className="modal-action">
+                        <button type="button" onClick={onClose} className="btn">Close</button>
+                        <button type="submit" className="btn btn-primary">Submit</button>
                     </div>
                 </form>
             </div>
@@ -489,15 +342,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                     onClose={() => setCompletenessModalOpen(false)}
                     onChange={setCompleteness}
                     initialCompleteness={completeness}
-                />
-            )}
-
-            {/* Print Modal */}
-            {isPrintModalOpen && (
-                <PrintModal
-                    isOpen={isPrintModalOpen}
-                    onClose={() => setPrintModalOpen(false)}
-                    onPrint={handlePrint}
                 />
             )}
         </div>

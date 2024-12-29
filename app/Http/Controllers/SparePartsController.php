@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 class SparePartsController extends Controller
 {
-    public function dashboard()
+    public function datainsights()
     {
         // Fetch all spare parts
         $spareparts = SparePart::with('supplier', 'category', 'subCategory', 'invoice', 'customer', 'payment', 'admin')->get();
 
-        return Inertia::render('SparePart/Dashboard', [
+        return Inertia::render('SparePart/DataInsights', [
             'spareparts' => $spareparts,
         ]);
     }
@@ -31,7 +31,7 @@ class SparePartsController extends Controller
     {
         $spareparts = SparePart::with('supplier', 'category', 'subCategory', 'invoice', 'customer', 'payment', 'admin')->findOrFail($id); // Fetch the spare part by ID
 
-        return Inertia::render('SparePart/Dashboard', [
+        return Inertia::render('SparePart/DataInsights', [
             'spareparts' => $spareparts,
         ]);
     }
@@ -67,6 +67,6 @@ class SparePartsController extends Controller
         // Create the spare part
         $sparePart = SparePart::create($request->all());
 
-        return redirect()->route('SparePart/Dashboard')->with('success', 'Spare part created successfully.');
+        return redirect()->route('SparePart/datainsights')->with('success', 'Spare part created successfully.');
     }
 }
