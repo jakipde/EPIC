@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Default\Api\SelectTableController;
 use App\Http\Controllers\Default\FileController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductSubCategoryController;
 use App\Http\Controllers\DataEntryController;
 use App\Http\Controllers\RepairsController;
 use Illuminate\Http\Request;
@@ -13,20 +15,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Repairs Routes
 Route::group([], function () {
-    Route::post('/data-entries', [DataEntryController::class, 'store'])->name('data-entries.store');
-    Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
-    Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show'); // Ensure this method exists
-    Route::get('/categories/{categoryId}/fields', [CategoryController::class, 'getFields']); // This should be in CategoryController
-});
-
-Route::group([], function () {
-    Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store'); // Create a new repair
-    Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete'); // Delete a repair
-    Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show'); // Show a specific repair
-    Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update'); // Update a repair
+    Route::post('/repairs', [RepairsController::class, 'store'])->name('api.repairs.store');
+    Route::delete('/repairs/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete');
+    Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show');
+    Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
 });
 
 // Group for default API routes with JWT verification
@@ -37,7 +31,29 @@ Route::middleware(['JwtCustomApiVerification::class'])
         Route::post('files', [FileController::class, 'store'])->name('api.file.store');
     });
 
-// Category-related API routes
-Route::group([], function () {
-    Route::get('/categories/{id}/fields', [CategoryController::class, 'getFields'])->name('api.categories.fields');
-});
+    // Supplier Routes
+    Route::group([], function () {
+        Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+        Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+        Route::get('/suppliers/{id}', [SupplierController::class, 'show'])->name('suppliers.show');
+        Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
+        Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+    });
+
+    // Product Category Routes
+    Route::group([], function () {
+        Route::get('/product-categories', [ProductCategoryController::class, 'index'])->name('product_categories.index');
+        Route::post('/product-categories', [ProductCategoryController::class, 'store'])->name('product_categories.store');
+        Route::get('/product-categories/{id}', [ProductCategoryController::class, 'show'])->name('product_categories.show');
+        Route::put('/product-categories/{id}', [ProductCategoryController::class, 'update'])->name('product_categories.update');
+        Route::delete('/product-categories/{id}', [ProductCategoryController::class, 'destroy'])->name('product_categories.destroy');
+    });
+
+    // Product Subcategory Routes
+    Route::group([], function () {
+        Route::get('/product-subcategories', [ProductSubCategoryController::class, 'index'])->name('product_subcategories.index');
+        Route::post('/product-subcategories', [ProductSubCategoryController::class, 'store'])->name('product_subcategories.store');
+        Route::get('/product-subcategories/{id}', [ProductSubCategoryController::class, 'show'])->name('product_subcategories.show');
+        Route::put('/product-subcategories/{id}', [ProductSubCategoryController::class, 'update'])->name('product_subcategories.update');
+        Route::delete('/product-subcategories/{id}', [ProductSubCategoryController::class, 'destroy'])->name('product_subcategories.destroy');
+    });

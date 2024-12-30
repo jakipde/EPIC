@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import SupplierCategoryModal from "./SupplierCategoryModal";
+import axios from 'axios'; // Import axios for making HTTP requests
 
 const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
     const [sku, setSku] = useState('');
@@ -20,9 +21,10 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
     const [description, setDescription] = useState('');
     const [productImage, setProductImage] = useState(null);
     const [isSupplierCategoryModalOpen, setIsSupplierCategoryModalOpen] = useState(false);
+    const [categories, setCategories] = useState([]); // State to hold categories
+    const [subCategories, setSubCategories] = useState([]); // State to hold subcategories
+    const [suppliers, setSuppliers] = useState([]); // State to hold suppliers
     const fileInputRef = useRef(null);
-
-    const modalRef = useRef(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -31,27 +33,46 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
             setSku(randomSku);
 
             // Reset fields when modal opens
-            setSupplier('');
-            setProductCode('');
-            setProductName('');
-            setNameInBarcode('');
-            setGrade('');
-            setStock(0);
-            setMinStock(0);
-            setCostPrice(0);
-            setStorePrice(0);
-            setSpecialPrice(0);
-            setSellingPrice(0);
-            setEcommerceLink('');
-            setCategory('');
-            setSubCategory('');
-            setDescription('');
-            setProductImage(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = null; // Reset file input
-            }
-                }
+            resetFields();
+
+            // Fetch suppliers when the modal opens
+            fetchSuppliers();
+        }
     }, [isOpen]);
+
+    const resetFields = () => {
+        setSupplier('');
+        setProductCode('');
+        setProductName('');
+        setNameInBarcode('');
+        setGrade('');
+        setStock(0);
+        setMinStock(0);
+        setCostPrice(0);
+        setStorePrice(0);
+        setSpecialPrice(0);
+        setSellingPrice(0);
+        setEcommerceLink('');
+        setCategory('');
+        setSubCategory('');
+        setDescription('');
+        setProductImage(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = null; // Reset file input
+        }
+    };
+
+    const fetchSuppliers = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get('/api/suppliers');
+            setSuppliers(response.data);
+        } catch (error) {
+            console.error('Error fetching suppliers:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -60,8 +81,54 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSupplierChange = async (e) => {
+        const selectedSupplierId = e.target.value;
+        setSupplier(selectedSupplierId);
+        setCategory(''); // Reset category when supplier changes
+        setSubCategory(''); // Reset subcategory when supplier changes
+        setSubCategories([]); // Clear subcategories
+
+        if (selectedSupplierId) {
+            try {
+                // Fetch categories based on selected supplier
+                const response = await axios.get(`/api/product-categories?supplier_id=${selectedSupplierId}`);
+                setCategories(response.data); // Store categories in state
+
+                // Optionally, fetch the default category if needed
+                if (response.data.length > 0) {
+                    setCategory(response.data[0].id); // Set default selected category
+                    // Now fetch subcategories for the default category
+                    const subResponse = await axios.get(`/api/product-categories/${response.data[0].id}/subcategories`);
+                    setSubCategories(subResponse.data); // Store subcategories in state
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        } else {
+            setCategories([]); // Clear categories if no supplier is selected
+        }
+    };
+
+    const handleCategoryChange = async (e) => {
+        const selectedCategoryId = e.target.value;
+        setCategory(selectedCategoryId);
+        setSubCategory(''); // Reset subcategory when category changes
+        setSubCategories([]); // Clear subcategories
+
+        if (selectedCategoryId) {
+            try {
+                // Fetch subcategories based on selected category
+                const response = await axios.get(`/api/product-categories/${selectedCategoryId}/subcategories`);
+                setSubCategories(response.data); // Store subcategories in state
+            } catch (error) {
+                console.error('Error fetching subcategories:', error);
+            }
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) return;
 
         const newSparePart = {
             sku,
@@ -83,6 +150,19 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
             product_image: productImage,
         };
 
+        setLoading(true);
+        try {
+            // Submit the new spare part
+            await axios.post('/api/spare-parts', newSparePart);
+            alert("Spare part added successfully!");
+            resetFields(); // Reset fields after success
+            onClose();
+        } catch (error) {
+            setErrorMessage("Error adding spare part: " + (error.response ? error.response.data : error.message));
+        } finally {
+            setLoading(false);
+        }
+
         onAddSparePart(newSparePart);
         onClose();
     };
@@ -99,8 +179,8 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
 
     return (
         <div className={`modal ${isOpen ? "modal-open" : ""}`}>
-            <div className="modal-box max-w-5xl w-full p-4" ref={modalRef}>
-            <div className="mb-4 flex justify-between items-center">
+            <div className="modal-box max-w-5xl w-full p-4">
+                <div className="mb-4 flex justify-between items-center">
                     <div className="font-bold text-lg">{sku}</div>
                     <button className="btn btn-primary" onClick={openSupplierCategoryModal}>
                         Add Supplier/Category
@@ -116,12 +196,16 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
                                 </label>
                                 <select
                                     value={supplier}
-                                    onChange={(e) => setSupplier(e.target.value)}
+                                    onChange={handleSupplierChange}
                                     className="select select-bordered"
                                     required
                                 >
                                     <option value="">--SELECT SUPPLIER--</option>
-                                    {/* Add supplier options here */}
+                                    {suppliers.map((sup) => (
+                                        <option key={sup.id} value={sup.id}>
+                                            {sup.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="form-control mb-3">
@@ -156,12 +240,16 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
                                         </label>
                                         <select
                                             value={category}
-                                            onChange={(e) => setCategory(e.target.value)}
+                                            onChange={handleCategoryChange}
                                             className="select select-bordered"
                                             required
                                         >
                                             <option value="">--SELECT CATEGORY--</option>
-                                            {/* Add category options here */}
+                                            {categories.map((cat) => (
+                                                <option key={cat.id} value={cat.id}>
+                                                    {cat.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="flex-1">
@@ -174,8 +262,12 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
                                             className="select select-bordered"
                                             required
                                         >
-                                            <option value="">--SELECT SUB-CATEGORY--</option>
-                                            {/* Add sub-category options here */}
+                                            <option value="">-- SELECT SUB-CATEGORY--</option>
+                                            {subCategories.map((subCat) => (
+                                                <option key={subCat.id} value={subCat.id}>
+                                                    {subCat.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -207,32 +299,30 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
                                     placeholder="Enter product description"
                                 ></textarea>
                             </div>
-                            <div className="form-control mb-3">
-                                <div className="flex space-x-4">
-                                    <div className="flex-1">
-                                        <label className="label">
-                                            <span className="label-text">Stock</span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={stock}
-                                            onChange={(e) => setStock(Math.max(0, e.target.value))}
-                                            className="input input-bordered"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="label">
-                                            <span className="label-text">Minimum Stock</span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={minStock}
-                                            onChange={(e) => setMinStock(Math.max(0, e.target.value))}
-                                            className="input input-bordered"
-                                            required
-                                        />
-                                    </div>
+                            <div className="flex space-x-4">
+                                <div className="flex-1">
+                                    <label className="label">
+                                        <span className="label-text">Stock</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={stock}
+                                        onChange={(e) => setStock(Math.max(0, e.target.value))}
+                                        className="input input-bordered"
+                                        required
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="label">
+                                        <span className="label-text">Minimum Stock</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={minStock}
+                                        onChange={(e) => setMinStock(Math.max(0, e.target.value))}
+                                        className="input input-bordered"
+                                        required
+                                    />
                                 </div>
                             </div>
                             <div className="form-control mb-3">
@@ -251,15 +341,15 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
                     </div>
 
                     <div className="form-control mb-10">
-                            <label className="label">
-                                <span className="label-text">Link e-commerce (optional)</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={ecommerceLink}  // Bind to the correct state (ecommerceLink)
-                                onChange={(e) => setEcommerceLink(e.target.value)}  // Update state on change
-                                className="input input-bordered"  // Full width for long text input
-                            />
+                        <label className="label">
+                            <span className="label-text">Link e-commerce (optional)</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={ecommerceLink}
+                            onChange={(e) => setEcommerceLink(e.target.value)}
+                            className="input input-bordered"
+                        />
                     </div>
 
                     {/* Spacing */}
@@ -320,7 +410,7 @@ const SparePartsFormModal = ({ isOpen, onClose, onAddSparePart }) => {
 
                     <div className="modal-action flex justify-end">
                         <button type="button" onClick={onClose} className="btn">Close</button>
-                        <button type="submit" className="btn btn-primary ml-2">Submit</button>
+                        <button type="submit" class="btn btn-primary ml-2">Submit</button>
                     </div>
                 </form>
                 {/* Render the SupplierCategoryModal */}

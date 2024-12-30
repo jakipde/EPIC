@@ -1,70 +1,126 @@
-import React, { useState, useEffect } from 'react';
-import { CSSTransition } from 'react-transition-group';
+import React, { useState, useEffect } from "react";
+import { CSSTransition } from "react-transition-group";
+import axios from "axios";
 
-const SupplierCategoryModal = ({ isOpen, onClose, categories }) => {
-    const [selectedOption, setSelectedOption] = useState('');
+const SupplierCategoryModal = ({ isOpen, onClose, onAddSupplier, onAddCategory }) => {
+    const [selectedOption, setSelectedOption] = useState("");
     const [formData, setFormData] = useState({
-        supplierName: '',
-        supplierAddress: '',
-        supplierPhone: '',
-        categoryName: '',
+        supplierName: "",
+        supplierAddress: "",
+        supplierPhone: "",
+        categoryName: "",
         categoryPicture: null,
-        subCategoryName: '',
-        selectedCategory: '', // Added to track selected category in subcategory form
+        subCategoryName: "",
+        selectedCategory: "",
+        selectedSupplier: "",
     });
+    const [categories, setCategories] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
+    const [notification, setNotification] = useState("");
 
     useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-
         if (isOpen) {
-            window.addEventListener('keydown', handleKeyDown);
+            fetchCategories();
+            fetchSuppliers();
+            resetForm();
         }
+    }, [isOpen]);
 
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [isOpen, onClose]);
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get("/api/product-categories");
+            setCategories(response.data);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            setNotification("Failed to load categories.");
+        }
+    };
+
+    const fetchSuppliers = async () => {
+        try {
+            const response = await axios.get("/api/suppliers");
+            setSuppliers(response.data);
+        } catch (error) {
+            console.error("Error fetching suppliers:", error);
+            setNotification("Failed to load suppliers.");
+        }
+    };
+
+    const resetForm = () => {
+        setSelectedOption("");
+        setFormData({
+            supplierName: "",
+            supplierAddress: "",
+            supplierPhone: "",
+            categoryName: "",
+            categoryPicture: null,
+            subCategoryName: "",
+            selectedCategory: "",
+            selectedSupplier: "",
+        });
+        setNotification(""); // Clear notification
+    };
 
     const handleOverlayClick = (event) => {
         if (event.target === event.currentTarget) {
-            setSelectedOption('');
             onClose();
         }
     };
 
     const handleOptionSelect = (option) => {
         setSelectedOption(option);
-        setFormData({
-            supplierName: '',
-            supplierAddress: '',
-            supplierPhone: '',
-            categoryName: '',
-            categoryPicture: null,
-            subCategoryName: '',
-            selectedCategory: '', // Reset the selected category when changing options
-        });
     };
 
     const handleFormChange = (e) => {
         const { name, value, type, files } = e.target;
         setFormData((prevData) => ({
             ...prevData,
-            [name]: type === 'file' ? files[0] : value,
+            [name]: type === "file" ? files[0] : value,
         }));
     };
 
-    const handleAddButtonClick = () => {
-        console.log('Form submitted:', formData);
-        // Handle form submission (you can add the actual submission logic here)
-        onClose(); // Close the modal after submission
+    const handleAddButtonClick = async () => {
+        try {
+            let response;
+            if (selectedOption === "supplier") {
+                response = await axios.post("/api/suppliers", {
+                    name: formData.supplierName,
+                    contact_name: formData.supplierAddress,
+                    phone: formData.supplierPhone,
+                });
+                onAddSupplier(response.data);
+                setNotification("Supplier added successfully!");
+            } else if (selectedOption === "category") {
+                const formDataToSend = new FormData();
+                formDataToSend.append("name", formData.categoryName);
+                formDataToSend.append("supplier_id", formData.selectedSupplier);
+                if (formData.categoryPicture) {
+                    formDataToSend.append("photo", formData.categoryPicture);
+                }
+                response = await axios.post("/api/product-categories", formDataToSend);
+                onAddCategory(response.data);
+                setNotification("Category added successfully!");
+            } else if (selectedOption === "subcategory") {
+                response = await axios.post("/api/product-subcategories", {
+                    name: formData.subCategoryName,
+                    product_category_id: formData.selectedCategory,
+                });
+                setNotification("Subcategory added successfully!");
+            }
+
+            // Refresh categories and suppliers after adding data
+            await fetchCategories();
+            await fetchSuppliers();
+            resetForm(); // Reset form after successful submission
+            onClose(); // Close the modal
+        } catch (error) {
+            console.error("Error adding data:", error.response ? error.response.data : error.message);
+            setNotification("Failed to add data. Please try again.");
+        }
     };
 
     const renderForm = () => {
-        if (selectedOption === 'supplier') {
+        if (selectedOption === "supplier") {
             return (
                 <div>
                     <label className="block mb-2">Name</label>
@@ -94,9 +150,10 @@ const SupplierCategoryModal = ({ isOpen, onClose, categories }) => {
                         value={formData.supplierPhone}
                         onChange={handleFormChange}
                     />
+                    {/* Add additional fields here if needed */}
                 </div>
             );
-        } else if (selectedOption === 'category') {
+        } else if (selectedOption === "category") {
             return (
                 <div>
                     <label className="block mb-2">Name</label>
@@ -108,7 +165,21 @@ const SupplierCategoryModal = ({ isOpen, onClose, categories }) => {
                         value={formData.categoryName}
                         onChange={handleFormChange}
                     />
-                    <label className="block mb-2">Picture</label>
+                    <label className="block mb-2">Select Supplier</label>
+                    <select
+                        className="input input-bordered w-full mb-4"
+                        name="selectedSupplier"
+                        value={formData.selectedSupplier}
+                        onChange={handleFormChange}
+                    >
+                        <option value="">Select Supplier</option>
+                        {suppliers.map((supplier) => (
+                            <option key={supplier.id} value={supplier.id}>
+                                {supplier.name}
+                            </option>
+                        ))}
+                    </select>
+                    <label className="block mb-2">Upload Picture</label>
                     <input
                         type="file"
                         className="input input-bordered w-full mb-4"
@@ -117,7 +188,7 @@ const SupplierCategoryModal = ({ isOpen, onClose, categories }) => {
                     />
                 </div>
             );
-        } else if (selectedOption === 'subcategory') {
+        } else if (selectedOption === "subcategory") {
             return (
                 <div>
                     <label className="block mb-2">Subcategory Name</label>
@@ -137,11 +208,15 @@ const SupplierCategoryModal = ({ isOpen, onClose, categories }) => {
                         onChange={handleFormChange}
                     >
                         <option value="">Select Category</option>
-                        {Array.isArray(categories) && categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
+                        {categories.map((category) => {
+                            const supplier = suppliers.find(s => s.id === category.supplier_id);
+                            const displayText = supplier ? `${category.name} (${supplier.name})` : category.name;
+                            return (
+                                <option key={category.id} value={category.id}>
+                                    {displayText}
+                                </option>
+                            );
+                        })}
                     </select>
                 </div>
             );
@@ -162,24 +237,29 @@ const SupplierCategoryModal = ({ isOpen, onClose, categories }) => {
                 <div className="bg-white p-6 rounded shadow-lg w-2/3 max-w-4xl">
                     <div className="mb-4 text-center">
                         <h2 className="text-lg font-bold">
-                            {selectedOption === 'supplier' ? 'Supplier' : selectedOption === 'category' ? 'Category' : selectedOption === 'subcategory' ? 'Subcategory' : 'Select Supplier, Category, or Subcategory'}
+                            {selectedOption === "supplier" ? "Supplier" : selectedOption === "category" ? "Category" : "Subcategory"}
                         </h2>
                     </div>
+                    {notification && (
+                        <div className={`mb-4 p-2 text-center ${notification.includes('Failed') ? 'text-red-500' : 'text-green-500'}`}>
+                            {notification}
+                        </div>
+                    )}
                     <div className="mt-4 flex justify-center">
                         <button
-                            onClick={() => handleOptionSelect('supplier')}
+                            onClick={() => handleOptionSelect("supplier")}
                             className="mr-2 btn btn-primary"
                         >
                             Supplier
                         </button>
                         <button
-                            onClick={() => handleOptionSelect('category')}
+                            onClick={() => handleOptionSelect("category")}
                             className="mr-2 btn btn-primary"
                         >
                             Category
                         </button>
                         <button
-                            onClick={() => handleOptionSelect('subcategory')}
+                            onClick={() => handleOptionSelect("subcategory")}
                             className="btn btn-primary"
                         >
                             Subcategory

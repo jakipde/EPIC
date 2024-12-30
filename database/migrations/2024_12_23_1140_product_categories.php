@@ -12,7 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('photo')->nullable();
+            $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade'); // Foreign key to suppliers
             $table->timestamps();
+            $table->softDeletes(); // Add this line for soft deletes
         });
     }
 

@@ -3,7 +3,9 @@
 use App\Http\Controllers\TestModalPageController;
 use App\Http\Controllers\AccessoriesController;
 use App\Http\Controllers\DataEntryController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductSubCategoryController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\TechniciansController;
 use App\Http\Controllers\DevicesController;
@@ -81,6 +83,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
         Route::resource('spareparts', SparePartsController::class);
 
+            // Suppliers
+            Route::resource('suppliers', SupplierController::class);
+
+            // Product Categories
+            Route::resource('product-categories', ProductCategoryController::class);
+
+            // Product Subcategories
+            Route::resource('product-subcategories', ProductSubCategoryController::class);
+
         Route::resource('tools', ToolsController::class);
         Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
         Route::get('/tools/overview', [ToolsController::class, 'overview'])->name('tools.overview');
@@ -95,7 +106,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
         Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
         Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
-Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
+        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
     });
 
     Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');
