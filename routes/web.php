@@ -60,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-        Route::get('/repairs/dashboard', [RepairsController::class, 'dashboard'])->name('repairs.dashboard');
+        Route::get('/repairs/dashboard', [RepairsController::class, 'index'])->name('repairs.dashboard');
         Route::get('/repairs/data-management', [RepairsController::class, 'datamanagement'])->name('repairs.data-management');
         Route::get('/repairs/reports', [RepairsController::class, 'reports'])->name('repairs.reports');
 

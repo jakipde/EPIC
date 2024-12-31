@@ -9,10 +9,10 @@ use Inertia\Inertia;
 
 class RepairsController extends Controller
 {
-    public function dashboard()
+    public function index()
     {
-        // Fetch repairs data
-        $repairs = Repair::all(); // You might want to paginate or filter this
+        // Fetch repairs data with pagination
+        $repairs = Repair::paginate(10); // Adjust the number as needed
 
         // Render the dashboard view using Inertia
         return Inertia::render('Repairs/Dashboard', [
@@ -20,24 +20,11 @@ class RepairsController extends Controller
         ]);
     }
 
-    public function datamanagement()
-    {
-        // Fetch repairs data
-        $repairs = Repair::all(); // You might want to paginate or filter this
+    public function datamanagement() {
 
-        // Render the data management view using Inertia
+        $repairs = Repair::all();
+
         return Inertia::render('Repairs/DataManagement', [
-            'repairs' => $repairs,
-        ]);
-    }
-
-    public function reports()
-    {
-        // Fetch repairs data
-        $repairs = Repair::all(); // You might want to paginate or filter this
-
-        // Render the reports view using Inertia
-        return Inertia::render('Repairs/UsageReports', [
             'repairs' => $repairs,
         ]);
     }
@@ -70,11 +57,10 @@ class RepairsController extends Controller
             // Create the repair
             $repair = Repair::create($request->all());
 
-            // Redirect to the dashboard after successful creation
-            return redirect()->route('repairs.dashboard')->with('success', 'Repair created successfully.');
+            return response()->json(['success' => true, 'message' => 'Repair created successfully.', 'repair' => $repair], 201);
         } catch (\Exception $e) {
             Log::error('Error saving repair: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Failed to save repair.']);
+            return response()->json(['success' => false, 'message' => 'Failed to save repair.'], 500);
         }
     }
 
@@ -91,7 +77,6 @@ class RepairsController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validate incoming request data
         $request->validate([
             'entry_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
@@ -99,7 +84,7 @@ class RepairsController extends Controller
             'phone_brand' => 'required|string|max:255',
             'phone_model' => 'required|string|max:255',
             'damage_description' => 'required|string',
-            'technician_id' => 'required|exists:technicians,id',
+            'technician_id' => 'required|exists :technicians,id',
             'under_warranty' => 'required|boolean',
             'warranty_duration' => 'nullable|integer',
             'notes' => 'nullable|string',
@@ -112,11 +97,10 @@ class RepairsController extends Controller
             // Update the repair record
             $repair->update($request->all());
 
-            // Redirect to the dashboard after successful update
-            return redirect()->route('repairs.dashboard')->with('success', 'Repair updated successfully.');
+            return response()->json(['success' => true, 'message' => 'Repair updated successfully.']);
         } catch (\Exception $e) {
             Log::error('Error updating repair: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Failed to update repair.']);
+            return response()->json(['success' => false, 'message' => 'Failed to update repair.'], 500);
         }
     }
 
@@ -124,7 +108,7 @@ class RepairsController extends Controller
     {
         try {
             // Find the repair by ID
- $repair = Repair::findOrFail($id);
+            $repair = Repair::findOrFail($id);
             // Delete the repair record
             $repair->delete();
 

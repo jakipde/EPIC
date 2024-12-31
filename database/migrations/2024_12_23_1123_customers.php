@@ -15,10 +15,8 @@ return new class extends Migration
             $table->id();  // Auto-incrementing primary key
             $table->string('name');  // Customer's full name
             $table->string('phone')->nullable();  // Customer's phone number (nullable)
-            $table->string('email')->nullable();  // Customer's email address (nullable)
-            $table->text('address')->nullable();  // Customer's physical address (nullable)
-            $table->enum('customer_type', ['regular', 'vip', 'prospect'])->default('regular');  // Type of customer (default is 'regular')
-            $table->decimal('loyalty_points', 10, 2)->default(0);  // Loyalty points accumulated by the customer
+            $table->enum('customer_type', ['User ', 'Store'])->default('User ');  // Type of customer (default is 'User ')
+            $table->decimal('loyalty_points', 10, 2)->nullable()->default(0);  // Loyalty points accumulated by the customer (optional)
             $table->timestamps();  // Created at and updated at timestamps
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customers'); // Corrected table name
+        Schema::dropIfExists('customers'); // Drop the customers table
     }
 };

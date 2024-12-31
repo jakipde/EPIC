@@ -1,21 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from 'axios'; // Make sure to install axios
 import CompletenessModal from "./CompletenessModal";
-import { HiXMark } from 'react-icons/hi2';
+import NewCustomerModal from "./NewCustomerModal";
+import PrintModal from "./PrintModal"; // Import the PrintModal
 
 const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
+    // State declarations
     const [entryDate, setEntryDate] = useState('');
     const [customerId, setCustomerId] = useState('');
     const [cashierId, setCashierId] = useState('');
+    const [technicianId, setTechnicianId] = useState('');
     const [phoneBrand, setPhoneBrand] = useState('');
     const [phoneModel, setPhoneModel] = useState('');
     const [imeiSn1, setImeiSn1] = useState('');
     const [imeiSn2, setImeiSn2] = useState('');
     const [damageDescription, setDamageDescription] = useState('');
-    const [technicianId, setTechnicianId] = useState('');
     const [underWarranty, setUnderWarranty] = useState(false);
     const [warrantyDuration, setWarrantyDuration] = useState(0);
     const [notes, setNotes] = useState('');
     const [repairType, setRepairType] = useState('');
+    const [serviceType, setServiceType] = useState('');
     const [deviceBrandOther, setDeviceBrandOther] = useState('');
     const [isOtherBrand, setIsOtherBrand] = useState(false);
     const [completeness, setCompleteness] = useState({
@@ -27,26 +31,79 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
         charger: false,
     });
 
+    const [isNewCustomerModalOpen, setNewCustomerModalOpen] = useState(false);
     const [isCompletenessModalOpen, setCompletenessModalOpen] = useState(false);
-    const modalRef = useRef(null); // Ref for the main modal
+    const [isPrintModalOpen, setPrintModalOpen] = useState(false);
+    const modalRef = useRef(null);
+
+    // State for dropdown data
+    const [customers, setCustomers] = useState([]);
+    const [cashiers, setCashiers] = useState([]);
+    const [technicians, setTechnicians] = useState([]);
+
+    // Pricing states
+    const [subTotal, setSubTotal] = useState(0);
+    const [voucher, setVoucher] = useState('');
+    const [downPayment, setDownPayment] = useState(0);
+    const [total, setTotal] = useState(0);
+    const [paymentType, setPaymentType] = useState('');
 
     useEffect(() => {
         const currentDate = new Date().toISOString().split('T')[0];
         setEntryDate(currentDate);
     }, []);
 
+    useEffect(() => {
+        const calculatedTotal = Math.max(0, subTotal - downPayment);
+        setTotal(calculatedTotal);
+    }, [subTotal, downPayment]);
+
+    useEffect(() => {
+        if (isOpen) {
+            // Fetch customers, cashiers, and technicians when the modal opens
+            fetchCustomers();
+            fetchCashiers();
+            fetchTechnicians();
+        }
+    }, [isOpen]);
+
+    const fetchCustomers = async () => {
+        try {
+            const response = await axios.get('/api/customers'); // Adjust the endpoint as needed
+            setCustomers(response.data);
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+        }
+    };
+
+    const fetchCashiers = async () => {
+        try {
+            const response = await axios.get('/api/cashiers'); // Adjust the endpoint as needed
+            setCashiers(response.data);
+        } catch (error) {
+            console.error('Error fetching cashiers:', error);
+        }
+    };
+
+    const fetchTechnicians = async () => {
+        try {
+            const response = await axios.get('/api/technicians'); // Adjust the endpoint as needed
+            setTechnicians(response.data);
+        } catch (error) {
+            console.error('Error fetching technicians:', error);
+        }
+    };
+
     const generateInvoiceNumber = () => {
         const now = new Date();
         const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear();
 
-        // Get hours, minutes, and seconds
         const hours = now.getHours();
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
 
-        // Convert time to ASCII values
         const asciiTime = [
             hours.toString().split('').map(char => char.charCodeAt(0)).join(''),
             minutes.toString().split('').map(char => char.charCodeAt(0)).join(''),
@@ -63,41 +120,70 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
             entry_date: entryDate,
             customer_id: customerId,
             cashier_id: cashierId,
+            technician_id: technicianId,
             phone_brand: isOtherBrand ? deviceBrandOther : phoneBrand,
             phone_model: phoneModel,
             imei_sn_1: imeiSn1,
             imei_sn_2: imeiSn2,
             damage_description: damageDescription,
-            technician_id: technicianId,
             under_warranty: underWarranty,
             warranty_duration: warrantyDuration,
             notes: notes,
             repair_type: repairType,
+            service_type: serviceType,
+            voucher: voucher,
             completeness: completeness,
+            total_price: total,
+            payment_type: paymentType,
+            invoice_number: generateInvoiceNumber(),
         };
 
         onAddRepair(newRepair);
+        resetForm();
+        onClose();
+    };
 
-        // Reset form fields
+    const resetForm = () => {
         setEntryDate('');
         setCustomerId('');
         setCashierId('');
+        setTechnicianId('');
         setPhoneBrand('');
         setPhoneModel('');
         setImeiSn1('');
         setImeiSn2('');
         setDamageDescription('');
-        setTechnicianId('');
         setUnderWarranty(false);
         setWarrantyDuration(0);
         setNotes('');
         setRepairType('');
+        setServiceType('');
         setDeviceBrandOther('');
-
-        onClose();
+        setSubTotal(0);
+        setVoucher('');
+        setDownPayment(0);
+        setTotal(0);
+        setPaymentType('');
     };
+
     const handleNewCustomer = () => {
-        console.log("New Customer button clicked");
+        setNewCustomerModalOpen(true);
+    };
+
+    const handleAddCustomer = (newCustomer) => {
+        setCustomers([...customers, { id: Date.now().toString(), ...newCustomer }]);
+    };
+
+    const handleCustomerChange = (e) => {
+        setCustomerId(e.target.value);
+    };
+
+    const handleCashierChange = (e) => {
+        setCashierId(e.target.value);
+    };
+
+    const handleTechnicianChange = (e) => {
+        setTechnicianId(e.target.value);
     };
 
     if (!isOpen) return null;
@@ -136,13 +222,16 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                 </label>
                                 <select
                                     value={cashierId}
-                                    onChange={(e) => setCashierId(e.target.value)}
+                                    onChange={handleCashierChange}
                                     className="select select-bordered"
                                     required
                                 >
                                     <option value="">-- Select Cashier --</option>
-                                    <option value="1">Cashier 1</option>
-                                    <option value="2">Cashier 2</option>
+                                    {cashiers.map(cashier => (
+                                        <option key={cashier.id} value={cashier.id}>
+                                            {cashier.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="form-control mb-3">
@@ -235,13 +324,16 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                 </label>
                                 <select
                                     value={customerId}
-                                    onChange={(e) => setCustomerId(e.target.value)}
+                                    onChange={handleCustomerChange}
                                     className="select select-bordered"
                                     required
                                 >
                                     <option value="">-- Select Customer --</option>
-                                    <option value="1">Customer 1</option>
-                                    <option value="2">Customer 2</option>
+                                    {customers.map(customer => (
+                                        <option key={customer.id} value={customer.id}>
+                                            {customer.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="form-control mb-3">
@@ -250,13 +342,16 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                 </label>
                                 <select
                                     value={technicianId}
-                                    onChange={(e) => setTechnicianId(e.target.value)}
+                                    onChange={handleTechnicianChange}
                                     className="select select-bordered"
                                     required
                                 >
                                     <option value="">-- Select Technician --</option>
-                                    <option value="1">Technician 1</option>
-                                    <option value="2">Technician 2</option>
+                                    {technicians.map(technician => (
+                                        <option key={technician.id} value={technician.id}>
+                                            {technician.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="form-control mb-3">
@@ -283,7 +378,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                             setWarrantyDuration(value);
                                         }}
                                         className="input input-bordered"
-                                        required
+ required
                                     />
                                 </div>
                             )}
@@ -314,23 +409,124 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     <option value="other">Other</option>
                                 </select>
                             </div>
-
-                            {/* Completeness Modal Button */}
                             <div className="form-control mb-3">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={() => setCompletenessModalOpen(true)}
+                                <label className="label">
+                                    <span className="label-text">Service Type</span>
+                                </label>
+                                <select
+                                    value={serviceType}
+                                    onChange={(e) => setServiceType(e.target.value)}
+                                    className="select select-bordered"
+                                    required
                                 >
-                                    Devices Completeness Details
-                                </button>
+                                    <option value="">-- Select Service Type --</option>
+                                    <option value="Hardware">Hardware</option>
+                                    <option value="Software">Software</option>
+                                    <option value="Diagnostic">Diagnostic</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <div className="modal-action">
+                    {/* Spacing for separation */}
+                    <div className="my-4 border-t border-gray-200"></div>
+
+                    {/* Payment Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text text-green-600">Sub Total</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={subTotal}
+                                onChange={(e) => setSubTotal(Math.max(0, e.target.value))}
+                                className="input input-bordered"
+                                required
+                            />
+                        </div>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text text-green-600">Voucher</span>
+                            </label>
+                            <select
+                                value={voucher}
+                                onChange={(e) => setVoucher(e.target.value)}
+                                className="select select-bordered"
+                            >
+                                <option value="">-- Select Voucher --</option>
+                                <option value="Voucher 1">Voucher 1</option>
+                                <option value="Voucher 2">Voucher 2</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text text-green-600">Down Payment</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={downPayment}
+                                onChange={(e) => setDownPayment(Math.max(0, e.target.value))}
+                                className="input input-bordered"
+                            />
+                        </div>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text text-green-600">Total</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={total}
+                                readOnly
+                                className="input input-bordered"
+                            />
+                        </div>
+                    </div>
+                    <div className="form-control mb-3">
+                        <label className="label">
+                            <span className="label-text text-green-600">Payment Type</span>
+                        </label>
+                        <select
+                            value={paymentType}
+                            onChange={(e) => setPaymentType(e.target.value)}
+                            className="select select-bordered"
+                            required
+                        >
+                            <option value="">-- Select Payment Type --</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Mobile Payment">Mobile Payment</option>
+                        </select>
+                    </div>
+
+                    {/* Completeness and Print Modal Buttons */}
+                    <div className="flex justify-between mb-3">
+                        <div className="form-control w-full mr-2">
+                            <button
+                                type="button"
+                                className="btn btn-secondary w-full"
+                                onClick={() => setCompletenessModalOpen(true)}
+                            >
+                                Devices Completeness Details
+                            </button>
+                        </div>
+                        <div className="form-control w-full ml-2">
+                            <button
+                                type="button"
+                                className="btn btn-secondary w-full"
+                                onClick={() => setPrintModalOpen(true)}
+                            >
+                                Print
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="modal-action flex justify-end">
                         <button type="button" onClick={onClose} className="btn">Close</button>
-                        <button type="submit" className="btn btn-primary">Submit</button>
+                        <button type="submit" className="btn btn-primary ml-2">Submit</button>
                     </div>
                 </form>
             </div>
@@ -344,6 +540,22 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                     initialCompleteness={completeness}
                 />
             )}
+
+            {/* Print Modal */}
+            {isPrintModalOpen && (
+                <PrintModal
+                    isOpen={isPrintModalOpen}
+                    onClose={() => setPrintModalOpen(false)}
+                    onPrint={handlePrint}
+                />
+            )}
+
+            {/* New Customer Modal */}
+            <NewCustomerModal
+                isOpen={isNewCustomerModalOpen}
+                onClose={() => setNewCustomerModalOpen(false)}
+                onAddCustomer={handleAddCustomer}
+            />
         </div>
     );
 };
