@@ -1,65 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import axios for API calls
+import axios from 'axios';
 
 const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
-    const [customerType, setCustomerType] = useState('User '); // New state for Customer Type
-    const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+    const [customerType, setCustomerType] = useState('User'); // Removed trailing space
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState(''); // New success message
 
-    // Close modal when clicking outside
-    const handleClickOutside = (event) => {
-        if (event.target.classList.contains('modal')) {
-            onClose(); // Close modal if clicked outside the modal content
-        }
-    };
-
-    // Close modal when pressing the "Esc" key
-    const handleEscKey = (event) => {
-        if (event.key === 'Escape') {
-            onClose(); // Close modal when "Esc" is pressed
-        }
-    };
-
-    // Attach event listeners for "Esc" key press and outside click
     useEffect(() => {
         if (isOpen) {
             document.addEventListener('keydown', handleEscKey);
             document.addEventListener('click', handleClickOutside);
         }
-
-        // Cleanup event listeners on modal close
         return () => {
             document.removeEventListener('keydown', handleEscKey);
             document.removeEventListener('click', handleClickOutside);
         };
     }, [isOpen]);
 
+    const handleClickOutside = (event) => {
+        if (event.target.classList.contains('modal')) {
+            onClose();
+        }
+    };
+
+    const handleEscKey = (event) => {
+        if (event.key === 'Escape') {
+            onClose();
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage(''); // Reset error message
+        setErrorMessage('');
+        setSuccessMessage('');
 
-        // Validate phone number format (basic validation)
-        const phoneRegex = /^[0-9]{10,15}$/; // Adjust regex as needed
+        const phoneRegex = /^[0-9]{10,15}$/;
         if (!phoneRegex.test(customerPhone)) {
             setErrorMessage('Please enter a valid phone number.');
             return;
         }
 
         try {
-            // Make an API call to add the customer
             const response = await axios.post('/api/customers', {
                 name: customerName,
                 phone: customerPhone,
                 customer_type: customerType,
             });
 
-            // Call the onAddCustomer function passed from the parent component
-            onAddCustomer(response.data); // Assuming the API returns the created customer
+            onAddCustomer(response.data); // Assuming API returns the created customer
+            setSuccessMessage('Customer added successfully!');
             resetForm();
-            onClose();
+            setTimeout(onClose, 2000); // Auto-close modal after success
         } catch (error) {
-            console.error('Error adding customer:', error);
             setErrorMessage('Failed to add customer. Please try again.');
         }
     };
@@ -67,14 +61,15 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
     const resetForm = () => {
         setCustomerName('');
         setCustomerPhone('');
-        setCustomerType('User '); // Reset customer type
+        setCustomerType('User');
     };
 
     return (
         <div className={`modal ${isOpen ? 'modal-open' : ''}`}>
             <div className="modal-box">
                 <h3 className="font-bold text-lg mb-4">Add New Customer</h3>
-                {errorMessage && <div className="alert alert-error">{errorMessage}</div>} {/* Display error message */}
+                {errorMessage && <div className="alert alert-error">{errorMessage}</div>}
+                {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="form-control mb-3">
                         <label className="label">
@@ -110,7 +105,7 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                             className="select select-bordered"
                             required
                         >
-                            <option value="User ">User </option>
+                            <option value="User">User</option>
                             <option value="Store">Store</option>
                         </select>
                     </div>

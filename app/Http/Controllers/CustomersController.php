@@ -17,14 +17,15 @@ class CustomersController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
+            'phone' => 'required|string|max:15|unique:customers,phone', // Ensure unique phone numbers
+            'customer_type' => 'required|string|in:User,Store', // Validate customer type
         ]);
 
-        $customer = Customer::create($request->all());
+        $customer = Customer::create($validated);
 
-        return redirect()->back()->with('success', 'Customer created successfully.');
+        return response()->json($customer, 201); // Return created customer
     }
 
     public function update(Request $request, $id)

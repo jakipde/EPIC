@@ -8,6 +8,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     // State declarations
     const [entryDate, setEntryDate] = useState('');
     const [customerId, setCustomerId] = useState('');
+    const [customerPhone, setCustomerPhone] = useState(''); // New state for customer phone
     const [cashierId, setCashierId] = useState('');
     const [technicianId, setTechnicianId] = useState('');
     const [phoneBrand, setPhoneBrand] = useState('');
@@ -79,7 +80,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     const fetchCashiers = async () => {
         try {
             const response = await axios.get('/api/cashiers'); // Adjust the endpoint as needed
-            setCashiers(response.data);
+            setCashiers (response.data);
         } catch (error) {
             console.error('Error fetching cashiers:', error);
         }
@@ -119,6 +120,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
         const newRepair = {
             entry_date: entryDate,
             customer_id: customerId,
+            customer_phone: customerPhone, // Include customer phone in the new repair object
             cashier_id: cashierId,
             technician_id: technicianId,
             phone_brand: isOtherBrand ? deviceBrandOther : phoneBrand,
@@ -146,6 +148,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     const resetForm = () => {
         setEntryDate('');
         setCustomerId('');
+        setCustomerPhone(''); // Reset customer phone
         setCashierId('');
         setTechnicianId('');
         setPhoneBrand('');
@@ -175,7 +178,10 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     };
 
     const handleCustomerChange = (e) => {
-        setCustomerId(e.target.value);
+        const selectedCustomerId = e.target.value;
+        setCustomerId(selectedCustomerId);
+        const selectedCustomer = customers.find(customer => customer.id === selectedCustomerId);
+        setCustomerPhone(selectedCustomer ? selectedCustomer.phone : ''); // Update phone number based on selection
     };
 
     const handleCashierChange = (e) => {
@@ -227,7 +233,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     required
                                 >
                                     <option value="">-- Select Cashier --</option>
-                                    {cashiers.map(cashier => (
+                                    {cashiers .map(cashier => (
                                         <option key={cashier.id} value={cashier.id}>
                                             {cashier.name}
                                         </option>
@@ -322,13 +328,8 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                 <label className="label">
                                     <span className="label-text">Customer</span>
                                 </label>
-                                <select
-                                    value={customerId}
-                                    onChange={handleCustomerChange}
-                                    className="select select-bordered"
-                                    required
-                                >
-                                    <option value="">-- Select Customer --</option>
+                                <select value={customerId} onChange={handleCustomerChange}>
+                                    <option value="">Select Customer</option>
                                     {customers.map(customer => (
                                         <option key={customer.id} value={customer.id}>
                                             {customer.name}
@@ -336,6 +337,19 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     ))}
                                 </select>
                             </div>
+                            {customerId && ( // Conditional rendering for phone number
+                                <div className="form-control mb-3">
+                                    <label className="label">
+                                        <span className="label-text">Customer Phone</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={customerPhone}
+                                        readOnly // Make phone number read-only
+                                        placeholder="Customer Phone"
+                                    />
+                                </div>
+                            )}
                             <div className="form-control mb-3">
                                 <label className="label">
                                     <span className="label-text">Technician</span>
@@ -354,7 +368,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                     ))}
                                 </select>
                             </div>
-                            <div className="form-control mb-3">
+                            <div className=" form-control mb-3">
                                 <label className="label">
                                     <span className="label-text">Under Warranty</span>
                                 </label>
@@ -378,7 +392,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                             setWarrantyDuration(value);
                                         }}
                                         className="input input-bordered"
- required
+                                        required
                                     />
                                 </div>
                             )}
@@ -485,79 +499,77 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                         </div>
                     </div>
                     <div className="form-control mb-3">
-                        <label className="label">
-                            <span className="label-text text-green-600">Payment Type</span>
-                        </label>
-                        <select
-                            value={paymentType}
-                            onChange={(e) => setPaymentType(e.target.value)}
-                            className="select select-bordered"
-                            required
+                        <span className="label-text text-green-600">Payment Type</span>
+                    <select
+                        value={paymentType}
+                        onChange={(e) => setPaymentType(e.target.value)}
+                        className="select select-bordered"
+                        required
+                    >
+                        <option value="">-- Select Payment Type --</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="Mobile Payment">Mobile Payment</option>
+                    </select>
+                </div>
+
+                {/* Completeness and Print Modal Buttons */}
+                <div className="flex justify-between mb-3">
+                    <div className="form-control w-full mr-2">
+                        <button
+                            type="button"
+                            className="btn btn-secondary w-full"
+                            onClick={() => setCompletenessModalOpen(true)}
                         >
-                            <option value="">-- Select Payment Type --</option>
-                            <option value="Cash">Cash</option>
-                            <option value="Credit Card">Credit Card</option>
-                            <option value="Debit Card">Debit Card</option>
-                            <option value="Mobile Payment">Mobile Payment</option>
-                        </select>
+                            Devices Completeness Details
+                        </button>
                     </div>
-
-                    {/* Completeness and Print Modal Buttons */}
-                    <div className="flex justify-between mb-3">
-                        <div className="form-control w-full mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-secondary w-full"
-                                onClick={() => setCompletenessModalOpen(true)}
-                            >
-                                Devices Completeness Details
-                            </button>
-                        </div>
-                        <div className="form-control w-full ml-2">
-                            <button
-                                type="button"
-                                className="btn btn-secondary w-full"
-                                onClick={() => setPrintModalOpen(true)}
-                            >
-                                Print
-                            </button>
-                        </div>
+                    <div className="form-control w-full ml-2">
+                        <button
+                            type="button"
+                            className="btn btn-secondary w-full"
+                            onClick={() => setPrintModalOpen(true)}
+                        >
+                            Print
+                        </button>
                     </div>
+                </div>
 
-                    <div className="modal-action flex justify-end">
-                        <button type="button" onClick={onClose} className="btn">Close</button>
-                        <button type="submit" className="btn btn-primary ml-2">Submit</button>
-                    </div>
-                </form>
-            </div>
-
-            {/* Completeness Modal */}
-            {isCompletenessModalOpen && (
-                <CompletenessModal
-                    isOpen={isCompletenessModalOpen}
-                    onClose={() => setCompletenessModalOpen(false)}
-                    onChange={setCompleteness}
-                    initialCompleteness={completeness}
-                />
-            )}
-
-            {/* Print Modal */}
-            {isPrintModalOpen && (
-                <PrintModal
-                    isOpen={isPrintModalOpen}
-                    onClose={() => setPrintModalOpen(false)}
-                    onPrint={handlePrint}
-                />
-            )}
-
-            {/* New Customer Modal */}
-            <NewCustomerModal
-                isOpen={isNewCustomerModalOpen}
-                onClose={() => setNewCustomerModalOpen(false)}
-                onAddCustomer={handleAddCustomer}
-            />
+                <div className="modal-action flex justify-end">
+                    <button type="button" onClick={onClose} className="btn">Close</button>
+                    <button type="submit" className="btn btn-primary ml-2">Submit</button>
+                </div>
+            </form>
         </div>
-    );
+
+        {/* Completeness Modal */}
+        {isCompletenessModalOpen && (
+            <CompletenessModal
+                isOpen={isCompletenessModalOpen}
+                onClose={() => setCompletenessModalOpen(false)}
+                onChange={setCompleteness}
+                initialCompleteness={completeness}
+            />
+        )}
+
+        {/* Print Modal */}
+        {isPrintModalOpen && (
+            <PrintModal
+                isOpen={isPrintModalOpen}
+                onClose={() => setPrintModalOpen(false)}
+                onPrint={handlePrint}
+            />
+        )}
+
+        {/* New Customer Modal */}
+        <NewCustomerModal
+            isOpen={isNewCustomerModalOpen}
+            onClose={() => setNewCustomerModalOpen(false)}
+            onAddCustomer={handleAddCustomer}
+        />
+    </div>
+);
 };
 
 export default ServiceFormModal;

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Default\Api\SelectTableController;
 use App\Http\Controllers\Default\FileController;
+use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductSubCategoryController;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/customers', [CustomersController::class, 'store']);
 
 // Repairs Routes
 Route::group([], function () {
