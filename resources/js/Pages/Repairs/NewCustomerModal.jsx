@@ -64,6 +64,17 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
         setCustomerType('User');
     };
 
+    useEffect(() => {
+        console.log('Rendering New Customer Modal'); // Log when rendering the modal
+        if (isOpen) {
+            document.addEventListener('keydown', handleEscKey);
+            document.addEventListener('click', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('keydown', handleEscKey);
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [isOpen]);
     return (
         <div className={`modal ${isOpen ? 'modal-open' : ''}`}>
             <div className="modal-box">

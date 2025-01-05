@@ -6,17 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('technicians', function (Blueprint $table) {
             $table->id();  // Auto-incrementing primary key
             $table->string('name');  // Technician's full name
             $table->string('phone')->nullable();  // Technician's phone number (nullable)
             $table->string('email')->nullable();  // Technician's email address (nullable)
-            $table->ulid('user_id');  // Foreign key to users table (matching type with users.id)
+            $table->ulid('user_id');  // Foreign key to users table
             $table->enum('role', ['technician', 'lead_technician', 'assistant_technician'])->default('technician');  // Role of the technician
             $table->decimal('hourly_rate', 10, 2)->nullable();  // Technician's hourly rate (nullable)
             $table->decimal('total_hours_worked', 10, 2)->default(0);  // Total hours worked by the technician
@@ -27,8 +24,8 @@ return new class extends Migration
             $table->foreign('user_id')
                   ->references('id')
                   ->on('users')
-                  ->onDelete('cascade');
-        });
+                  ->onDelete('cascade'); // Delete technician if user is deleted
+ });
     }
 
     /**

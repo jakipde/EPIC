@@ -22,7 +22,7 @@ class UserController extends Controller
 
         $query->orderBy('created_at', 'desc');
 
-        return inertia('User/Index', [
+        return inertia('User /Index', [
             'data' => $query->paginate(),
         ]);
     }
@@ -44,7 +44,7 @@ class UserController extends Controller
         ]);
 
         return redirect()->route('user.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed created']);
+            ->with('message', ['type' => 'success', 'message' => 'User  has been created']);
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -74,19 +74,19 @@ class UserController extends Controller
         $user->save();
 
         return redirect()->route('user.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed updated']);
+            ->with('message', ['type' => 'success', 'message' => 'User  has been updated']);
     }
 
     public function destroy(User $user): RedirectResponse
     {
         if ($user->role_id == null) {
             return redirect()->route('user.index')
-                ->with('message', ['type' => 'error', 'message' => 'Item default can\'t deleted']);
+                ->with('message', ['type' => 'error', 'message' => 'Default users cannot be deleted']);
         }
 
         $user->delete();
 
         return redirect()->route('user.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed deleted']);
+            ->with('message', ['type' => 'success', 'message' => 'User  has been deleted']);
     }
 }

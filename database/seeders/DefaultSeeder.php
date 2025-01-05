@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Constants\PermissionConstant;
 use App\Constants\SettingConstant;
 use App\Models\Default\Permission;
-use App\Models\Default\Role;
 use App\Models\Default\Setting;
 use App\Models\Default\User;
 use Illuminate\Database\Seeder;
@@ -18,45 +17,40 @@ class DefaultSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed settings
         foreach (SettingConstant::SYSTEM as $setting) {
             Setting::insert(['id' => Str::ulid(), ...$setting]);
         }
 
+        // Seed permissions
         foreach (PermissionConstant::LIST as $permission) {
             Permission::insert(['id' => Str::ulid(), ...$permission]);
         }
 
-        // Create the technician role
-        $technicianRole = Role::create(['name' => 'technician']);
-
-        // Create the admin role
-        $adminRole = Role::create(['name' => 'admin']);
-
-        // Assign all permissions to the technician role
-        $permissions = Permission::all();
-        foreach ($permissions as $permission) {
-            $technicianRole->rolePermissions()->create(['permission_id' => $permission->id]);
-        }
-
-        // Create the user "Zaky P" with the technician role
+        // Create users with roles directly
         User::create([
+            'id' => Str::ulid(), // Manually set the id
             'name' => 'Zaky P',
             'email' => 'zakypde@gmail.com',
             'password' => bcrypt('erytchandra12'),
-            'role_id' => $technicianRole->id, // Assigning technician role
+            'role' => 'technician', // Assigning technician role directly
         ]);
 
-        // Create the admin user
         User::create([
+            'id' => Str::ulid(), // Manually set the id
             'name' => 'Administrator',
             'email' => 'admin@admin.com',
             'password' => bcrypt('password'),
-            'role_id' => $adminRole->id, // Assigning admin role
+            'role' => 'admin', // Assigning admin role directly
         ]);
 
-        // Create the guest role and assign permissions
-        $guest = Role::create(['name' => Role::GUEST]);
-        $permission = Permission::where('name', 'view-shortlink')->first();
-        $guest->rolePermissions()->create(['permission_id' => $permission->id]);
+        // Create a guest user
+        User::create([
+            'id' => Str::ulid(), // Manually set the id
+            'name' => 'Guest User',
+            'email' => 'guest@guest.com',
+            'password' => bcrypt('guestpassword'),
+            'role' => 'guest', // Assigning guest role directly
+        ]);
     }
 }

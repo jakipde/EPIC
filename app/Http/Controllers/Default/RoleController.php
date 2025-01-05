@@ -56,7 +56,7 @@ class RoleController extends Controller
         DB::commit();
 
         return redirect()->route('roles.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed created']);
+            ->with('message', ['type' => 'success', 'message' => 'Role has been created']);
     }
 
     public function edit(Role $role): Response
@@ -77,13 +77,11 @@ class RoleController extends Controller
 
         if ($role->flag == 1) {
             return redirect()->route('roles.index')
-                ->with('message', ['type' => 'error', 'message' => 'Item default can\'t updated']);
+                ->with('message', ['type' => 'error', 'message' => 'Default roles cannot be updated']);
         }
 
         DB::beginTransaction();
-        $role->update([
-            'name' => $request->name,
-        ]);
+        $role->update(['name' => $request->name]);
 
         RolePermission::where('role_id', $role->id)->delete();
 
@@ -96,19 +94,19 @@ class RoleController extends Controller
         DB::commit();
 
         return redirect()->route('roles.index')
-            ->with('message', ['type' => 'success', 'message' => 'Item has beed updated']);
+            ->with('message', ['type' => 'success', 'message' => 'Role has been updated']);
     }
 
     public function destroy(Role $role): RedirectResponse
     {
-        $deleted = $role->delete();
-
-        if ($deleted) {
+        if ($role->flag == 1) {
             return redirect()->route('roles.index')
-                ->with('message', ['type' => 'success', 'message' => 'Item has beed deleted']);
+                ->with('message', ['type' => 'error', 'message' => 'Default roles cannot be deleted']);
         }
 
+        $role->delete();
+
         return redirect()->route('roles.index')
-            ->with('message', ['type' => 'error', 'message' => 'Item default can\'t deleted']);
+            ->with('message', ['type' => 'success', 'message' => 'Role has been deleted']);
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Default\User;
 
-class Technician extends Model
+class Admin extends Model
 {
     use HasFactory;
 
@@ -15,10 +15,10 @@ class Technician extends Model
         'phone',
         'email',
         'user_id', // Foreign key to users table
-        'specialization', // Add any specific fields for technicians
+        'status',
     ];
 
-    // Define the relationship with the User model
+    // Define the relationship with the User model ```php
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
