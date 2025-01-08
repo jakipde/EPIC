@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import DataTable from '@/Components/DaisyUI/DataTable';
-import ServiceFormModal from './ServiceFormModal'; // Import the modal
+import ModalParent from './ModalParent'; // Import the ModalParent
 
 const DataManagement = () => {
     const [search, setSearch] = useState('');
@@ -13,13 +13,16 @@ const DataManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5);
     const [repairs, setRepairs] = useState([]); // Initialize with an empty array
-    const [isModalOpen, setModalOpen] = useState(false);
+    const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false); // State for ServiceFormModal
 
     // Fetch repairs data from the API
     useEffect(() => {
         const fetchRepairs = async () => {
             try {
                 const response = await fetch('/api/repairs'); // Adjust the URL to your API endpoint
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
                 const data = await response.json();
                 setRepairs(data); // Assuming the API returns an array of repairs
             } catch (error) {
@@ -36,14 +39,10 @@ const DataManagement = () => {
                               repair.damage_description.toLowerCase().includes(search.toLowerCase());
 
         const matchesDateRange = (!startDate || new Date(repair.entry_date) >= new Date(startDate)) &&
-                                  (!endDate || new Date(repair.entry_date) <= new Date(endDate));
+                                  (!endDate || new Date(repair.entry_date ) <= new Date(endDate));
 
         return matchesSearch && matchesDateRange;
     });
-
-    const handleAddRepair = (newRepair) => {
-        setRepairs(prevRepairs => [...prevRepairs, newRepair]);
-    };
 
     return (
         <AuthenticatedLayout page="Data Management">
@@ -69,7 +68,8 @@ const DataManagement = () => {
                         onChange={(e) => setSearch(e.target.value)}
                         value={search} placeholder="Search repairs..."
                     />
-                    <Button size="sm" type="primary" className="ml-2" onClick={() => setModalOpen(true)}>Add Data</Button>
+                    {/* Use the existing "Add Data" button to open the ServiceFormModal */}
+                    <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
 
                 {/* Data Table */}
@@ -104,8 +104,11 @@ const DataManagement = () => {
                     ))}
                 </div>
 
-                {/* Service Form Modal */}
-                <ServiceFormModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} onAddRepair={handleAddRepair} />
+                {/* Modal Parent */}
+                <ModalParent
+                    isServiceFormModalOpen={isServiceFormModalOpen}
+                    setServiceFormModalOpen={setServiceFormModalOpen}
+                />
             </div>
         </AuthenticatedLayout>
     );

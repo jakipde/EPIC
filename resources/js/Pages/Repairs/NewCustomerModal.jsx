@@ -37,26 +37,26 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
         setSuccessMessage('');
 
         const phoneRegex = /^[0-9]{10,15}$/;
-        if (!phoneRegex.test(customerPhone)) {
-            setErrorMessage('Please enter a valid phone number.');
-            return;
-        }
+            if (!phoneRegex.test(customerPhone)) {
+                setErrorMessage('Please enter a valid phone number.');
+                return;
+            }
 
-        try {
-            const response = await axios.post('/api/customers', {
-                name: customerName,
-                phone: customerPhone,
-                customer_type: customerType,
-            });
+            try {
+                const response = await axios.post('/api/customers', {
+                    name: customerName,
+                    phone: customerPhone,
+                    customer_type: customerType,
+                });
 
-            onAddCustomer(response.data); // Assuming API returns the created customer
-            setSuccessMessage('Customer added successfully!');
-            resetForm();
-            setTimeout(onClose, 2000); // Auto-close modal after success
-        } catch (error) {
-            setErrorMessage('Failed to add customer. Please try again.');
-        }
-    };
+                onAddCustomer(response.data); // Assuming API returns the created customer
+                setSuccessMessage('Customer added successfully!');
+                resetForm();
+                setTimeout(onClose, 2000); // Auto-close modal after success
+            } catch (error) {
+                setErrorMessage('Failed to add customer. Please try again.');
+            }
+        };
 
     const resetForm = () => {
         setCustomerName('');

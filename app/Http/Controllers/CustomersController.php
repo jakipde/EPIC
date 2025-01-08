@@ -19,8 +19,9 @@ class CustomersController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:15|unique:customers,phone', // Ensure unique phone numbers
-            'customer_type' => 'required|string|in:User,Store', // Validate customer type
+            'phone' => 'nullable|string|max:15|unique:customers,phone', // Phone is now nullable
+            'customer_type' => 'required|string|in:User ,Store', // Validate customer type
+            'loyalty_points' => 'nullable|numeric|min:0', // Allow loyalty points to be optional
         ]);
 
         $customer = Customer::create($validated);
@@ -32,7 +33,9 @@ class CustomersController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:15|unique:customers,phone,' . $id, // Phone is now nullable and unique except for the current customer
+            'customer_type' => 'required|string|in:User ,Store', // Validate customer type
+            'loyalty_points' => 'nullable|numeric|min:0', // Allow loyalty points to be optional
         ]);
 
         $customer = Customer::findOrFail($id);

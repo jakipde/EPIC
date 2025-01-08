@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from 'axios'; // Make sure to install axios
-import CompletenessModal from "./CompletenessModal";
-import NewCustomerModal from "./NewCustomerModal";
-import PrintModal from "./PrintModal"; // Import the PrintModal
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
 
-const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
+const ServiceFormModal = ({
+    isOpen,
+    onClose,
+    onAddRepair,
+    setNewCustomerModalOpen,
+    setPrintModalOpen,
+}) => {
     // State declarations
     const [entryDate, setEntryDate] = useState('');
     const [customerId, setCustomerId] = useState('');
@@ -32,11 +35,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
         charger: false,
     });
 
-    const [isNewCustomerModalOpen, setNewCustomerModalOpen] = useState(false);
-    const [isCompletenessModalOpen, setCompletenessModalOpen] = useState(false);
-    const [isPrintModalOpen, setPrintModalOpen] = useState(false);
-    const modalRef = useRef(null);
-
     // State for dropdown data
     const [customers, setCustomers] = useState([]);
     const [cashiers, setCashiers] = useState([]);
@@ -61,7 +59,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
 
     useEffect(() => {
         if (isOpen) {
-            // Fetch customers, cashiers, and technicians when the modal opens
             fetchCustomers();
             fetchCashiers();
             fetchTechnicians();
@@ -71,7 +68,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
     const fetchCustomers = async () => {
         try {
             const response = await axios.get('/api/customers');
-            console.log('Fetched customers:', response.data);
+            console.log('Fetched customers:', response.data); // Log the fetched customers
             setCustomers(response.data);
         } catch (error) {
             console.error('Error fetching customers:', error);
@@ -102,7 +99,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear();
         const hours = now.getHours();
-        const minutes = now.getMinutes();
+        const minutes = now .getMinutes();
         const seconds = now.getSeconds();
 
         const asciiTime = [
@@ -169,22 +166,14 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
         setPaymentType('');
     };
 
-    const handleNewCustomer = () => {
-        console.log('Opening New Customer Modal');
-        setNewCustomerModalOpen(true);
-    };
-
-    const handleAddCustomer = (newCustomer) => {
-        setCustomers([...customers, { id: Date.now().toString(), ...newCustomer }]);
-    };
-
     const handleCustomerChange = (e) => {
         const selectedCustomerId = e.target.value;
         setCustomerId(selectedCustomerId);
         const selectedCustomer = customers.find(customer => customer.id === selectedCustomerId);
-        setCustomerPhone(selectedCustomer ? selectedCustomer.phone : '');
+        console.log('Selected Customer:', selectedCustomer); // Log the selected customer
+        setCustomerPhone(selectedCustomer ? selectedCustomer.phone.trim() : ''); // Trim any spaces
+        console.log('Customer Phone:', selectedCustomer ? selectedCustomer.phone.trim() : ''); // Log the phone number
     };
-
     const handleCashierChange = (e) => {
         setCashierId(e.target.value);
     };
@@ -197,12 +186,12 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
 
     return (
         <div className={`modal ${isOpen ? "modal-open" : ""}`}>
-            <div className="modal-box max-w-5xl w-full p-4" ref={modalRef}>
+            <div className="modal-box max-w-5xl w-full p-4">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-lg">{generateInvoiceNumber()}</h3>
                     <button
                         className="btn btn-primary"
-                        onClick={handleNewCustomer}
+                        onClick={() => setNewCustomerModalOpen(true)}
                     >
                         New Customer
                     </button>
@@ -329,26 +318,17 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                                 <label className="label">
                                     <span className="label-text">Customer</span>
                                 </label>
-                                <select value={customerId} onChange={handleCustomerChange}>
-                                    <option value="">Select Customer</option>
+                                <select onChange={handleCustomerChange} value={customerId} className="select select-bordered">
+                                    <option value="">Select a customer</option>
                                     {customers.map(customer => (
-                                        <option key={customer.id} value={customer.id}>
-                                            {customer.name}
-                                        </option>
+                                        <option key={customer.id} value={customer.id}>{customer.name}</option>
                                     ))}
                                 </select>
                             </div>
                             {customerId && (
-                                <div className="form-control mb-3">
-                                    <label className="label">
-                                        <span className="label-text">Customer Phone</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={customerPhone}
-                                        readOnly
-                                        placeholder="Customer Phone"
-                                    />
+                                <div className="mb-3">
+                                    <span className="font-semibold">Customer Phone: </span>
+                                    <span>{customerPhone}</span>
                                 </div>
                             )}
                             <div className="form-control mb-3">
@@ -382,7 +362,7 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                             </div>
                             {underWarranty && (
                                 <div className="form-control mb-3">
-                                <label className="label">
+                                    <label className="label">
                                         <span className="label-text">Warranty Duration (days)</span>
                                     </label>
                                     <input
@@ -504,13 +484,13 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                         <select
                             value={paymentType}
                             onChange={(e) => setPaymentType(e.target.value)}
-                            className=" select select-bordered"
+                            className="select select-bordered"
                             required
                         >
                             <option value="">-- Select Payment Type --</option>
                             <option value="Cash">Cash</option>
                             <option value="Credit Card">Credit Card</option>
-                            < option value="Debit Card">Debit Card</option>
+                            <option value="Debit Card">Debit Card</option>
                             <option value="Mobile Payment">Mobile Payment</option>
                         </select>
                     </div>
@@ -521,9 +501,9 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                             <button
                                 type="button"
                                 className="btn btn-secondary w-full"
-                                onClick={() => setCompletenessModalOpen(true)}
+                                onClick={() => setPrintModalOpen(true)}
                             >
-                                Devices Completeness Details
+                                Print
                             </button>
                         </div>
                         <div className="form-control w-full ml-2">
@@ -542,9 +522,6 @@ const ServiceFormModal = ({ isOpen, onClose, onAddRepair }) => {
                         <button type="submit" className="btn btn-primary ml-2">Submit</button>
                     </div>
                 </form>
-                {isNewCustomerModalOpen && <NewCustomerModal onClose={() => setNewCustomerModalOpen(false)} onAddCustomer={handleAddCustomer} />}
-                {isCompletenessModalOpen && <CompletenessModal onClose={() => setCompletenessModalOpen(false)} />}
-                {isPrintModalOpen && <PrintModal onClose={() => setPrintModalOpen(false)} />}
             </div>
         </div>
     );
