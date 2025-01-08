@@ -1,35 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 
 const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
-    const [customerType, setCustomerType] = useState('User'); // Removed trailing space
+    const [customerType, setCustomerType] = useState('User');
     const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState(''); // New success message
-
-    useEffect(() => {
-        if (isOpen) {
-            document.addEventListener('keydown', handleEscKey);
-            document.addEventListener('click', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('keydown', handleEscKey);
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, [isOpen]);
-
-    const handleClickOutside = (event) => {
-        if (event.target.classList.contains('modal')) {
-            onClose();
-        }
-    };
-
-    const handleEscKey = (event) => {
-        if (event.key === 'Escape') {
-            onClose();
-        }
-    };
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -37,26 +14,41 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
         setSuccessMessage('');
 
         const phoneRegex = /^[0-9]{10,15}$/;
-            if (!phoneRegex.test(customerPhone)) {
-                setErrorMessage('Please enter a valid phone number.');
-                return;
-            }
+        if (!phoneRegex.test(customerPhone)) {
+            setErrorMessage('Please enter a valid phone number.');
+            return;
+        }
 
-            try {
-                const response = await axios.post('/api/customers', {
-                    name: customerName,
-                    phone: customerPhone,
-                    customer_type: customerType,
-                });
+        try {
+            const response = await axios.post('/api/customers', {
+                name: customerName,
+                phone: customerPhone,
+                customer_type: customerType,
+            });
 
-                onAddCustomer(response.data); // Assuming API returns the created customer
+            // Check for successful response
+            if (response.status === 201) {
+                onAddCustomer(response.data); // Pass the new customer
                 setSuccessMessage('Customer added successfully!');
                 resetForm();
-                setTimeout(onClose, 2000); // Auto-close modal after success
-            } catch (error) {
-                setErrorMessage('Failed to add customer. Please try again.');
+
+                // Close modal after a short delay
+                setTimeout(() => {
+                    setSuccessMessage(''); // Reset success message after 3 seconds
+                    onClose(); // Auto-close modal after success
+                }, 3000);
+            } else {
+                setErrorMessage('Failed to add customer: ' + (response.data.message || 'An unexpected error occurred.'));
             }
-        };
+        } catch (error) {
+            // Provide a more detailed error message
+            if (error.response && error.response.data) {
+                setErrorMessage('Failed to add customer: ' + (error.response.data.message || 'An unexpected error occurred.'));
+            } else {
+                setErrorMessage('Failed to add customer. Please check your internet connection or try again later.');
+            }
+        }
+    };
 
     const resetForm = () => {
         setCustomerName('');
@@ -64,17 +56,6 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
         setCustomerType('User');
     };
 
-    useEffect(() => {
-        console.log('Rendering New Customer Modal'); // Log when rendering the modal
-        if (isOpen) {
-            document.addEventListener('keydown', handleEscKey);
-            document.addEventListener('click', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('keydown', handleEscKey);
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, [isOpen]);
     return (
         <div className={`modal ${isOpen ? 'modal-open' : ''}`}>
             <div className="modal-box">
@@ -83,9 +64,7 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                 {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="form-control mb-3">
-                        <label className="label">
-                            <span className="label-text">Name</span>
-                        </label>
+                        <label className="label">Name</label>
                         <input
                             type="text"
                             value={customerName}
@@ -95,9 +74,7 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                         />
                     </div>
                     <div className="form-control mb-3">
-                        <label className="label">
-                            <span className="label-text">Phone Number</span>
-                        </label>
+                        <label className="label">Phone Number</label>
                         <input
                             type="text"
                             value={customerPhone}
@@ -107,9 +84,7 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                         />
                     </div>
                     <div className="form-control mb-3">
-                        <label className="label">
-                            <span className="label-text">Customer Type</span>
-                        </label>
+                        <label className="label">Customer Type</label>
                         <select
                             value={customerType}
                             onChange={(e) => setCustomerType(e.target.value)}

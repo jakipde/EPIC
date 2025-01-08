@@ -9,6 +9,8 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
     const [isCompletenessModalOpen, setCompletenessModalOpen] = useState(false);
     const [isPrintModalOpen, setPrintModalOpen] = useState(false);
     const [repairs, setRepairs] = useState([]);
+    const [customers, setCustomers] = useState([]);
+    const [selectedCustomerId, setSelectedCustomerId] = useState('');
     const [completeness, setCompleteness] = useState({
         simTray: false,
         simCard: false,
@@ -23,7 +25,9 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
     };
 
     const handleAddCustomer = (newCustomer) => {
-        console.log("New customer added:", newCustomer);
+        setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
+        setSelectedCustomerId(newCustomer.id); // Automatically select the new customer
+        setNewCustomerModalOpen(false); // Close new customer modal
     };
 
     const handlePrint = (printType) => {
@@ -39,6 +43,10 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
                 setNewCustomerModalOpen={setNewCustomerModalOpen}
                 setCompletenessModalOpen={setCompletenessModalOpen}
                 setPrintModalOpen={setPrintModalOpen}
+                customers={customers} // Pass customers
+                setCustomers={setCustomers} // Pass setter function
+                selectedCustomerId={selectedCustomerId} // Pass selected customer ID
+                setSelectedCustomerId={setSelectedCustomerId} // Pass setter function for selected customer ID
             />
 
             <NewCustomerModal

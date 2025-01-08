@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-
 const ServiceFormModal = ({
     isOpen,
     onClose,
     onAddRepair,
     setNewCustomerModalOpen,
-    setPrintModalOpen,
+    customers, // Use the customers prop directly
+    setCustomers,
+    selectedCustomerId, // New prop for the selected customer ID
+    setSelectedCustomerId // New prop for updating selected customer ID
 }) => {
     // State declarations
     const [entryDate, setEntryDate] = useState('');
-    const [customerId, setCustomerId] = useState('');
+    const [customerId, setCustomerId] = useState(selectedCustomerId); // Initialize with selected customer ID
     const [customerPhone, setCustomerPhone] = useState('');
     const [cashierId, setCashierId] = useState('');
     const [technicianId, setTechnicianId] = useState('');
@@ -36,7 +38,6 @@ const ServiceFormModal = ({
     });
 
     // State for dropdown data
-    const [customers, setCustomers] = useState([]);
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
 
@@ -62,14 +63,15 @@ const ServiceFormModal = ({
             fetchCustomers();
             fetchCashiers();
             fetchTechnicians();
+            setCustomerId(selectedCustomerId); // Set customer ID when modal opens
         }
-    }, [isOpen]);
+    }, [isOpen, selectedCustomerId]); // Update on selectedCustomerId change
+
 
     const fetchCustomers = async () => {
         try {
             const response = await axios.get('/api/customers');
-            console.log('Fetched customers:', response.data); // Log the fetched customers
-            setCustomers(response.data);
+            setCustomers(response.data); // Update customer list
         } catch (error) {
             console.error('Error fetching customers:', error);
         }
@@ -111,7 +113,7 @@ const ServiceFormModal = ({
         return `INV-${day}${month}${year}${asciiTime}`;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const newRepair = {
@@ -131,20 +133,24 @@ const ServiceFormModal = ({
             repair_type: repairType,
             service_type: serviceType,
             voucher: voucher,
-            completeness: completeness,
             total_price: total,
             payment_type: paymentType,
-            invoice_number: generateInvoiceNumber(),
         };
 
-        onAddRepair(newRepair);
-        resetForm();
-        onClose();
+        try {
+            // Submit the new repair data to the server
+            await axios.post('/api/repairs', newRepair);
+            onAddRepair(newRepair); // Update the repairs list
+            resetForm(); // Reset the form
+            onClose(); // Close the modal
+        } catch (error) {
+            console.error('Error submitting repair:', error);
+        }
     };
 
     const resetForm = () => {
         setEntryDate('');
-        setCustomerId('');
+        setCustomerId(selectedCustomerId);
         setCustomerPhone('');
         setCashierId('');
         setTechnicianId('');
@@ -166,14 +172,18 @@ const ServiceFormModal = ({
         setPaymentType('');
     };
 
+
+    const handleAddCustomer = (newCustomer) => {
+        setCustomers(prevCustomers => [...prevCustomers, newCustomer]); // Update customer list
+    };
+
     const handleCustomerChange = (e) => {
         const selectedCustomerId = e.target.value;
         setCustomerId(selectedCustomerId);
         const selectedCustomer = customers.find(customer => customer.id === selectedCustomerId);
-        console.log('Selected Customer:', selectedCustomer); // Log the selected customer
-        setCustomerPhone(selectedCustomer ? selectedCustomer.phone.trim() : ''); // Trim any spaces
-        console.log('Customer Phone:', selectedCustomer ? selectedCustomer.phone.trim() : ''); // Log the phone number
+        setCustomerPhone(selectedCustomer ? selectedCustomer.phone.trim() : '');
     };
+
     const handleCashierChange = (e) => {
         setCashierId(e.target.value);
     };
