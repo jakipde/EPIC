@@ -6,7 +6,6 @@ use App\Http\Controllers\DataEntryController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductSubCategoryController;
-use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\TechniciansController;
 use App\Http\Controllers\DevicesController;
 use App\Http\Controllers\ProductsController;
@@ -23,14 +22,14 @@ use App\Http\Controllers\Default\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// define module as main route
-// Route::get('/', [App\Module\Shortlink\Controllers\HomeController::class, 'index'])->name('home');
+// Define module as main route
 Route::get('/', function () {
     return redirect('/login');
 });
 
 Route::get('files/{file}', [FileController::class, 'show'])->name('file.show');
 
+// Web routes with authentication
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [GeneralController::class, 'index'])->name('dashboard');
     Route::get('/maintance', [GeneralController::class, 'maintance'])->name('maintance');
@@ -41,88 +40,88 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/users/{user}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('user.destroy');
 
-    // Permission
-    Route::delete('_permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
-    Route::put('_permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
-    Route::post('_permissions', [PermissionController::class, 'store'])->name('permissions.store');
-    Route::get('_permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    // Permission management
+    Route::resource('_permissions', PermissionController::class)->except(['create', 'show']);
 
-    // Role
+    // Role management
     Route::resource('/roles', RoleController::class);
 
-    // Setting
+    // Settings and profile management
     Route::get('/settings', [SettingController::class, 'index'])->name('setting.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('setting.update');
-
-    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-        Route::get('/repairs/dashboard', [RepairsController::class, 'index'])->name('repairs.dashboard');
-        Route::get('/repairs/data-management', [RepairsController::class, 'datamanagement'])->name('repairs.data-management');
-        Route::get('/repairs/reports', [RepairsController::class, 'reports'])->name('repairs.reports');
+// Repairs management routes
+Route::prefix('/repairs')->group(function () {
+    Route::get('/dashboard', [RepairsController::class, 'index'])->name('repairs.dashboard');
+    Route::get('/data-management', [RepairsController::class, 'datamanagement'])->name('repairs.data-management');
+    Route::get('/reports', [RepairsController::class, 'reports'])->name('repairs.reports');
+});
 
-        Route::get('/customers', [CustomersController::class, 'index'])->name('api.customers.index');
-        Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');
-        Route::get('/technicians', [TechniciansController::class, 'index'])->name('api.technicians.index');
-        Route::post('/technicians', [TechniciansController::class, 'store'])->name('technicians.store');
+// Technicians management routes
+Route::prefix('/technicians')->group(function () {
+    Route::get('/', [TechniciansController::class, 'index'])->name('api.technicians.index');
+    Route::post('/', [TechniciansController::class, 'store'])->name('technicians.store');
+});
 
+// Devices management routes
+Route::resource('devices', DevicesController::class);
+Route::get('/devices/dashboard', [DevicesController::class, 'dashboard'])->name('devices.dashboard');
+Route::get('/devices/overview', [DevicesController::class, 'overview'])->name('devices.overview');
 
-        Route::resource('devices', DevicesController::class);
-        Route::get('/devices/dashboard', [DevicesController::class, 'dashboard'])->name('devices.dashboard');
-        Route::get('/devices/overview', [DevicesController::class, 'overview'])->name('devices.overview');
+// Accessories management routes
+Route::resource('accessories', AccessoriesController::class);
+Route::get('/accessories/dashboard', [AccessoriesController::class, 'dashboard'])->name('accessories.dashboard');
+Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
 
-        Route::resource('accessories', AccessoriesController::class);
-        Route::get('/accessories/dashboard', [AccessoriesController::class, 'dashboard'])->name('accessories.dashboard');
-        Route::get('/accessories/overview', [AccessoriesController::class, 'overview'])->name('accessories.overview');
+// Spare parts management routes
+Route::prefix('/spareparts')->group(function () {
+    Route::get('/datainsights', [SparePartsController::class, 'datainsights'])->name('spareparts.datainsights');
+    Route::get('/warranty-report', [SparePartsController::class, 'warrantyreport'])->name('spareparts.warranty-report');
+    Route::get('/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
+    Route::resource('/', SparePartsController::class)->except(['show']); // Resource excluding show
+});
 
-        Route::get('/spareparts/datainsights', [SparePartsController::class, 'datainsights'])->name('spareparts.datainsights');
-        Route::get('/spareparts/warranty-report', [SparePartsController::class, 'warrantyreport'])->name('spareparts.warranty-report');
-        Route::get('/spareparts/{id}', [SparePartsController::class, 'show'])->name('spareparts.view');
-        Route::resource('spareparts', SparePartsController::class);
+// Suppliers management routes
+Route::resource('suppliers', SupplierController::class);
 
-            // Suppliers
-            Route::resource('suppliers', SupplierController::class);
+// Product categories management routes
+Route::resource('product-categories', ProductCategoryController::class);
 
-            // Product Categories
-            Route::resource('product-categories', ProductCategoryController::class);
+// Product subcategories management routes
+Route::resource('product-subcategories', ProductSubCategoryController::class);
 
-            // Product Subcategories
-            Route::resource('product-subcategories', ProductSubCategoryController::class);
+// Tools management routes
+Route::resource('tools', ToolsController::class);
+Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
+Route::get('/tools/overview', [ToolsController::class, 'overview'])->name('tools.overview');
 
-        Route::resource('tools', ToolsController::class);
-        Route::get('/tools/dashboard', [ToolsController::class, 'dashboard'])->name('tools.dashboard');
-        Route::get('/tools/overview', [ToolsController::class, 'overview'])->name('tools.overview');
+// Products management routes
+Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
+Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
 
-        Route::get('/products/dashboard', [ProductsController::class, 'dashboard'])->name('products.dashboard');
-        Route::get('/products/overview', [ProductsController::class, 'overview'])->name('products.overview');
+// Data entry routes with authentication
+Route::middleware(['auth'])->group(function () {
+    Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
+    Route::get('/data-entries/bulk-input', [DataEntryController::class, 'bulkInput'])->name('data-entries.bulk-input');
+    Route::post('/data-entries', [DataEntryController::class, 'store'])->name('data-entries.store');
+    Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
+    Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
+    Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
+});
 
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/data-input', [DataEntryController::class, 'dataInput'])->name('data-entries.data-input');
-        Route::get('/data-entries/bulk-input', [DataEntryController::class, 'bulkInput'])->name('data-entries.bulk-input');
-        Route::post('/data-entries', [DataEntryController::class, 'store'])->name('data-entries.store');
-        Route::put('/data-entries/{id}', [DataEntryController::class, 'update'])->name('data-entries.update');
-        Route::delete('/data-entries/{id}', [DataEntryController::class, 'destroy'])->name('data-entries.destroy');
-        Route::get('/data-entries/categories/{category}/fields', [DataEntryController::class, 'getFields'])->name('category-fields.show');
-        Route::get('/data-entries/categories/{category}/fields', [CategoryController::class, 'getFields'])->name('data-entries.categories.fields');
-    });
+// Test modal pages
+Route::prefix('test-modal-pages')->group(function () {
+    Route::delete('{testModalPage}', [TestModalPageController::class, 'destroy'])->name('test-modal-pages.destroy');
+    Route::put('{testModalPage}', [TestModalPageController::class, 'update'])->name('test-modal-pages.update');
+    Route::post('/', [TestModalPageController::class, 'store'])->name('test-modal-pages.store');
+    Route::get('/', [TestModalPageController::class, 'index'])->name('test-modal-pages.index');
+});
 
-    Route::delete('test-modal-pages/{testModalPage}', [TestModalPageController::class,'destroy'])->name('test-modal-pages.destroy');
-    Route::put('test-modal-pages/{testModalPage}', [TestModalPageController::class,'update'])->name('test-modal-pages.update');
-    Route::post('test-modal-pages', [TestModalPageController::class,'store'])->name('test-modal-pages.store');
-    Route::get('test-modal-pages', [TestModalPageController::class,'index'])->name('test-modal-pages.index');
-
-    // Setting
-    Route::get('/settings', [SettingController::class, 'index'])->name('setting.index');
-    Route::post('/settings', [SettingController::class, 'update'])->name('setting.update');
-
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::get('/test-warranty-report', function () {
-        return 'Test route is working!';
-    });
+// Test route for warranty report
+Route::get('/test-warranty-report', function () {
+    return 'Test route is working!';
+});
