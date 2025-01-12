@@ -14,7 +14,7 @@ const ServiceFormModal = ({
 }) => {
     // State declarations
     const [entryDate, setEntryDate] = useState('');
-    const [customerId, setCustomerId] = useState(selectedCustomerId);
+    const [customerId, setCustomerId] = useState(selectedCustomerId || '');
     const [customerPhone, setCustomerPhone] = useState('');
     const [cashierId, setCashierId] = useState('');
     const [technicianId, setTechnicianId] = useState('');
@@ -30,14 +30,6 @@ const ServiceFormModal = ({
     const [serviceType, setServiceType] = useState('');
     const [deviceBrandOther, setDeviceBrandOther] = useState('');
     const [isOtherBrand, setIsOtherBrand] = useState(false);
-    const [completeness, setCompleteness] = useState({
-        simTray: false,
-        simCard: false,
-        softCase: false,
-        memoryCard: false,
-        box: false,
-        charger: false,
-    });
 
     // State for dropdown data
     const [cashiers, setCashiers] = useState([]);
@@ -102,9 +94,18 @@ const ServiceFormModal = ({
             fetchCustomers();
             fetchCashiers();
             fetchTechnicians();
-            setCustomerId(selectedCustomerId); // Set customer ID when modal opens
+            setCustomerId(selectedCustomerId || ''); // Set customer ID when modal opens
         }
     }, [isOpen, selectedCustomerId]);
+
+    useEffect(() => {
+        const selectedCustomer = customers.find(customer => customer.id === customerId);
+        if (selectedCustomer) {
+            setCustomerPhone(selectedCustomer.phone); // Update parent state with selected customer's phone
+        } else {
+            setCustomerPhone(''); // Reset if no customer is selected
+        }
+    }, [customerId, customers, setCustomerPhone]); // Include setCustomerPhone in dependencies
 
     const fetchCustomers = async () => {
         try {
@@ -187,7 +188,7 @@ const ServiceFormModal = ({
 
     const resetForm = () => {
         setEntryDate('');
-        setCustomerId(selectedCustomerId);
+        setCustomerId(selectedCustomerId || ''); // Keep the selected customer
         setCustomerPhone('');
         setCashierId('');
         setTechnicianId('');
@@ -210,14 +211,14 @@ const ServiceFormModal = ({
     };
 
     const handleAddCustomer = (newCustomer) => {
-        setCustomers(prevCustomers => [...prevCustomers, newCustomer]); // Update customer list
+        setCustomers(prevCustomers => [...prevCustomers, newCustomer]);
     };
 
     const handleCustomerChange = (e) => {
-        const selectedCustomerId = e.target.value;
-        setCustomerId(selectedCustomerId);
-        const selectedCustomer = customers.find(customer => customer.id === selectedCustomerId);
-        setCustomerPhone(selectedCustomer ? selectedCustomer.phone.trim() : '');
+        const selectedId = e.target.value;
+        setCustomerId(selectedId);
+        const selectedCustomer = customers.find(customer => customer.id === selectedId);
+        setCustomerPhone(selectedCustomer ? selectedCustomer.phone : ''); // Set phone number based on selected customer
     };
 
     const handleCashierChange = (e) => {
@@ -385,7 +386,7 @@ const ServiceFormModal = ({
                             </div>
                             {underWarranty && (
                                 <div className="form-control mb-3">
- <label className="label">
+                                    <label className="label">
                                         <span className="label-text">Warranty Duration (days)</span>
                                     </label>
                                     <input

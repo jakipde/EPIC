@@ -11,6 +11,7 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
     const [repairs, setRepairs] = useState([]);
     const [customers, setCustomers] = useState([]);
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
+    const [customerPhone, setCustomerPhone] = useState(''); // State for customer phone
     const [completeness, setCompleteness] = useState({
         simTray: false,
         simCard: false,
@@ -26,8 +27,8 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
 
     const handleAddCustomer = (newCustomer) => {
         setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
-        setSelectedCustomerId(newCustomer.id); // Automatically select the new customer
-        setNewCustomerModalOpen(false); // Close new customer modal
+        setSelectedCustomerId(newCustomer.id);
+        setNewCustomerModalOpen(false);
     };
 
     const handlePrint = (printType) => {
@@ -41,12 +42,11 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
                 onClose={() => setServiceFormModalOpen(false)}
                 onAddRepair={handleAddRepair}
                 setNewCustomerModalOpen={setNewCustomerModalOpen}
-                setCompletenessModalOpen={setCompletenessModalOpen}
-                setPrintModalOpen={setPrintModalOpen}
-                customers={customers} // Pass customers
-                setCustomers={setCustomers} // Pass setter function
-                selectedCustomerId={selectedCustomerId} // Pass selected customer ID
-                setSelectedCustomerId={setSelectedCustomerId} // Pass setter function for selected customer ID
+                customers={customers}
+                setCustomers={setCustomers}
+                selectedCustomerId={selectedCustomerId}
+                setSelectedCustomerId={setSelectedCustomerId}
+                setCustomerPhone={setCustomerPhone} // Pass the function to set customer phone
             />
 
             <NewCustomerModal
@@ -55,18 +55,14 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
                 onAddCustomer={handleAddCustomer}
             />
 
-            <CompletenessModal
-                isOpen={isCompletenessModalOpen}
-                onClose={() => setCompletenessModalOpen(false)}
-                onChange={setCompleteness}
-                initialCompleteness={completeness}
-            />
+            {/* Other modals here */}
 
-            <PrintModal
-                isOpen={isPrintModalOpen}
-                onClose={() => setPrintModalOpen(false)}
-                onPrint={handlePrint}
-            />
+            {/* Display the customer phone number if selected */}
+            {selectedCustomerId && (
+                <div>
+                    <strong>Customer Phone: </strong>{customerPhone}
+                </div>
+            )}
         </div>
     );
 };
