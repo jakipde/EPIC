@@ -10,6 +10,8 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductSubCategoryController;
 use App\Http\Controllers\DataEntryController;
 use App\Http\Controllers\RepairsController;
+use App\Http\Controllers\BrandsController;
+use App\Http\Controllers\DevicesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +31,9 @@ Route::group([], function () {
     Route::get('/repairs/{id}', [RepairsController::class, 'show'])->name('api.repairs.show');
     Route::put('/repairs/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
 });
+
+Route::get('/brands', [BrandsController::class, 'index']); // Fetch all brands
+Route::get('/models', [DevicesController::class, 'index']); // Fetch models based on brand
 
 // Cashiers and Technicians Routes
 Route::get('/cashiers', [AdminsController::class, 'index']); // Fetch all cashiers

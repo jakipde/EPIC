@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import Select from 'react-select';
+
 const ServiceFormModal = ({
     isOpen,
     onClose,
     onAddRepair,
     setNewCustomerModalOpen,
-    customers, // Use the customers prop directly
+    customers,
     setCustomers,
-    selectedCustomerId, // New prop for the selected customer ID
-    setSelectedCustomerId // New prop for updating selected customer ID
+    selectedCustomerId,
+    setSelectedCustomerId
 }) => {
     // State declarations
     const [entryDate, setEntryDate] = useState('');
-    const [customerId, setCustomerId] = useState(selectedCustomerId); // Initialize with selected customer ID
+    const [customerId, setCustomerId] = useState(selectedCustomerId);
     const [customerPhone, setCustomerPhone] = useState('');
     const [cashierId, setCashierId] = useState('');
     const [technicianId, setTechnicianId] = useState('');
@@ -40,6 +42,8 @@ const ServiceFormModal = ({
     // State for dropdown data
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [models, setModels] = useState([]);
 
     // Pricing states
     const [subTotal, setSubTotal] = useState(0);
@@ -47,6 +51,41 @@ const ServiceFormModal = ({
     const [downPayment, setDownPayment] = useState(0);
     const [total, setTotal] = useState(0);
     const [paymentType, setPaymentType] = useState('');
+
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const response = await axios.get('/api/brands'); // Adjust the endpoint as necessary
+                const brandOptions = response.data.map(brand => ({ value: brand.id, label: brand.name }));
+                setBrands(brandOptions);
+            } catch (error) {
+                console.error('Error fetching brands:', error);
+            }
+        };
+
+        fetchBrands();
+    }, []);
+
+    const handleBrandChange = async (selectedOption) => {
+        const selectedBrandId = selectedOption.value;
+        setPhoneBrand(selectedBrandId);
+
+        if (selectedBrandId) {
+            try {
+                const response = await axios.get(`/api/models?brand_id=${selectedBrandId}`); // Adjust the endpoint as necessary
+                const modelOptions = response.data.map(model => ({ value: model.device_id, label: model.device_name }));
+                setModels(modelOptions);
+            } catch (error) {
+                console.error('Error fetching models:', error);
+            }
+        } else {
+            setModels([]); // Clear models if no brand is selected
+        }
+    };
+
+    const handleModelChange = (selectedOption) => {
+        setPhoneModel(selectedOption.value);
+    };
 
     useEffect(() => {
         const currentDate = new Date().toISOString().split('T')[0];
@@ -65,8 +104,7 @@ const ServiceFormModal = ({
             fetchTechnicians();
             setCustomerId(selectedCustomerId); // Set customer ID when modal opens
         }
-    }, [isOpen, selectedCustomerId]); // Update on selectedCustomerId change
-
+    }, [isOpen, selectedCustomerId]);
 
     const fetchCustomers = async () => {
         try {
@@ -89,7 +127,7 @@ const ServiceFormModal = ({
     const fetchTechnicians = async () => {
         try {
             const response = await axios.get('/api/technicians');
-            setTechnicians(response.data);
+            setTechnicians(response.data)
         } catch (error) {
             console.error('Error fetching technicians:', error);
         }
@@ -101,7 +139,7 @@ const ServiceFormModal = ({
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear();
         const hours = now.getHours();
-        const minutes = now .getMinutes();
+        const minutes = now.getMinutes();
         const seconds = now.getSeconds();
 
         const asciiTime = [
@@ -138,7 +176,6 @@ const ServiceFormModal = ({
         };
 
         try {
-            // Submit the new repair data to the server
             await axios.post('/api/repairs', newRepair);
             onAddRepair(newRepair); // Update the repairs list
             resetForm(); // Reset the form
@@ -171,7 +208,6 @@ const ServiceFormModal = ({
         setTotal(0);
         setPaymentType('');
     };
-
 
     const handleAddCustomer = (newCustomer) => {
         setCustomers(prevCustomers => [...prevCustomers, newCustomer]); // Update customer list
@@ -244,42 +280,19 @@ const ServiceFormModal = ({
                                 <label className="label">
                                     <span className="label-text">Phone Brand</span>
                                 </label>
-                                <select
-                                    value={phoneBrand}
-                                    onChange={(e) => {
-                                        setPhoneBrand(e.target.value);
-                                        setIsOtherBrand(e.target.value === 'other');
-                                    }}
-                                    className="select select-bordered"
+                                <Select
+                                    options={brands}
+                                    onChange={handleBrandChange}
                                     required
-                                >
-                                    <option value="">-- Select Brand --</option>
-                                    <option value="Samsung">Samsung</option>
-                                    <option value="Apple">Apple</option>
-                                    <option value="Xiaomi">Xiaomi</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                {isOtherBrand && (
-                                    <input
-                                        type="text"
-                                        value={deviceBrandOther}
-                                        onChange={(e) => setDeviceBrandOther(e.target.value)}
-                                        placeholder="Specify other brand"
-                                        className="input input-bordered mt-2"
-                                        required
-                                    />
-                                )}
+                                />
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
                                     <span className="label-text">Phone Model</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    value={phoneModel}
-                                    onChange={(e) => setPhoneModel(e.target.value)}
-                                    placeholder="ex: Note 5 Pro"
-                                    className="input input-bordered"
+                                <Select
+                                    options={models}
+                                    onChange={handleModelChange}
                                     required
                                 />
                             </div>
@@ -372,7 +385,7 @@ const ServiceFormModal = ({
                             </div>
                             {underWarranty && (
                                 <div className="form-control mb-3">
-                                    <label className="label">
+ <label className="label">
                                         <span className="label-text">Warranty Duration (days)</span>
                                     </label>
                                     <input

@@ -22,7 +22,7 @@ class UserController extends Controller
 
         $query->orderBy('created_at', 'desc');
 
-        return inertia('User /Index', [
+        return inertia('User/Index', [
             'data' => $query->paginate(),
         ]);
     }
