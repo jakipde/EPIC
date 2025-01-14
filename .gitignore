@@ -18,3 +18,5 @@ yarn-error.log
 /.idea
 /.vscode
 /.scannerwork
+devices.sql
+brands.sql

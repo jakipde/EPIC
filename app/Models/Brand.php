@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Brand extends Model
 {
-    use HasFactory;
+    // Define the table associated with the model (optional)
+    protected $table = 'brands';
 
-    protected $fillable = ['name']; // Define fillable fields
+    // Define the fillable attributes (optional)
+    protected $fillable = ['name'];
 }

@@ -21,13 +21,13 @@ class PhoneList extends Migration
         });
 
         // Create the devices table
-        Schema::create('devices', function (Blueprint $table) {
-            $table->id(); // Auto-incrementing ID for devices
-            $table->foreignId('brand_id')->constrained('brands'); // Foreign key referencing brands
-            $table->integer('device_id'); // Device ID
-            $table->string('device_name'); // Device name
-            $table->timestamps(); // Created at and updated at timestamps
-        });
+            Schema::create('devices', function (Blueprint $table) {
+                $table->id(); // Auto-incrementing primary key (BIGINT UNSIGNED)
+                $table->string('name', 255); // Device name (VARCHAR(255))
+                $table->text('img'); // Image URL or path (TEXT)
+                $table->text('description'); // Description of the device (TEXT)
+                $table->foreignId('brand_id')->constrained('brands'); // Foreign key referencing brands
+            });
     }
 
     /**

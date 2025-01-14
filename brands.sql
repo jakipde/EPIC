@@ -1,3 +1,8 @@
+CREATE TABLE IF NOT EXISTS brands (
+    id INT PRIMARY KEY,
+    name VARCHAR(255)
+);
+
 INSERT INTO Brands (id, name) VALUES (1, 'Acer');
 INSERT INTO Brands (id, name) VALUES (2, 'alcatel');
 INSERT INTO Brands (id, name) VALUES (3, 'Allview');

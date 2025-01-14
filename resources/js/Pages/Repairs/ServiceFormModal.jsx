@@ -19,7 +19,7 @@ const ServiceFormModal = ({
     const [cashierId, setCashierId] = useState('');
     const [technicianId, setTechnicianId] = useState('');
     const [phoneBrand, setPhoneBrand] = useState('');
-    const [phoneModel, setPhoneModel] = useState('');
+    const [phoneDevice, setPhoneDevice] = useState('');
     const [imeiSn1, setImeiSn1] = useState('');
     const [imeiSn2, setImeiSn2] = useState('');
     const [damageDescription, setDamageDescription] = useState('');
@@ -35,7 +35,12 @@ const ServiceFormModal = ({
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [models, setModels] = useState([]);
+    const [devices, setDevices] = useState([]); // Changed from models to devices
+
+    // State for selected device details
+    const [selectedDevice, setSelectedDevice] = useState(null);
+    const [deviceImage, setDeviceImage] = useState('');
+    const [deviceDescription, setDeviceDescription] = useState('');
 
     // Pricing states
     const [subTotal, setSubTotal] = useState(0);
@@ -61,22 +66,31 @@ const ServiceFormModal = ({
     const handleBrandChange = async (selectedOption) => {
         const selectedBrandId = selectedOption.value;
         setPhoneBrand(selectedBrandId);
-
+    
         if (selectedBrandId) {
             try {
-                const response = await axios.get(`/api/models?brand_id=${selectedBrandId}`); // Adjust the endpoint as necessary
-                const modelOptions = response.data.map(model => ({ value: model.device_id, label: model.device_name }));
-                setModels(modelOptions);
+                const response = await axios.get(`/api/devices?brand_id=${selectedBrandId}`);
+                console.log('Fetched devices:', response.data); // Log the fetched devices
+                const deviceOptions = response.data.map(device => ({
+                    value: device.device_id,
+                    label: device.device_name,
+                    img: device.img,
+                    description: device.description
+                }));
+                setDevices(deviceOptions); // Set devices instead of models
             } catch (error) {
-                console.error('Error fetching models:', error);
+                console.error('Error fetching devices:', error.response ? error.response.data : error.message);
             }
         } else {
-            setModels([]); // Clear models if no brand is selected
+            setDevices([]); // Clear devices if no brand is selected
         }
     };
 
-    const handleModelChange = (selectedOption) => {
-        setPhoneModel(selectedOption.value);
+    const handleDeviceChange = (selectedOption) => {
+        setPhoneDevice(selectedOption.value);
+        setSelectedDevice(selectedOption); // Store the selected device
+        setDeviceImage(selectedOption.img);
+        setDeviceDescription(selectedOption.description);
     };
 
     useEffect(() => {
@@ -128,7 +142,7 @@ const ServiceFormModal = ({
     const fetchTechnicians = async () => {
         try {
             const response = await axios.get('/api/technicians');
-            setTechnicians(response.data)
+            setTechnicians(response.data);
         } catch (error) {
             console.error('Error fetching technicians:', error);
         }
@@ -161,8 +175,8 @@ const ServiceFormModal = ({
             customer_phone: customerPhone,
             cashier_id: cashierId,
             technician_id: technicianId,
-            phone_brand: isOtherBrand ? deviceBrandOther : phoneBrand,
-            phone_model: phoneModel,
+            phone_brand: phoneBrand,
+            phone_model: phoneDevice,
             imei_sn_1: imeiSn1,
             imei_sn_2: imeiSn2,
             damage_description: damageDescription,
@@ -193,7 +207,7 @@ const ServiceFormModal = ({
         setCashierId('');
         setTechnicianId('');
         setPhoneBrand('');
-        setPhoneModel('');
+        setPhoneDevice(''); // Reset phoneDevice
         setImeiSn1('');
         setImeiSn2('');
         setDamageDescription('');
@@ -202,16 +216,11 @@ const ServiceFormModal = ({
         setNotes('');
         setRepairType('');
         setServiceType('');
-        setDeviceBrandOther('');
         setSubTotal(0);
         setVoucher('');
         setDownPayment(0);
         setTotal(0);
         setPaymentType('');
-    };
-
-    const handleAddCustomer = (newCustomer) => {
-        setCustomers(prevCustomers => [...prevCustomers, newCustomer]);
     };
 
     const handleCustomerChange = (e) => {
@@ -284,7 +293,7 @@ const ServiceFormModal = ({
                                 <Select
                                     options={brands}
                                     onChange={handleBrandChange}
-                                    required
+                                    placeholder="Select Brand"
                                 />
                             </div>
                             <div className="form-control mb-3">
@@ -292,10 +301,12 @@ const ServiceFormModal = ({
                                     <span className="label-text">Phone Model</span>
                                 </label>
                                 <Select
-                                    options={models}
-                                    onChange={handleModelChange}
-                                    required
+                                    options={devices}
+                                    onChange={handleDeviceChange}
+                                    placeholder="Select Model"
                                 />
+                                {deviceImage && <img src={deviceImage} alt="Device" />}
+                                {deviceDescription && <p>{deviceDescription}</p>}
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
@@ -359,14 +370,12 @@ const ServiceFormModal = ({
                                 <label className="label">
                                     <span className="label-text">Technician</span>
                                 </label>
-                                <select
-                                    value={technicianId}
+                                <select value={technicianId}
                                     onChange={handleTechnicianChange}
                                     className="select select-bordered"
                                     required
                                 >
-                                    <option value="">-- Select Technician --</option>
-                                    {technicians.map(technician => (
+                                    <option value="">-- Select Technician --</option> {technicians.map(technician => (
                                         <option key={technician.id} value={technician.id}>
                                             {technician.name}
                                         </option>
@@ -495,7 +504,7 @@ const ServiceFormModal = ({
                             <label className="label">
                                 <span className="label-text text-green-600">Total</span>
                             </label>
-                            <input
+                            < input
                                 type="number"
                                 value={total}
                                 readOnly
@@ -518,6 +527,15 @@ const ServiceFormModal = ({
                             <option value="Mobile Payment">Mobile Payment</option>
                         </select>
                     </div>
+
+                    {/* Device Details Section */}
+                    {selectedDevice && (
+                        <div className="hidden-form mb-4">
+                            <h3 className="font-bold">Device Details</h3>
+                            <img src={deviceImage} alt={selectedDevice.label} style={{ width: '100px', height: 'auto' }} />
+                            <p>{deviceDescription}</p>
+                        </div>
+                    )}
 
                     {/* Completeness and Print Modal Buttons */}
                     <div className="flex justify-between mb-3">

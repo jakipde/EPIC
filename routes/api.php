@@ -36,12 +36,8 @@ use Illuminate\Support\Facades\Route;
         Route::put('/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
     });
 
-    Route::get('/brands', [BrandsController::class, 'index']); // Fetch all brands
-    Route::get('/models', [DevicesController::class, 'index']); // Fetch models based on brand
-
-    // Cashiers and Technicians Routes
-    Route::get('/cashiers', [AdminsController::class, 'index']); // Fetch all cashiers
-    Route::get('/technicians', [TechniciansController::class, 'index']); // Fetch all technicians
+    Route::get('/brands', [BrandsController::class, 'index']);
+    Route::get('/devices', [DevicesController::class, 'index']);
 
     // Cashiers and Technicians API routes
     Route::get('/cashiers', [AdminsController::class, 'index']);
