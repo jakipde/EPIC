@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
-const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) => {
-  if (!isOpen) return null; // Don't render the modal if it's not open
+const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) => {
+  if (!isOpen) return null; // Don't render if not open
 
   // Close modal when clicking outside
   const handleClickOutside = (event) => {
@@ -24,7 +24,6 @@ const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) =
       document.addEventListener('click', handleClickOutside);
     }
 
-    // Cleanup event listeners on modal close
     return () => {
       document.removeEventListener('keydown', handleEscKey);
       document.removeEventListener('click', handleClickOutside);
@@ -52,7 +51,7 @@ const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) =
                 <span className="label-text">SIM Tray</span>
                 <input
                   type="checkbox"
-                  checked={initialCompleteness.simTray}
+                  checked={initialCompleteness.simTray || false} // Use fallback to avoid undefined error
                   onChange={() => handleCheckboxChange('simTray')}
                   className="checkbox"
                 />
@@ -64,7 +63,7 @@ const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) =
                 <span className="label-text">SIM Card</span>
                 <input
                   type="checkbox"
-                  checked={initialCompleteness.simCard}
+                  checked={initialCompleteness.simCard || false} // Use fallback to avoid undefined error
                   onChange={() => handleCheckboxChange('simCard')}
                   className="checkbox"
                 />
@@ -76,7 +75,7 @@ const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) =
                 <span className="label-text">Soft Case</span>
                 <input
                   type="checkbox"
-                  checked={initialCompleteness.softCase}
+                  checked={initialCompleteness.softCase || false} // Use fallback to avoid undefined error
                   onChange={() => handleCheckboxChange('softCase')}
                   className="checkbox"
                 />
@@ -91,7 +90,7 @@ const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) =
                 <span className="label-text">Memory Card</span>
                 <input
                   type="checkbox"
-                  checked={initialCompleteness.memoryCard}
+                  checked={initialCompleteness.memoryCard || false} // Use fallback to avoid undefined error
                   onChange={() => handleCheckboxChange('memoryCard')}
                   className="checkbox"
                 />
@@ -103,7 +102,7 @@ const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) =
                 <span className="label-text">Box</span>
                 <input
                   type="checkbox"
-                  checked={initialCompleteness.box}
+                  checked={initialCompleteness.box || false} // Use fallback to avoid undefined error
                   onChange={() => handleCheckboxChange('box')}
                   className="checkbox"
                 />
@@ -115,7 +114,7 @@ const CompletenessModal = ({ isOpen, onClose, onChange, initialCompleteness }) =
                 <span className="label-text">Charger</span>
                 <input
                   type="checkbox"
-                  checked={initialCompleteness.charger}
+                  checked={initialCompleteness.charger || false} // Use fallback to avoid undefined error
                   onChange={() => handleCheckboxChange('charger')}
                   className="checkbox"
                 />

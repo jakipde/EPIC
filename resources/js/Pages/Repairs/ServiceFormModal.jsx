@@ -8,10 +8,13 @@ const ServiceFormModal = ({
     onClose,
     onAddRepair,
     setNewCustomerModalOpen,
+    setPrintModalOpen,
     customers,
     setCustomers,
     selectedCustomerId,
-    setSelectedCustomerId
+    setCompletenessModalOpen,
+    completeness,
+    setCompleteness,
 }) => {
     // State declarations (same as before)
     const [entryDate, setEntryDate] = useState('');
@@ -30,11 +33,10 @@ const ServiceFormModal = ({
     const [damageDescription, setDamageDescription] = useState('');
     const [underWarranty, setUnderWarranty] = useState(false);
     const [warrantyDuration, setWarrantyDuration] = useState(0);
+    const [warrantyUnit, setWarrantyUnit] = useState('days'); // Default to 'days'
     const [notes, setNotes] = useState('');
     const [repairType, setRepairType] = useState('');
     const [serviceType, setServiceType] = useState('');
-    const [deviceBrandOther, setDeviceBrandOther] = useState('');
-    const [isOtherBrand, setIsOtherBrand] = useState(false);
 
     // State for dropdown data
     const [cashiers, setCashiers] = useState([]);
@@ -190,6 +192,7 @@ const ServiceFormModal = ({
             repair_type: repairType,
             service_type: serviceType,
             voucher: voucher,
+            completeness: completeness,
             total_price: total,
             payment_type: paymentType,
         };
@@ -274,24 +277,6 @@ const ServiceFormModal = ({
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
-                                    <span className="label-text">Cashier</span>
-                                </label>
-                                <select
-                                    value={cashierId}
-                                    onChange={handleCashierChange}
-                                    className="select select-bordered"
-                                    required
-                                >
-                                    <option value="">-- Select Cashier --</option>
-                                    {cashiers.map(cashier => (
-                                        <option key={cashier.id} value={cashier.id}>
-                                            {cashier.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="form-control mb-3">
-                                <label className="label">
                                     <span className="label-text">Phone Brand</span>
                                 </label>
                                 <Select
@@ -318,8 +303,6 @@ const ServiceFormModal = ({
                                     isClearable
                                     isDisabled={!selectedBrand}
                                 />
-                                {deviceImage && <img src={deviceImage} alt="Device" className="mt-2" />}
-                                {deviceDescription && <p className="mt-1">{deviceDescription}</p>}
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
@@ -379,50 +362,81 @@ const ServiceFormModal = ({
                                     <span>{customerPhone}</span>
                                 </div>
                             )}
-                            <div className="form-control mb-3">
+                        <div className="flex justify-between mb-3">
+                            <div className="form-control w-full mr-2">
+                                <label className="label">
+                                    <span className="label-text">Cashier</span>
+                                </label>
+                                <select
+                                    value={cashierId}
+                                    onChange={handleCashierChange}
+                                    className="select select-bordered"
+                                    required
+                                >
+                                    <option value="">-- Select Cashier --</option>
+                                    {cashiers.map(cashier => (
+                                        <option key={cashier.id} value={cashier.id}>
+                                            {cashier.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="form-control w-full ml-2">
                                 <label className="label">
                                     <span className="label-text">Technician</span>
                                 </label>
-                                <select value={technicianId}
+                                <select
+                                    value={technicianId}
                                     onChange={handleTechnicianChange}
                                     className="select select-bordered"
                                     required
                                 >
-                                    <option value="">-- Select Technician --</option> {technicians.map(technician => (
+                                    <option value="">-- Select Technician --</option>
+                                    {technicians.map(technician => (
                                         <option key={technician.id} value={technician.id}>
                                             {technician.name}
                                         </option>
                                     ))}
                                 </select>
                             </div>
-                            <div className="form-control mb-3">
-                                <label className="label">
-                                    <span className="label-text">Under Warranty</span>
-                                </label>
-                                <input
-                                    type="checkbox"
-                                    checked={underWarranty}
-                                    onChange={() => setUnderWarranty(!underWarranty)}
-                                    className="checkbox"
-                                />
-                            </div>
-                            {underWarranty && (
-                                <div className="form-control mb-3">
-                                    <label className="label">
-                                        <span className="label-text">Warranty Duration (days)</span>
-                                    </label>
+                        </div>
+                            <div className="form-control mb-3 mt-8">
+                                <div className="flex items-center">
                                     <input
-                                        type="number"
-                                        value={warrantyDuration}
-                                        onChange={(e) => {
-                                            const value = Math.max(0, e.target.value);
-                                            setWarrantyDuration(value);
-                                        }}
-                                        className="input input-bordered"
-                                        required
+                                        type="checkbox"
+                                        checked={underWarranty}
+                                        onChange={() => setUnderWarranty(!underWarranty)}
+                                        className="checkbox mr-2"
                                     />
+                                    <label className="label mr-4">
+                                        <span className="label-text">Under Warranty</span>
+                                    </label>
+                                    {underWarranty && (
+                                        <>
+                                            <input
+                                                type="number"
+                                                value={warrantyDuration}
+                                                onChange={(e) => {
+                                                    const value = Math.max(0, e.target.value);
+                                                    setWarrantyDuration(value);
+                                                }}
+                                                className="input input-bordered mr-2"
+                                                required
+                                            />
+                                            <select
+                                                value={warrantyUnit}
+                                                onChange={(e) => setWarrantyUnit(e.target.value)}
+                                                className="select select-bordered"
+                                            >
+                                                <option value="days">Days</option>
+                                                <option value="weeks">Weeks</option>
+                                                <option value="months">Months</option>
+                                            </select>
+                                        </>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                             <div className="form-control mb-3">
                                 <label className="label">
                                     <span className="label-text">Notes</span>
@@ -447,6 +461,12 @@ const ServiceFormModal = ({
                                     <option value="">-- Select Repair Type --</option>
                                     <option value="screen">Screen Replacement</option>
                                     <option value="battery">Battery Replacement</option>
+                                    <option value="camera">Camera Repairs </option>
+                                    <option value="charging_port">Charging Port Repairs</option>
+                                    <option value="speaker_microphone">Speaker/Microphone Repairs</option>
+                                    <option value="button">Button Replacements</option>
+                                    <option value="water_damage">Water Damage Restoration</option>
+                                    <option value="signal">Signal Repairs</option>
                                     <option value="other">Other</option>
                                 </select>
                             </div>
@@ -541,36 +561,31 @@ const ServiceFormModal = ({
                         </select>
                     </div>
 
-                    {/* Device Details Section */}
-                    {selectedDevice && (
-                        <div className="hidden-form mb-4">
-                            <h3 className="font-bold">Device Details</h3>
-                            <img src={deviceImage} alt={selectedDevice.label} style={{ width: '100px', height: 'auto' }} />
-                            <p>{deviceDescription}</p>
-                        </div>
-                    )}
-
-                    {/* Completeness and Print Modal Buttons */}
-                    <div className="flex justify-between mb-3">
-                        <div className="form-control w-full mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-secondary w-full"
-                                onClick={() => setPrintModalOpen(true)}
-                            >
-                                Print
-                            </button>
-                        </div>
-                        <div className="form-control w-full ml-2">
-                            <button
-                                type="button"
-                                className="btn btn-secondary w-full"
-                                onClick={() => setPrintModalOpen(true)}
-                            >
-                                Print
-                            </button>
-                        </div>
+                {/* Completeness and Print Modal Buttons */}
+                <div className="flex justify-between mb-3 mt-6">
+                    <div className="form-control w-full mr-2">
+                        <button
+                            type="button"
+                            className="btn btn-secondary w-full"
+                            onClick={() => {
+                                setCompletenessModalOpen(true); // Open completeness modal
+                            }}
+                        >
+                            Devices Completeness
+                        </button>
                     </div>
+                    <div className="form-control w-full ml-2">
+                        <button
+                            type="button"
+                            className="btn btn-secondary w-full"
+                            onClick={() => {
+                                setPrintModalOpen(true); // Open print modal
+                            }}
+                        >
+                            Print
+                        </button>
+                    </div>
+                </div>
 
                     <div className="modal-action flex justify-end">
                         <button type="button" onClick={onClose} className="btn">Close</button>

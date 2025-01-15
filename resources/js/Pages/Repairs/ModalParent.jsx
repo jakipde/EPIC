@@ -12,6 +12,8 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
     const [customers, setCustomers] = useState([]);
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
     const [customerPhone, setCustomerPhone] = useState(''); // State for customer phone
+
+    // Completeness state
     const [completeness, setCompleteness] = useState({
         simTray: false,
         simCard: false,
@@ -31,10 +33,6 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
         setNewCustomerModalOpen(false);
     };
 
-    const handlePrint = (printType) => {
-        console.log(`Printing with type: ${printType}`);
-    };
-
     return (
         <div>
             <ServiceFormModal
@@ -47,6 +45,10 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
                 selectedCustomerId={selectedCustomerId}
                 setSelectedCustomerId={setSelectedCustomerId}
                 setCustomerPhone={setCustomerPhone} // Pass the function to set customer phone
+                setCompletenessModalOpen={setCompletenessModalOpen} // Pass function to open completeness modal
+                completeness={completeness} // Pass completeness state
+                setCompleteness={setCompleteness} // Pass function to update completeness state
+                setPrintModalOpen={setPrintModalOpen} // Pass function to open print modal
             />
 
             <NewCustomerModal
@@ -55,14 +57,18 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
                 onAddCustomer={handleAddCustomer}
             />
 
-            {/* Other modals here */}
+            {/* Modals */}
+            <CompletenessModal
+                isOpen={isCompletenessModalOpen}
+                onClose={() => setCompletenessModalOpen(false)} // Close completeness modal
+                initialCompleteness={completeness} // Pass completeness state here
+                onChange={setCompleteness} // Function to update completeness state
+            />
 
-            {/* Display the customer phone number if selected */}
-            {selectedCustomerId && (
-                <div>
-                    <strong>Customer Phone: </strong>{customerPhone}
-                </div>
-            )}
+            <PrintModal
+                isOpen={isPrintModalOpen}
+                onClose={() => setPrintModalOpen(false)} // Close print modal
+            />
         </div>
     );
 };
