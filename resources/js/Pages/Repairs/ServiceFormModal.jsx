@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import { XMLParser } from 'fast-xml-parser'; // Import the parser
 import Select from 'react-select';
 
 const ServiceFormModal = ({
@@ -12,12 +13,16 @@ const ServiceFormModal = ({
     selectedCustomerId,
     setSelectedCustomerId
 }) => {
-    // State declarations
+    // State declarations (same as before)
     const [entryDate, setEntryDate] = useState('');
     const [customerId, setCustomerId] = useState(selectedCustomerId || '');
     const [customerPhone, setCustomerPhone] = useState('');
     const [cashierId, setCashierId] = useState('');
     const [technicianId, setTechnicianId] = useState('');
+    const [selectedBrand, setSelectedBrand] = useState(null);
+    const [selectedDevice, setSelectedDevice] = useState(null);
+    const [deviceImage, setDeviceImage] = useState('');
+    const [deviceDescription, setDeviceDescription] = useState('');
     const [phoneBrand, setPhoneBrand] = useState('');
     const [phoneDevice, setPhoneDevice] = useState('');
     const [imeiSn1, setImeiSn1] = useState('');
@@ -37,11 +42,6 @@ const ServiceFormModal = ({
     const [brands, setBrands] = useState([]);
     const [devices, setDevices] = useState([]); // Changed from models to devices
 
-    // State for selected device details
-    const [selectedDevice, setSelectedDevice] = useState(null);
-    const [deviceImage, setDeviceImage] = useState('');
-    const [deviceDescription, setDeviceDescription] = useState('');
-
     // Pricing states
     const [subTotal, setSubTotal] = useState(0);
     const [voucher, setVoucher] = useState('');
@@ -50,47 +50,51 @@ const ServiceFormModal = ({
     const [paymentType, setPaymentType] = useState('');
 
     useEffect(() => {
-        const fetchBrands = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get('/api/brands'); // Adjust the endpoint as necessary
-                const brandOptions = response.data.map(brand => ({ value: brand.id, label: brand.name }));
-                setBrands(brandOptions);
+                const response = await axios.get('/secret.json'); // Adjust path if necessary
+                const result = response.data;
+
+                // Extract brands and devices
+                const brandsData = result.root.brands.map(brand => ({
+                    value: brand.id,
+                    label: brand.name,
+                }));
+
+                const devicesData = result.root.devices.map(device => ({
+                    value: device.id,
+                    label: device.name,
+                    img: device.img,
+                    description: device.description,
+                    brandId: device.brand_id,
+                }));
+
+                setBrands(brandsData);
+                setDevices(devicesData);
             } catch (error) {
-                console.error('Error fetching brands:', error);
+                console.error('Error fetching or parsing JSON:', error);
             }
         };
 
-        fetchBrands();
+        fetchData();
     }, []);
 
-    const handleBrandChange = async (selectedOption) => {
-        const selectedBrandId = selectedOption.value;
-        setPhoneBrand(selectedBrandId);
-    
-        if (selectedBrandId) {
-            try {
-                const response = await axios.get(`/api/devices?brand_id=${selectedBrandId}`);
-                console.log('Fetched devices:', response.data); // Log the fetched devices
-                const deviceOptions = response.data.map(device => ({
-                    value: device.device_id,
-                    label: device.device_name,
-                    img: device.img,
-                    description: device.description
-                }));
-                setDevices(deviceOptions); // Set devices instead of models
-            } catch (error) {
-                console.error('Error fetching devices:', error.response ? error.response.data : error.message);
-            }
-        } else {
-            setDevices([]); // Clear devices if no brand is selected
-        }
+    const handleBrandChange = (selectedOption) => {
+        setSelectedBrand(selectedOption);
+        setSelectedDevice(null); // Reset the selected device to the placeholder (empty)
+        setDeviceImage(''); // Clear the device image
+        setDeviceDescription(''); // Clear the device description
     };
 
     const handleDeviceChange = (selectedOption) => {
-        setPhoneDevice(selectedOption.value);
-        setSelectedDevice(selectedOption); // Store the selected device
-        setDeviceImage(selectedOption.img);
-        setDeviceDescription(selectedOption.description);
+        setSelectedDevice(selectedOption);
+        if (selectedOption) {
+            setDeviceImage(selectedOption.img);
+            setDeviceDescription(selectedOption.description);
+        } else {
+            setDeviceImage('');
+            setDeviceDescription('');
+        }
     };
 
     useEffect(() => {
@@ -292,8 +296,12 @@ const ServiceFormModal = ({
                                 </label>
                                 <Select
                                     options={brands}
-                                    onChange={handleBrandChange}
+                                    onChange={(selectedOption) => {
+                                        handleBrandChange(selectedOption);
+                                        setPhoneBrand(selectedOption ? selectedOption.label : '');
+                                    }}
                                     placeholder="Select Brand"
+                                    isClearable
                                 />
                             </div>
                             <div className="form-control mb-3">
@@ -301,12 +309,17 @@ const ServiceFormModal = ({
                                     <span className="label-text">Phone Model</span>
                                 </label>
                                 <Select
-                                    options={devices}
-                                    onChange={handleDeviceChange}
+                                    options={devices.filter(device => device.brandId === selectedBrand?.value)}
+                                    onChange={(selectedOption) => {
+                                        handleDeviceChange(selectedOption);
+                                        setPhoneDevice(selectedOption ? selectedOption.label : '');
+                                    }}
                                     placeholder="Select Model"
+                                    isClearable
+                                    isDisabled={!selectedBrand}
                                 />
-                                {deviceImage && <img src={deviceImage} alt="Device" />}
-                                {deviceDescription && <p>{deviceDescription}</p>}
+                                {deviceImage && <img src={deviceImage} alt="Device" className="mt-2" />}
+                                {deviceDescription && <p className="mt-1">{deviceDescription}</p>}
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">

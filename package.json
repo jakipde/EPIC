@@ -39,9 +39,11 @@
     "@heroicons/react": "^2.2.0",
     "@xobotyi/scrollbar-width": "^1.9.5",
     "chart.js": "^4.4.4",
+    "fast-xml-parser": "^4.5.1",
     "react-chartjs-2": "^5.2.0",
     "react-select": "^5.9.0",
     "react-transition-group": "^4.4.5",
-    "tailwind-scrollbar": "^3.1.0"
+    "tailwind-scrollbar": "^3.1.0",
+    "xml2js": "^0.6.2"
   }
 }
