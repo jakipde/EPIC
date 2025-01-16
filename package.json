@@ -36,7 +36,12 @@
     "vite": "^5.4.8"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/roboto": "^5.1.1",
     "@heroicons/react": "^2.2.0",
+    "@mui/icons-material": "^6.4.0",
+    "@mui/material": "^6.4.0",
     "@xobotyi/scrollbar-width": "^1.9.5",
     "chart.js": "^4.4.4",
     "fast-xml-parser": "^4.5.1",

@@ -62,9 +62,6 @@ export default function AuthenticatedLayout({
                                     <DarkSwitch />
                                 </div>
                                 <div className="ml-3 relative">
-                                    <ThemeSwitch />
-                                </div>
-                                <div className="ml-3 relative">
                                     <details className="dropdown dropdown-end">
                                         <summary className="btn btn-ghost btn-circle">
                                             <span className="inline-flex items-center justify-center h-[2.375rem] w-[2.375rem] rounded-full bg-gray-500 text-sm font-semibold text-white leading-none">

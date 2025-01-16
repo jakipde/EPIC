@@ -70,7 +70,6 @@ const PrintModal = ({ isOpen, onClose, onPrint }) => {
                 </div>
 
                 <div className="modal-action flex justify-end mt-4">
-                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
                     <button type="button" className="btn btn-primary ml-2" onClick={handleConfirmPrint} disabled={!selectedPrintType}>
                         Confirm Print
                     </button>

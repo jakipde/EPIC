@@ -12,22 +12,24 @@ class Repair extends Model
     protected $fillable = [
         'entry_date',
         'customer_id',
-        'cashier',
+        'cashier_id', // Corrected to match the migration
+        'technician_id',
         'phone_brand',
+        'phone_model', // Added to align with the migration
         'imei_sn_1',
         'imei_sn_2',
         'damage_description',
-        'phone_accessories',
-        'technician_id',
         'under_warranty',
         'warranty_duration',
-        'exit_date',
-        'print_type',
-        'invoice_number'
+        'warranty_unit', // Added if needed for warranty duration
+        'notes', // Added if needed for additional notes
+        'repair_type',
+        'service_type', // Added to align with the migration
+        'total_price', // Added to align with the migration
+        'completeness', // Added to align with the migration
+        'exit_date', // Included if needed for tracking completion
+        'print_type', // Included if needed for print types
+        'invoice_number' // Included for invoice tracking if needed
     ];
 
-    public function category()
-    {
-        return $this->morphOne(Category::class, 'categoryData');
-    }
 }

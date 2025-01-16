@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import { XMLParser } from 'fast-xml-parser'; // Import the parser
 import Select from 'react-select';
 
 const ServiceFormModal = ({
@@ -14,7 +13,6 @@ const ServiceFormModal = ({
     selectedCustomerId,
     setCompletenessModalOpen,
     completeness,
-    setCompleteness,
 }) => {
     // State declarations (same as before)
     const [entryDate, setEntryDate] = useState('');
@@ -45,10 +43,10 @@ const ServiceFormModal = ({
     const [devices, setDevices] = useState([]); // Changed from models to devices
 
     // Pricing states
-    const [subTotal, setSubTotal] = useState(0);
-    const [voucher, setVoucher] = useState('');
-    const [downPayment, setDownPayment] = useState(0);
+    const [subTotal, setSubTotal] = useState('');
+    const [downPayment, setDownPayment] = useState('');
     const [total, setTotal] = useState(0);
+    const [voucher, setVoucher] = useState('');
     const [paymentType, setPaymentType] = useState('');
 
     useEffect(() => {
@@ -105,9 +103,29 @@ const ServiceFormModal = ({
     }, []);
 
     useEffect(() => {
-        const calculatedTotal = Math.max(0, subTotal - downPayment);
+        const parsedSubTotal = parseFloat(subTotal.replace(/[^0-9]/g, "")) || 0;
+        const parsedDownPayment = parseFloat(downPayment.replace(/[^0-9]/g, "")) || 0;
+        const calculatedTotal = Math.max(0, parsedSubTotal - parsedDownPayment);
         setTotal(calculatedTotal);
     }, [subTotal, downPayment]);
+
+    const handleSubTotalChange = (e) => {
+        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimals
+        setSubTotal(value);
+    };
+
+    const handleDownPaymentChange = (e) => {
+        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimals
+        setDownPayment(value);
+    };
+
+    const formatCurrency = (value, includeDecimals = false) => {
+        return 'Rp' + new Intl.NumberFormat('id-ID', {
+            style: 'decimal',
+            minimumFractionDigits: includeDecimals ? 2 : 0,
+            maximumFractionDigits: includeDecimals ? 2 : 0,
+        }).format(value);
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -198,10 +216,10 @@ const ServiceFormModal = ({
         };
 
         try {
-            await axios.post('/api/repairs', newRepair);
-            onAddRepair(newRepair); // Update the repairs list
-            resetForm(); // Reset the form
-            onClose(); // Close the modal
+            await axios.post('/api/repairs', newRepair); // Updated endpoint
+            onAddRepair(newRepair);
+            resetForm();
+            onClose();
         } catch (error) {
             console.error('Error submitting repair:', error);
         }
@@ -306,7 +324,7 @@ const ServiceFormModal = ({
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
-                                    <span className="label-text">IMEI / SN 1</span>
+                                    <span className="label-text">IMEI / SN 1 (Optional)</span>
                                 </label>
                                 <input
                                     type="text"
@@ -415,15 +433,15 @@ const ServiceFormModal = ({
                                     {underWarranty && (
                                         <>
                                             <input
-                                                type="number"
-                                                value={warrantyDuration}
-                                                onChange={(e) => {
-                                                    const value = Math.max(0, e.target.value);
-                                                    setWarrantyDuration(value);
-                                                }}
-                                                className="input input-bordered mr-2"
-                                                required
-                                            />
+                                            type="number"
+                                            value={warrantyDuration}
+                                            onChange={(e) => {
+                                                const value = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                                setWarrantyDuration(value);
+                                            }}
+                                            className="input input-bordered mr-2"
+                                            required
+                                        />
                                             <select
                                                 value={warrantyUnit}
                                                 onChange={(e) => setWarrantyUnit(e.target.value)}
@@ -495,58 +513,62 @@ const ServiceFormModal = ({
                     {/* Payment Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                         <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Sub Total</span>
-                            </label>
-                            <input
-                                type="number"
-                                value={subTotal}
-                                onChange={(e) => setSubTotal(Math.max(0, e.target.value))}
-                                className="input input-bordered"
-                                required
-                            />
-                        </div>
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Voucher</span>
-                            </label>
-                            <select
-                                value={voucher}
-                                onChange={(e) => setVoucher(e.target.value)}
-                                className="select select-bordered"
-                            >
-                                <option value="">-- Select Voucher --</option>
-                                <option value="Voucher 1">Voucher 1</option>
-                                <option value="Voucher 2">Voucher 2</option>
-                            </select>
-                        </div>
+                        <label className="label">
+                            <span className="label-text text-green-600">Sub Total</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={formatCurrency(parseFloat(subTotal.replace(/[^0-9]/g, "")) || 0, false)}
+                            onChange={handleSubTotalChange}
+                            className="input input-bordered"
+                            placeholder="Enter subtotal"
+                            required
+                        />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Down Payment</span>
-                            </label>
-                            <input
-                                type="number"
-                                value={downPayment}
-                                onChange={(e) => setDownPayment(Math.max(0, e.target.value))}
-                                className="input input-bordered"
-                            />
-                        </div>
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Total</span>
-                            </label>
-                            < input
-                                type="number"
-                                value={total}
-                                readOnly
-                                className="input input-bordered"
-                            />
-                        </div>
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text text-green-600">Voucher</span>
+                        </label>
+                        <select
+                            value={voucher}
+                            onChange={(e) => setVoucher(e.target.value)}
+                            className="select select-bordered"
+                        >
+                            <option value="">-- Select Voucher --</option>
+                            <option value="Voucher 1">Voucher 1</option>
+                            <option value="Voucher 2">Voucher 2</option>
+                        </select>
                     </div>
-                    <div className="form-control mb-3">
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text text-green-600">Down Payment</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={formatCurrency(parseFloat(downPayment.replace(/[^0-9]/g, "")) || 0, false)}
+                            onChange={handleDownPaymentChange}
+                            className="input input-bordered"
+                            placeholder="Enter down payment"
+                        />
+                    </div>
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text text-green-600">Total</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={formatCurrency(total, false)} // No decimals for total as well
+                            readOnly
+                            className="input input-bordered"
+                        />
+                    </div>
+                </div>
+                <div className="form-control mb-3">
+                    <label className="label">
                         <span className="label-text text-green-600">Payment Type</span>
+                    </label>
                         <select
                             value={paymentType}
                             onChange={(e) => setPaymentType(e.target.value)}
@@ -556,10 +578,9 @@ const ServiceFormModal = ({
                             <option value="">-- Select Payment Type --</option>
                             <option value="Cash">Cash</option>
                             <option value="Credit Card">Credit Card</option>
-                            <option value="Debit Card">Debit Card</option>
-                            <option value="Mobile Payment">Mobile Payment</option>
+                            <option value="QR code">QR code</option>
                         </select>
-                    </div>
+                </div>
 
                 {/* Completeness and Print Modal Buttons */}
                 <div className="flex justify-between mb-3 mt-6">

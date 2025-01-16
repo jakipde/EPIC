@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Repair;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -20,8 +21,8 @@ class RepairsController extends Controller
         ]);
     }
 
-    public function datamanagement() {
-
+    public function datamanagement()
+    {
         $repairs = Repair::all();
 
         return Inertia::render('Repairs/DataManagement', [
@@ -37,7 +38,7 @@ class RepairsController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'entry_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
             'cashier_id' => 'required|exists:admins,id',
@@ -51,7 +52,15 @@ class RepairsController extends Controller
             'warranty_duration' => 'nullable|integer',
             'notes' => 'nullable|string',
             'repair_type' => 'required|string|max:255',
+            'service_type' => 'nullable|string|max:255',
+            'total_price' => 'required|numeric',
+            'completeness' => 'nullable|string',
         ]);
+
+        if ($validator->fails()) {
+            Log::error('Validation errors: ', $validator->errors()->all());
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
 
         try {
             // Create the repair
@@ -84,11 +93,14 @@ class RepairsController extends Controller
             'phone_brand' => 'required|string|max:255',
             'phone_model' => 'required|string|max:255',
             'damage_description' => 'required|string',
-            'technician_id' => 'required|exists :technicians,id',
+            'technician_id' => 'required|exists:technicians,id',
             'under_warranty' => 'required|boolean',
             'warranty_duration' => 'nullable|integer',
             'notes' => 'nullable|string',
             'repair_type' => 'required|string|max:255',
+            'service_type' => 'nullable|string|max:255', // Add this line if service_type is needed
+            'total_price' => 'required|numeric', // Include total_price since it's now required
+            'completeness' => 'nullable|string', // Add completeness if required
         ]);
 
         try {

@@ -59,6 +59,7 @@ Route::prefix('/repairs')->group(function () {
     Route::get('/dashboard', [RepairsController::class, 'index'])->name('repairs.dashboard');
     Route::get('/data-management', [RepairsController::class, 'datamanagement'])->name('repairs.data-management');
     Route::get('/reports', [RepairsController::class, 'reports'])->name('repairs.reports');
+
 });
 
 // Technicians management routes

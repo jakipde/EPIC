@@ -2,13 +2,13 @@
 
 use App\Http\Controllers\Default\Api\SelectTableController;
 use App\Http\Controllers\Default\FileController;
+use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\AdminsController;
 use App\Http\Controllers\TechniciansController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductSubCategoryController;
-use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\BrandsController;
 use App\Http\Controllers\DevicesController;
 use Illuminate\Http\Request;
@@ -19,6 +19,14 @@ use Illuminate\Support\Facades\Route;
         return $request->user();
     });
 
+        // API routes for repairs
+        Route::prefix('api')->group(function () {
+            Route::post('/', [RepairsController::class, 'store'])->name('api.repairs.store');
+            Route::delete('/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete');
+            Route::get('/{id}', [RepairsController::class, 'show'])->name('api.repairs.show');
+            Route::put('/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
+        });
+
     // Customers API routes
     Route::prefix('customers')->group(function () {
         Route::get('/', [CustomersController::class, 'index']);  // Fetch all customers
@@ -26,14 +34,6 @@ use Illuminate\Support\Facades\Route;
         Route::get('/{id}', [CustomersController::class, 'show']); // Fetch a single customer by ID
         Route::put('/{id}', [CustomersController::class, 'update']); // Update a customer
         Route::delete('/{id}', [CustomersController::class, 'destroy']); // Delete a customer
-    });
-
-    // Repairs API routes
-    Route::prefix('repairs')->group(function () {
-        Route::post('/', [RepairsController::class, 'store'])->name('api.repairs.store');
-        Route::delete('/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete');
-        Route::get('/{id}', [RepairsController::class, 'show'])->name('api.repairs.show');
-        Route::put('/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
     });
 
     Route::get('/brands', [BrandsController::class, 'index']);

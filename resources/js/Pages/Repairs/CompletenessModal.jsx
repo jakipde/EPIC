@@ -31,10 +31,10 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) =
   }, [isOpen]);
 
   const handleCheckboxChange = (field) => {
-    onChange({
-      ...initialCompleteness,
-      [field]: !initialCompleteness[field], // Toggle the checkbox value
-    });
+    onChange((prevCompleteness) => ({
+      ...prevCompleteness,
+      [field]: !prevCompleteness[field], // Toggle the checkbox value
+    }));
   };
 
   return (
@@ -46,81 +46,41 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) =
         <div className="grid grid-cols-2 gap-4">
           {/* Left Column */}
           <div>
-            <div className="form-control mb-3">
-              <label className="label cursor-pointer">
-                <span className="label-text">SIM Tray</span>
-                <input
-                  type="checkbox"
-                  checked={initialCompleteness.simTray || false} // Use fallback to avoid undefined error
-                  onChange={() => handleCheckboxChange('simTray')}
-                  className="checkbox"
-                />
-              </label>
-            </div>
-
-            <div className="form-control mb-3">
-              <label className="label cursor-pointer">
-                <span className="label-text">SIM Card</span>
-                <input
-                  type="checkbox"
-                  checked={initialCompleteness.simCard || false} // Use fallback to avoid undefined error
-                  onChange={() => handleCheckboxChange('simCard')}
-                  className="checkbox"
-                />
-              </label>
-            </div>
-
-            <div className="form-control mb-3">
-              <label className="label cursor-pointer">
-                <span className="label-text">Soft Case</span>
-                <input
-                  type="checkbox"
-                  checked={initialCompleteness.softCase || false} // Use fallback to avoid undefined error
-                  onChange={() => handleCheckboxChange('softCase')}
-                  className="checkbox"
-                />
-              </label>
-            </div>
+            {['simTray', 'simCard', 'softCase'].map((item) => (
+              <div className="form-control mb-3" key={item}>
+                <label className="label cursor-pointer">
+                  <span className="label-text">{item.replace(/([A-Z])/g, ' $1')}</span>
+                  <input
+                    type="checkbox"
+                    checked={initialCompleteness[item] || false} // Use fallback to avoid undefined error
+                    onChange={() => handleCheckboxChange(item)}
+                    className="checkbox"
+                  />
+                </label>
+              </div>
+            ))}
           </div>
 
           {/* Right Column */}
           <div>
-            <div className="form-control mb-3">
-              <label className="label cursor-pointer">
-                <span className="label-text">Memory Card</span>
-                <input
-                  type="checkbox"
-                  checked={initialCompleteness.memoryCard || false} // Use fallback to avoid undefined error
-                  onChange={() => handleCheckboxChange('memoryCard')}
-                  className="checkbox"
-                />
-              </label>
-            </div>
-
-            <div className="form-control mb-3">
-              <label className="label cursor-pointer">
-                <span className="label-text">Box</span>
-                <input
-                  type="checkbox"
-                  checked={initialCompleteness.box || false} // Use fallback to avoid undefined error
-                  onChange={() => handleCheckboxChange('box')}
-                  className="checkbox"
-                />
-              </label>
-            </div>
-
-            <div className="form-control mb-3">
-              <label className="label cursor-pointer">
-                <span className="label-text">Charger</span>
-                <input
-                  type="checkbox"
-                  checked={initialCompleteness.charger || false} // Use fallback to avoid undefined error
-                  onChange={() => handleCheckboxChange('charger')}
-                  className="checkbox"
-                />
-              </label>
-            </div>
+            {['memoryCard', 'box', 'charger'].map((item) => (
+              <div className="form-control mb-3" key={item}>
+                <label className="label cursor-pointer">
+                  <span className="label-text">{item.replace(/([A-Z])/g, ' $1')}</span>
+                  <input
+                    type="checkbox"
+                    checked={initialCompleteness[item] || false} // Use fallback to avoid undefined error
+                    onChange={() => handleCheckboxChange(item)}
+                    className="checkbox"
+                  />
+                </label>
+              </div>
+            ))}
           </div>
+        </div>
+
+        <div className="modal-action">
+          <button className="btn" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
