@@ -1,5 +1,5 @@
-import signinBg from "./images/PointManagement1.jpg";
-import signupBg from "./images/PointManagement2.jpg";
+import signinBg from "./images/isometric-view-san-francisco-s-bridge.jpg";
+import signupBg from "./images/isometric-view-san-francisco-s-ferry-building.jpg";
 
 const assets = {
   images: {
