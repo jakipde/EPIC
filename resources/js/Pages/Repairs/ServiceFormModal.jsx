@@ -14,12 +14,14 @@ const ServiceFormModal = ({
     setCompletenessModalOpen,
     completeness,
 }) => {
-    // State declarations (same as before)
+    // State declarations
     const [entryDate, setEntryDate] = useState('');
     const [customerId, setCustomerId] = useState(selectedCustomerId || '');
     const [customerPhone, setCustomerPhone] = useState('');
     const [cashierId, setCashierId] = useState('');
     const [technicianId, setTechnicianId] = useState('');
+    const [users, setUsers] = useState([]);
+    const [error, setError] = useState(null);
     const [selectedBrand, setSelectedBrand] = useState(null);
     const [selectedDevice, setSelectedDevice] = useState(null);
     const [deviceImage, setDeviceImage] = useState('');
@@ -30,7 +32,7 @@ const ServiceFormModal = ({
     const [imeiSn2, setImeiSn2] = useState('');
     const [damageDescription, setDamageDescription] = useState('');
     const [underWarranty, setUnderWarranty] = useState(false);
-    const [warrantyDuration, setWarrantyDuration] = useState(0);
+    const [warrantyDuration, setWarrantyDuration] = useState('');
     const [warrantyUnit, setWarrantyUnit] = useState('days'); // Default to 'days'
     const [notes, setNotes] = useState('');
     const [repairType, setRepairType] = useState('');
@@ -40,7 +42,7 @@ const ServiceFormModal = ({
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [devices, setDevices] = useState([]); // Changed from models to devices
+    const [devices, setDevices] = useState([]);
 
     // Pricing states
     const [subTotal, setSubTotal] = useState('');
@@ -81,9 +83,9 @@ const ServiceFormModal = ({
 
     const handleBrandChange = (selectedOption) => {
         setSelectedBrand(selectedOption);
-        setSelectedDevice(null); // Reset the selected device to the placeholder (empty)
-        setDeviceImage(''); // Clear the device image
-        setDeviceDescription(''); // Clear the device description
+        setSelectedDevice(null);
+        setDeviceImage('');
+        setDeviceDescription('');
     };
 
     const handleDeviceChange = (selectedOption) => {
@@ -94,6 +96,20 @@ const ServiceFormModal = ({
         } else {
             setDeviceImage('');
             setDeviceDescription('');
+        }
+    };
+
+    const handleImeiSn1Change = (e) => {
+        const value = e.target.value.replace(/[^0-9]/g, ''); // Allow only digits
+        if (value.length <= 15) {
+            setImeiSn1(value);
+        }
+    };
+
+    const handleImeiSn2Change = (e) => {
+        const value = e.target.value.replace(/[^0-9]/g, ''); // Allow only digits
+        if (value.length <= 15) {
+            setImeiSn2(value);
         }
     };
 
@@ -110,12 +126,12 @@ const ServiceFormModal = ({
     }, [subTotal, downPayment]);
 
     const handleSubTotalChange = (e) => {
-        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimals
+        const value = e.target.value.replace(/[^0-9.]/g, '');
         setSubTotal(value);
     };
 
     const handleDownPaymentChange = (e) => {
-        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimals
+        const value = e.target.value.replace(/[^0-9.]/g, '');
         setDownPayment(value);
     };
 
@@ -130,45 +146,32 @@ const ServiceFormModal = ({
     useEffect(() => {
         if (isOpen) {
             fetchCustomers();
-            fetchCashiers();
-            fetchTechnicians();
-            setCustomerId(selectedCustomerId || ''); // Set customer ID when modal opens
+            fetchUsersByRoleName('Cashier');
+            fetchUsersByRoleName('Technician');
+            setCustomerId(selectedCustomerId || '');
         }
     }, [isOpen, selectedCustomerId]);
 
     useEffect(() => {
+        console.log('Cashiers:', cashiers);
+        console.log('Technicians:', technicians);
+    }, [cashiers, technicians]);
+
+    useEffect(() => {
         const selectedCustomer = customers.find(customer => customer.id === customerId);
         if (selectedCustomer) {
-            setCustomerPhone(selectedCustomer.phone); // Update parent state with selected customer's phone
+            setCustomerPhone(selectedCustomer.phone);
         } else {
-            setCustomerPhone(''); // Reset if no customer is selected
+            setCustomerPhone('');
         }
-    }, [customerId, customers, setCustomerPhone]); // Include setCustomerPhone in dependencies
+    }, [customerId, customers]);
 
     const fetchCustomers = async () => {
         try {
             const response = await axios.get('/api/customers');
-            setCustomers(response.data); // Update customer list
+            setCustomers(response.data);
         } catch (error) {
             console.error('Error fetching customers:', error);
-        }
-    };
-
-    const fetchCashiers = async () => {
-        try {
-            const response = await axios.get('/api/cashiers');
-            setCashiers(response.data);
-        } catch (error) {
-            console.error('Error fetching cashiers:', error);
-        }
-    };
-
-    const fetchTechnicians = async () => {
-        try {
-            const response = await axios.get('/api/technicians');
-            setTechnicians(response.data);
-        } catch (error) {
-            console.error('Error fetching technicians:', error);
         }
     };
 
@@ -216,7 +219,7 @@ const ServiceFormModal = ({
         };
 
         try {
-            await axios.post('/api/repairs', newRepair); // Updated endpoint
+            await axios.post('/api/repairs', newRepair);
             onAddRepair(newRepair);
             resetForm();
             onClose();
@@ -227,12 +230,10 @@ const ServiceFormModal = ({
 
     const resetForm = () => {
         setEntryDate('');
-        setCustomerId(selectedCustomerId || ''); // Keep the selected customer
+        setCustomerId(selectedCustomerId || '');
         setCustomerPhone('');
-        setCashierId('');
-        setTechnicianId('');
         setPhoneBrand('');
-        setPhoneDevice(''); // Reset phoneDevice
+        setPhoneDevice('');
         setImeiSn1('');
         setImeiSn2('');
         setDamageDescription('');
@@ -252,15 +253,22 @@ const ServiceFormModal = ({
         const selectedId = e.target.value;
         setCustomerId(selectedId);
         const selectedCustomer = customers.find(customer => customer.id === selectedId);
-        setCustomerPhone(selectedCustomer ? selectedCustomer.phone : ''); // Set phone number based on selected customer
+        setCustomerPhone(selectedCustomer ? selectedCustomer.phone : '');
     };
 
-    const handleCashierChange = (e) => {
-        setCashierId(e.target.value);
-    };
-
-    const handleTechnicianChange = (e) => {
-        setTechnicianId(e.target.value);
+    const fetchUsersByRoleName = async (roleName) => {
+        try {
+            const response = await axios.get(`/api/users?role_name=${roleName}`);
+            console.log(`Users response data:`, response.data);
+            if (roleName === 'Cashier') {
+                setCashiers(response.data); // Set the cashiers state
+            } else if (roleName === 'Technician') {
+                setTechnicians(response.data); // Set the technicians state
+            }
+        } catch (error) {
+            console.error(`Error fetching users:`, error.response ? error.response.data : error.message);
+            setError(error.message);
+        }
     };
 
     if (!isOpen) return null;
@@ -329,7 +337,7 @@ const ServiceFormModal = ({
                                 <input
                                     type="text"
                                     value={imeiSn1}
-                                    onChange={(e) => setImeiSn1(e.target.value)}
+                                    onChange={handleImeiSn1Change} // Updated handler
                                     placeholder="ex: 851591001xxx"
                                     className="input input-bordered"
                                     required
@@ -342,7 +350,7 @@ const ServiceFormModal = ({
                                 <input
                                     type="text"
                                     value={imeiSn2}
-                                    onChange={(e) => setImeiSn2(e.target.value)}
+                                    onChange={handleImeiSn2Change} // Updated handler
                                     placeholder="ex: 8515912328xxx"
                                     className="input input-bordered"
                                 />
@@ -368,55 +376,41 @@ const ServiceFormModal = ({
                                     <span className="label-text">Customer</span>
                                 </label>
                                 <select onChange={handleCustomerChange} value={customerId} className="select select-bordered">
-                                    <option value="">Select a customer</option>
+                                    <option value="">Select a customer - {customerPhone}</option>
                                     {customers.map(customer => (
-                                        <option key={customer.id} value={customer.id}>{customer.name}</option>
+                                    <option key={customer.id} value={customer.id}>
+                                        {`${customer.name} - ${customer.phone}`} {/* Updated format */}
+                                    </option>
                                     ))}
                                 </select>
                             </div>
-                            {customerId && (
-                                <div className="mb-3">
-                                    <span className="font-semibold">Customer Phone: </span>
-                                    <span>{customerPhone}</span>
-                                </div>
-                            )}
                         <div className="flex justify-between mb-3">
                             <div className="form-control w-full mr-2">
                                 <label className="label">
                                     <span className="label-text">Cashier</span>
                                 </label>
-                                <select
-                                    value={cashierId}
-                                    onChange={handleCashierChange}
-                                    className="select select-bordered"
-                                    required
-                                >
-                                    <option value="">-- Select Cashier --</option>
-                                    {cashiers.map(cashier => (
-                                        <option key={cashier.id} value={cashier.id}>
-                                            {cashier.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={cashiers.map(cashier => ({
+                                        value: cashier.id,
+                                        label: cashier.name
+                                    }))}
+                                    onChange={(option) => setCashierId(option.value)}
+                                    placeholder="Select Cashier"
+                                />
                             </div>
 
                             <div className="form-control w-full ml-2">
                                 <label className="label">
                                     <span className="label-text">Technician</span>
                                 </label>
-                                <select
-                                    value={technicianId}
-                                    onChange={handleTechnicianChange}
-                                    className="select select-bordered"
-                                    required
-                                >
-                                    <option value="">-- Select Technician --</option>
-                                    {technicians.map(technician => (
-                                        <option key={technician.id} value={technician.id}>
-                                            {technician.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Select
+                                    options={technicians.map(technician => ({
+                                        value: technician.id,
+                                        label: technician.name
+                                    }))}
+                                    onChange={(option) => setTechnicianId(option.value)}
+                                    placeholder="Select Technician"
+                                />
                             </div>
                         </div>
                             <div className="form-control mb-3 mt-8">
@@ -433,15 +427,15 @@ const ServiceFormModal = ({
                                     {underWarranty && (
                                         <>
                                             <input
-                                            type="number"
-                                            value={warrantyDuration}
-                                            onChange={(e) => {
-                                                const value = Math.max(0, parseInt(e.target.value, 10) || 0);
-                                                setWarrantyDuration(value);
-                                            }}
-                                            className="input input-bordered mr-2"
-                                            required
-                                        />
+                                                type="number"
+                                                value={warrantyDuration} // Will be empty when not set
+                                                onChange={(e) => {
+                                                    const value = e.target.value === '' ? '' : Math.max(0, Math.min(99, parseInt(e.target.value, 10)));
+                                                    setWarrantyDuration(value); // Allow empty or set to a number
+                                                }}
+                                                className="input input-bordered mr-2"
+                                                max="99" // Optional: Limits input to 99 in the UI
+                                            />
                                             <select
                                                 value={warrantyUnit}
                                                 onChange={(e) => setWarrantyUnit(e.target.value)}
@@ -506,6 +500,20 @@ const ServiceFormModal = ({
                             </div>
                         </div>
                     </div>
+
+                <div className="flex justify-center mb-2 mt-2 space-x-4">
+                    <div className="form-control">
+                        <button
+                            type="button"
+                            className="btn btn-secondary w-80"
+                            onClick={() => {
+                                setCompletenessModalOpen(true);
+                            }}
+                        >
+                            Completeness
+                        </button>
+                    </div>
+                </div>
 
                     {/* Spacing for separation */}
                     <div className="my-4 border-t border-gray-200"></div>
@@ -582,25 +590,13 @@ const ServiceFormModal = ({
                         </select>
                 </div>
 
-                {/* Completeness and Print Modal Buttons */}
-                <div className="flex justify-between mb-3 mt-6">
-                    <div className="form-control w-full mr-2">
+                <div className="flex justify-center mb-3 mt-6 space-x-4">
+                    <div className="form-control">
                         <button
                             type="button"
-                            className="btn btn-secondary w-full"
+                            className="btn btn-secondary w-80"
                             onClick={() => {
-                                setCompletenessModalOpen(true); // Open completeness modal
-                            }}
-                        >
-                            Devices Completeness
-                        </button>
-                    </div>
-                    <div className="form-control w-full ml-2">
-                        <button
-                            type="button"
-                            className="btn btn-secondary w-full"
-                            onClick={() => {
-                                setPrintModalOpen(true); // Open print modal
+                                setPrintModalOpen(true);
                             }}
                         >
                             Print

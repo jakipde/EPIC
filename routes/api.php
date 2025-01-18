@@ -3,6 +3,8 @@
 use App\Http\Controllers\Default\Api\SelectTableController;
 use App\Http\Controllers\Default\FileController;
 use App\Http\Middleware\JwtCustomApiVerification;
+use App\Models\Default\User;
+use App\Models\Default\Role;
 use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\AdminsController;
 use App\Http\Controllers\TechniciansController;
@@ -17,6 +19,33 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::get('/users', function (Request $request) {
+    $roleName = $request->query('role_name'); // Fetch role_name from query parameters
+
+    // Validate role_name is provided
+    if (!$roleName) {
+        return response()->json(['error' => 'role_name is required'], 400);
+    }
+
+    // Validating the role name
+    $validRoles = ['Technician', 'Cashier'];
+    if (!in_array($roleName, $validRoles)) {
+        return response()->json(['error' => 'Invalid role name'], 400);
+    }
+
+    // Fetch the role by name
+    $role = Role::where('name', $roleName)->first();
+
+    if (!$role) {
+        return response()->json(['error' => 'Role not found'], 404);
+    }
+
+    // Fetch users based on role_id (which is a ULID)
+    $users = User::where('role_id', $role->id)->get();
+
+    return response()->json($users); // Return users as JSON
 });
 
 Route::middleware([JwtCustomApiVerification::class])
@@ -45,10 +74,6 @@ Route::middleware([JwtCustomApiVerification::class])
 
     Route::get('/brands', [BrandsController::class, 'index']);
     Route::get('/devices', [DevicesController::class, 'index']);
-
-    // Cashiers and Technicians API routes
-    Route::get('/cashiers', [AdminsController::class, 'index']);
-    Route::get('/technicians', [TechniciansController::class, 'index']);
 
     // Suppliers API routes
     Route::prefix('suppliers')->group(function () {

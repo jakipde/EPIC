@@ -62,12 +62,6 @@ Route::prefix('/repairs')->group(function () {
 
 });
 
-// Technicians management routes
-Route::prefix('/technicians')->group(function () {
-    Route::get('/', [TechniciansController::class, 'index'])->name('api.technicians.index');
-    Route::post('/', [TechniciansController::class, 'store'])->name('technicians.store');
-});
-
 // Devices management routes
 Route::resource('devices', DevicesController::class);
 Route::get('/devices/dashboard', [DevicesController::class, 'dashboard'])->name('devices.dashboard');
