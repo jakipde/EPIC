@@ -12,15 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->ulid('id')->primary(); // Ensure this is set to ulid
-            $table->string('identity_number')->nullable();  // Identity number
+            $table->ulid('id')->primary();
             $table->string('name');
-            $table->string('phone_number')->nullable();    // Phone number
-            $table->string('photo')->nullable();           // Employee photo (if needed)
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'technician', 'guest'])->default('guest'); // Role of the user
+            $table->ulid('role_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->ulid('created_by')->nullable();
@@ -50,6 +47,16 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('roles', function (Blueprint $table) {
+            $table->ulid('id')->primary();
+            $table->string('name');
+            $table->timestamps();
+            $table->softDeletes();
+            $table->ulid('created_by')->nullable();
+            $table->ulid('updated_by')->nullable();
+            $table->ulid('deleted_by')->nullable();
+        });
+
         Schema::create('role_permissions', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->ulid('role_id');
@@ -68,6 +75,7 @@ return new class extends Migration
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('permissions');
+        Schema::dropIfExists('roles');
         Schema::dropIfExists('role_permissions');
     }
 };

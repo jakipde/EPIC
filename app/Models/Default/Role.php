@@ -2,14 +2,14 @@
 
 namespace App\Models\Default;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Role extends Model
 {
     const GUEST = 'guest';
+
+    public $cascadeDeletes = ['rolePermissions', 'users'];
 
     protected $fillable = [
         'name',

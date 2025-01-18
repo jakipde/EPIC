@@ -1,21 +1,15 @@
-// app.jsx
-import React from 'react';
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
 import './bootstrap';
 import '../css/app.css';
 
-import { CssBaseline } from '@mui/material';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import ErrorBaundry from './Components/ErrorBaundry';
 import { BrowserRouter as Router } from 'react-router-dom'; // Import Router
+import ErrorBoundary from './Components/ErrorBaundry'
 
 const appName =
-    window.document.getElementsByTagName('title')[0]?.innerText || 'Point Management';
+    window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -27,10 +21,9 @@ createInertiaApp({
     setup({ el, App, props }) {
         createRoot(el).render(
             <Router> {/* Wrap App in Router */}
-                <ErrorBaundry>
-                    <CssBaseline />
+                <ErrorBoundary>
                     <App {...props} />
-                </ErrorBaundry>
+                </ErrorBoundary>
             </Router>
         );
     },

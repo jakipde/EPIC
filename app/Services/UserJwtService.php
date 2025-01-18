@@ -8,28 +8,29 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Log;
 
 class UserJwtService
 {
     const ALGO = 'HS256';
+
     const EXPIRED = 120; // minutes
+
     const KEYPREFIX = 'ABCSquad_';
 
-    // Generate token on login
+    // generate token in login
     public static function generateJwtToken()
     {
-        $created_at = now()->format('Y_m_d_H_i_s');
-        Session::put('user_login_at', $created_at);
+        Session::put('user_login_at', $created_at = now()->format('Y_m_d_H_i_s'));
 
         $key = self::KEYPREFIX . auth()->id() . $created_at;
+
         $value = JWT::encode(
             [
                 'user_id' => auth()->id(),
                 'created_at' => $created_at,
                 'exp' => now()->addMinutes(self::EXPIRED)->timestamp,
             ],
-            config('app.key'),
+            config('app.key', 'jaki'),
             self::ALGO
         );
 
@@ -38,24 +39,24 @@ class UserJwtService
         return $value;
     }
 
-    // Validate token in API middleware
+    // validate token in api middleware
     public static function validateToken($token)
     {
         $token = str_replace(self::KEYPREFIX, '', $token);
 
         try {
-            $payload = JWT::decode($token, new Key(config('app.key'), self::ALGO));
+            $payload = JWT::decode($token, new Key(config('app.key', 'jaki'), self::ALGO));
+
+            // pretend act as user
             auth()->loginUsingId($payload->user_id);
         } catch (ExpiredException $e) {
-            Log::warning('Expired Token', ['token' => $token]);
-            abort(403, 'Expired Token, please relogin');
+            abort('403', 'Expired Token please relogin');
         } catch (Exception $e) {
-            Log::error('Invalid Token', ['error' => $e->getMessage()]);
-            abort(403, 'Invalid token');
+            abort('403', 'not valid token');
         }
     }
 
-    // Retrieve the active token
+    // only call from inertia middleware that accessable to session
     public static function getActiveToken()
     {
         $login_at = Session::get('user_login_at');
@@ -63,8 +64,8 @@ class UserJwtService
 
         $existToken = Cache::get($key, '');
 
-        // Renew token if session is valid but cache is expired
-        if (empty($existToken) && !empty($login_at)) {
+        // please renew if session is valid but cache is expired
+        if ($existToken == '' && $login_at != '') {
             return self::generateJwtToken();
         }
 

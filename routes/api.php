@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Default\Api\SelectTableController;
 use App\Http\Controllers\Default\FileController;
+use App\Http\Middleware\JwtCustomApiVerification;
 use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\AdminsController;
 use App\Http\Controllers\TechniciansController;
@@ -14,9 +15,15 @@ use App\Http\Controllers\DevicesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-    // API routes
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::middleware([JwtCustomApiVerification::class])
+    ->prefix('_default')
+    ->group(function () {
+        Route::get('/select/{table}', SelectTableController::class)->name('api.select.table');
+        Route::post('files', [FileController::class, 'store'])->name('api.file.store');
     });
 
         // API routes for repairs
@@ -42,12 +49,6 @@ use Illuminate\Support\Facades\Route;
     // Cashiers and Technicians API routes
     Route::get('/cashiers', [AdminsController::class, 'index']);
     Route::get('/technicians', [TechniciansController::class, 'index']);
-
-    // Default API routes with JWT verification
-    Route::middleware(['JwtCustomApiVerification'])->prefix('_default')->group(function () {
-        Route::get('/select/{table}', SelectTableController::class)->name('api.select.table');
-        Route::post('files', [FileController::class, 'store'])->name('api.file.store');
-    });
 
     // Suppliers API routes
     Route::prefix('suppliers')->group(function () {

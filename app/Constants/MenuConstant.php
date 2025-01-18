@@ -173,7 +173,7 @@ class MenuConstant
         }
 
         if (Route::has('setting.index')) {
-            $menu[] = [
+            $menu[] =             [
                 'name' => 'Setting',
                 'show' => true,
                 'icon' => 'HiCog',
