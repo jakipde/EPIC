@@ -15,10 +15,8 @@ class RepairsController extends Controller
         // Fetch repairs data with pagination
         $repairs = Repair::paginate(10); // Adjust the number as needed
 
-        // Render the dashboard view using Inertia
-        return Inertia::render('Repairs/Dashboard', [
-            'repairs' => $repairs,
-        ]);
+        // Return the repairs as JSON
+        return response()->json($repairs);
     }
 
     public function datamanagement()
@@ -76,12 +74,14 @@ class RepairsController extends Controller
     public function show($id)
     {
         // Fetch the repair record by ID
-        $repair = Repair::findOrFail($id);
+        $repair = Repair::find($id); // Use find() for debugging
 
-        // Return the Inertia response with the repair data
-        return Inertia::render('Repairs/Show', [
-            'repair' => $repair,
-        ]);
+        if (!$repair) {
+            return response()->json(['error' => 'Repair not found'], 404);
+        }
+
+        // Return the repair data as JSON
+        return response()->json($repair);
     }
 
     public function update(Request $request, $id)

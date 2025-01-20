@@ -32,7 +32,7 @@ return new class extends Migration
             $table->date('date')->nullable();  // Date of the transaction or part addition
             $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('cascade');  // Foreign key to the customer who bought the part (nullable)
             $table->foreignId('payment_id')->nullable()->constrained('payments')->onDelete('cascade'); // Foreign key to payments table (nullable)
-            $table->foreignId('admin_id')->constrained('admins')->onDelete('cascade');  // Foreign key to employees table
+//            $table->foreignId('admin_id')->constrained('admins')->onDelete('cascade');  // Foreign key to employees table
             $table->decimal('profit', 10, 2)->default(0);  // Profit made from selling this part
             $table->timestamps();  // created_at and updated_at timestamps
         });

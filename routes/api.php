@@ -55,13 +55,13 @@ Route::middleware([JwtCustomApiVerification::class])
         Route::post('files', [FileController::class, 'store'])->name('api.file.store');
     });
 
-        // API routes for repairs
-        Route::prefix('api')->group(function () {
-            Route::post('/', [RepairsController::class, 'store'])->name('api.repairs.store');
-            Route::delete('/{id}', [RepairsController::class, 'destroy'])->name('api.repairs.delete');
-            Route::get('/{id}', [RepairsController::class, 'show'])->name('api.repairs.show');
-            Route::put('/{id}', [RepairsController::class, 'update'])->name('api.repairs.update');
-        });
+    Route::prefix('repairs')->group(function () {
+        Route::post('/', [RepairsController::class, 'store'])->name('repairs.store');
+        Route::get('/', [RepairsController::class, 'index'])->name('repairs.index');
+        Route::get('/{id}', [RepairsController::class, 'show'])->name('repairs.show');
+        Route::put('/{id}', [RepairsController::class, 'update'])->name('repairs.update');
+        Route::delete('/{id}', [RepairsController::class, 'destroy'])->name('repairs.delete');
+    });
 
     // Customers API routes
     Route::prefix('customers')->group(function () {

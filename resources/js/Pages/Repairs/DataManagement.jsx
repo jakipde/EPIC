@@ -15,7 +15,6 @@ const DataManagement = () => {
     const [repairs, setRepairs] = useState([]); // Initialize with an empty array
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false); // State for ServiceFormModal
 
-    // Fetch repairs data from the API
     useEffect(() => {
         const fetchRepairs = async () => {
             try {
@@ -24,9 +23,17 @@ const DataManagement = () => {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                setRepairs(data); // Assuming the API returns an array of repairs
+                console.log('Fetched repairs data:', data); // Log the fetched data
+                // Check if data.data is an array
+                if (Array.isArray(data.data)) {
+                    setRepairs(data.data); // Set repairs from the data field
+                } else {
+                    console.error('Expected an array but got:', data.data);
+                    setRepairs([]); // Reset to an empty array if the data is not as expected
+                }
             } catch (error) {
                 console.error('Error fetching repairs:', error);
+                setRepairs([]); // Reset to an empty array on error
             }
         };
 
@@ -39,10 +46,15 @@ const DataManagement = () => {
                               repair.damage_description.toLowerCase().includes(search.toLowerCase());
 
         const matchesDateRange = (!startDate || new Date(repair.entry_date) >= new Date(startDate)) &&
-                                  (!endDate || new Date(repair.entry_date ) <= new Date(endDate));
+                                  (!endDate || new Date(repair.entry_date) <= new Date(endDate));
 
         return matchesSearch && matchesDateRange;
     });
+
+    // Calculate the current page data for pagination
+    const indexOfLastRepair = currentPage * itemsPerPage;
+    const indexOfFirstRepair = indexOfLastRepair - itemsPerPage;
+    const currentRepairs = filteredRepairs.slice(indexOfFirstRepair, indexOfLastRepair);
 
     return (
         <AuthenticatedLayout page="Data Management">
@@ -68,47 +80,32 @@ const DataManagement = () => {
                         onChange={(e) => setSearch(e.target.value)}
                         value={search} placeholder="Search repairs..."
                     />
-                    {/* Use the existing "Add Data" button to open the ServiceFormModal */}
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
 
                 {/* Data Table */}
                 <DataTable
-                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status']}
-                    data={filteredRepairs.map((repair) => ({
+                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Warranty Unit', 'Repair Type', 'Service Type', 'Status']}
+                    data={currentRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
                         customer: repair.customer_id,
                         phone_brand: repair.phone_brand,
                         phone_model: repair.phone_model,
                         damage: repair.damage_description,
-                        description: repair.notes, // Assuming you want to show notes here
-                        technician: repair.technician_id,
+                        description: repair.notes, // Assuming you want to include notes as the description
+                        technician: repair.technician_name,
                         under_warranty: repair.under_warranty ? 'Yes' : 'No',
-                        warranty_duration: repair.warranty_duration,
+                        warranty_duration: repair.warranty_duration, // Assuming this is the duration value
+                        warranty_unit: repair.warranty_unit, // New column for warranty unit
                         repair_type: repair.repair_type,
-                        status: repair.repair_status, // Add the status field here
+                        service_type: repair.service_type, // New column for service type
+                        status: repair.repair_status,
                     }))}
                 />
 
-                {/* Pagination */}
-                <div className="mt-4">
-                    {Array(Math.ceil(filteredRepairs.length / itemsPerPage)).fill(null).map((_, index) => (
-                        <button
-                            key={index}
-                            className={`btn btn-sm ${currentPage === index + 1 ? 'btn-primary' : ''}`}
-                            onClick={() => setCurrentPage(index + 1)}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Modal Parent */}
-                <ModalParent
-                    isServiceFormModalOpen={isServiceFormModalOpen}
-                    setServiceFormModalOpen={setServiceFormModalOpen}
-                />
+                {/* Modal for adding new service */}
+                {isServiceFormModalOpen && <ModalParent onClose={() => setServiceFormModalOpen(false)} />}
             </div>
         </AuthenticatedLayout>
     );
