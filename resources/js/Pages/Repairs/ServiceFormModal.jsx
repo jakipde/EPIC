@@ -199,7 +199,6 @@ const ServiceFormModal = ({
         const newRepair = {
             entry_date: entryDate,
             customer_id: customerId,
-            customer_phone: customerPhone,
             cashier_id: cashierId,
             technician_id: technicianId,
             phone_brand: phoneBrand,
@@ -209,20 +208,21 @@ const ServiceFormModal = ({
             damage_description: damageDescription,
             under_warranty: underWarranty,
             warranty_duration: warrantyDuration,
+            warranty_unit: warrantyUnit,
             notes: notes,
             repair_type: repairType,
             service_type: serviceType,
-            voucher: voucher,
-            completeness: completeness,
-            total_price: total,
-            payment_type: paymentType,
+            total_price: 0, // Set this to a default value or calculate it
+            completeness: '', // Add if needed
         };
 
         try {
-            await axios.post('/api/repairs', newRepair);
-            onAddRepair(newRepair);
-            resetForm();
-            onClose();
+            const response = await axios.post('/api/repairs', newRepair);
+            if (response.data.success) {
+                onAddRepair(response.data.repair); // Call the function to add the new repair to the table
+                resetForm();
+                onClose();
+            }
         } catch (error) {
             console.error('Error submitting repair:', error);
         }

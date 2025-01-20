@@ -24,11 +24,11 @@ const DataManagement = () => {
                 }
                 const data = await response.json();
                 console.log('Fetched repairs data:', data); // Log the fetched data
-                // Check if data.data is an array
-                if (Array.isArray(data.data)) {
-                    setRepairs(data.data); // Set repairs from the data field
+                // Check if data is an array
+                if (Array.isArray(data)) {
+                    setRepairs(data); // Set repairs if it's an array
                 } else {
-                    console.error('Expected an array but got:', data.data);
+                    console.error('Expected an array but got:', data);
                     setRepairs([]); // Reset to an empty array if the data is not as expected
                 }
             } catch (error) {
@@ -82,10 +82,9 @@ const DataManagement = () => {
                     />
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
-
-                {/* Data Table */}
+                 {/* Data Table */}
                 <DataTable
-                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Warranty Unit', 'Repair Type', 'Service Type', 'Status']}
+                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status']}
                     data={currentRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
@@ -93,19 +92,33 @@ const DataManagement = () => {
                         phone_brand: repair.phone_brand,
                         phone_model: repair.phone_model,
                         damage: repair.damage_description,
-                        description: repair.notes, // Assuming you want to include notes as the description
-                        technician: repair.technician_name,
+                        description: repair.notes, // Assuming you want to show notes here
+                        technician: repair.technician_id,
                         under_warranty: repair.under_warranty ? 'Yes' : 'No',
-                        warranty_duration: repair.warranty_duration, // Assuming this is the duration value
-                        warranty_unit: repair.warranty_unit, // New column for warranty unit
+                        warranty_duration: repair.warranty_duration,
                         repair_type: repair.repair_type,
-                        service_type: repair.service_type, // New column for service type
-                        status: repair.repair_status,
+                        status: repair.repair_status, // Add the status field here
                     }))}
                 />
 
-                {/* Modal for adding new service */}
-                {isServiceFormModalOpen && <ModalParent onClose={() => setServiceFormModalOpen(false)} />}
+                {/* Pagination */}
+                <div className="mt-4">
+                    {Array(Math.ceil(filteredRepairs.length / itemsPerPage)).fill(null).map((_, index) => (
+                        <button
+                            key={index}
+                            className={`btn btn-sm ${currentPage === index + 1 ? 'btn-primary' : ''}`}
+                            onClick={() => setCurrentPage(index + 1)}
+                        >
+                            {index + 1}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Modal Parent */}
+                <ModalParent
+                    isServiceFormModalOpen={isServiceFormModalOpen}
+                    setServiceFormModalOpen={setServiceFormModalOpen}
+                />
             </div>
         </AuthenticatedLayout>
     );
