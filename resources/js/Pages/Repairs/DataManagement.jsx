@@ -15,28 +15,29 @@ const DataManagement = () => {
     const [repairs, setRepairs] = useState([]); // Initialize with an empty array
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false); // State for ServiceFormModal
 
-    useEffect(() => {
-        const fetchRepairs = async () => {
-            try {
-                const response = await fetch('/api/repairs'); // Adjust the URL to your API endpoint
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                console.log('Fetched repairs data:', data); // Log the fetched data
-                // Check if data is an array
-                if (Array.isArray(data)) {
-                    setRepairs(data); // Set repairs if it's an array
-                } else {
-                    console.error('Expected an array but got:', data);
-                    setRepairs([]); // Reset to an empty array if the data is not as expected
-                }
-            } catch (error) {
-                console.error('Error fetching repairs:', error);
-                setRepairs([]); // Reset to an empty array on error
+    const fetchRepairs = async () => {
+        try {
+            const response = await fetch('/api/repairs'); // Adjust the URL to your API endpoint
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        };
+            const result = await response.json();
+            console.log('Fetched repairs data:', result); // Log the fetched data
 
+            // Access the data property
+            if (Array.isArray(result.data)) {
+                setRepairs(result.data); // Set repairs if it's an array
+            } else {
+                console.error('Expected an array but got:', result.data);
+                setRepairs([]); // Reset to an empty array if the data is not as expected
+            }
+        } catch (error) {
+            console.error('Error fetching repairs:', error);
+            setRepairs([]); // Reset to an empty array on error
+        }
+    };
+
+    useEffect(() => {
         fetchRepairs();
     }, []);
 
@@ -82,9 +83,10 @@ const DataManagement = () => {
                     />
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
-                 {/* Data Table */}
+
+                {/* Data Table */}
                 <DataTable
-                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status']}
+                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status', 'Sub Total']}
                     data={currentRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
@@ -98,6 +100,7 @@ const DataManagement = () => {
                         warranty_duration: repair.warranty_duration,
                         repair_type: repair.repair_type,
                         status: repair.repair_status, // Add the status field here
+                        sub_total: repair.sub_total, // Add sub_total field here
                     }))}
                 />
 
