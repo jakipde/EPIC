@@ -4,45 +4,44 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class Payments extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->date('date');  // Payment date
-            $table->foreignId('repair_id')  // Foreign key to the repairs table
-                ->constrained('repairs')
+            $table->date('date');
+            $table->unsignedBigInteger('repair_id'); // Explicitly define the type
+            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->decimal('sub_total', 10, 2);
+            $table->decimal('voucher', 10, 2)->nullable();
+            $table->decimal('total', 10, 2);
+            $table->decimal('down_payment', 10, 2)->nullable();
+            $table->enum('payment_status', ['pending', 'paid', 'partially_paid'])
+                ->default('pending');
+            $table->enum('payment_method', ['cash', 'card', 'bank_transfer', 'other'])
+                ->nullable();
+            $table->unsignedBigInteger('cashier_id')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+
+            // Foreign key definitions
+            $table->foreign('repair_id')
+                ->references('id')->on('repairs')
                 ->onDelete('cascade');
-            $table->foreignId('invoice_id')  // Foreign key to the invoices table
-                ->constrained('invoices')
+
+            $table->foreign('invoice_id')
+                ->references('id')->on('invoices')
                 ->onDelete('cascade');
-            $table->decimal('sub_total', 10, 2);  // Sub total for the payment
-            $table->decimal('voucher', 10, 2)->nullable();  // Optional voucher amount (discount)
-            $table->decimal('total', 10, 2);  // Total amount to be paid
-            $table->decimal('down_payment', 10, 2)->nullable();  // Down payment amount
-            $table->enum('payment_status', ['pending', 'paid', 'partially_paid']);  // Status of the payment
-            $table->enum('payment_method', ['cash', 'card', 'bank_transfer', 'other'])->nullable();  // Method of payment (optional)
-//            $table->foreignId('cashier_id')  // Foreign key to the employees table (cashier/admin who processed the payment)
-//                ->constrained('admins')
-//                ->onDelete('cascade');
-            $table->text('notes')->nullable();  // Optional notes for the payment (e.g., payment remarks)
-            $table->timestamps();  // Created at and updated at timestamps
+
+            $table->foreign('cashier_id')
+                ->references('id')->on('users')
+                ->onDelete('set null');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('payments');
     }
-};
+}

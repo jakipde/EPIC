@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "769ce773d233b70dface26a737a56d97",
+    "content-hash": "12c8545eae12255ea02e51ff1057f5cd",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -1381,16 +1381,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.38.2",
+            "version": "v11.39.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "9d290aa90fcad44048bedca5219d2b872e98772a"
+                "reference": "996c96955f78e8a2b26a24c490a1721cfb14574f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/9d290aa90fcad44048bedca5219d2b872e98772a",
-                "reference": "9d290aa90fcad44048bedca5219d2b872e98772a",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/996c96955f78e8a2b26a24c490a1721cfb14574f",
+                "reference": "996c96955f78e8a2b26a24c490a1721cfb14574f",
                 "shasum": ""
             },
             "require": {
@@ -1591,7 +1591,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-01-15T00:06:46+00:00"
+            "time": "2025-01-21T15:02:43+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -2459,6 +2459,62 @@
                 "source": "https://github.com/Masterminds/html5-php/tree/2.9.0"
             },
             "time": "2024-03-31T07:05:07+00:00"
+        },
+        {
+            "name": "midtrans/midtrans-php",
+            "version": "2.6.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Midtrans/midtrans-php.git",
+                "reference": "737ddabeb0c4d40316c4db132f9ef5c8f7a1b3a6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Midtrans/midtrans-php/zipball/737ddabeb0c4d40316c4db132f9ef5c8f7a1b3a6",
+                "reference": "737ddabeb0c4d40316c4db132f9ef5c8f7a1b3a6",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-openssl": "*",
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "5.7.*",
+                "psy/psysh": "0.4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Midtrans\\": "Midtrans/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andri Setiawan",
+                    "email": "andri.setiawan@veritrans.co.id"
+                },
+                {
+                    "name": "Alvin Litani",
+                    "email": "alvin.litani@veritrans.co.id"
+                },
+                {
+                    "name": "Ismail Faruqi",
+                    "email": "ismail.faruqi@veritrans.co.id"
+                }
+            ],
+            "description": "PHP Wrapper for Midtrans Payment API.",
+            "homepage": "https://midtrans.com",
+            "support": {
+                "issues": "https://github.com/Midtrans/midtrans-php/issues",
+                "source": "https://github.com/Midtrans/midtrans-php/tree/v2.6.1"
+            },
+            "time": "2024-10-16T08:55:12+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -7442,16 +7498,16 @@
         },
         {
             "name": "laravel/breeze",
-            "version": "v2.3.1",
+            "version": "v2.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/breeze.git",
-                "reference": "60ac80abfa08c3c2dbc61e4b16f02230b843cfd3"
+                "reference": "2a4764055792b14e0e571a710adbda9c9eb300d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/breeze/zipball/60ac80abfa08c3c2dbc61e4b16f02230b843cfd3",
-                "reference": "60ac80abfa08c3c2dbc61e4b16f02230b843cfd3",
+                "url": "https://api.github.com/repos/laravel/breeze/zipball/2a4764055792b14e0e571a710adbda9c9eb300d4",
+                "reference": "2a4764055792b14e0e571a710adbda9c9eb300d4",
                 "shasum": ""
             },
             "require": {
@@ -7499,7 +7555,7 @@
                 "issues": "https://github.com/laravel/breeze/issues",
                 "source": "https://github.com/laravel/breeze"
             },
-            "time": "2025-01-13T16:52:29+00:00"
+            "time": "2025-01-21T14:57:42+00:00"
         },
         {
             "name": "laravel/pint",

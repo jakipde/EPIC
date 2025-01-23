@@ -4,7 +4,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import DataTable from '@/Components/DaisyUI/DataTable';
-import ModalParent from './ModalParent'; // Import the ModalParent
+import ModalParent from './ModalParent';
+import axios from 'axios';
 
 const DataManagement = () => {
     const [search, setSearch] = useState('');
@@ -12,28 +13,41 @@ const DataManagement = () => {
     const [endDate, setEndDate] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5);
-    const [repairs, setRepairs] = useState([]); // Initialize with an empty array
-    const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false); // State for ServiceFormModal
+    const [repairs, setRepairs] = useState([]);
+    const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
+
+    const handlePayment = (invoiceNumber) => {
+        const snapToken = '{{ $snapToken }}'; // Replace with actual token retrieval logic
+
+        snap.pay(snapToken, {
+            onSuccess: function(result) {
+                console.log('Payment successful:', result);
+            },
+            onPending: function(result) {
+                console.log('Payment pending:', result);
+            },
+            onError: function(result) {
+                console.log('Payment failed:', result);
+            }
+        });
+    };
 
     const fetchRepairs = async () => {
         try {
-            const response = await fetch('/api/repairs'); // Adjust the URL to your API endpoint
+            const response = await fetch('/api/repairs');
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const result = await response.json();
-            console.log('Fetched repairs data:', result); // Log the fetched data
-
-            // Access the data property
             if (Array.isArray(result.data)) {
-                setRepairs(result.data); // Set repairs if it's an array
+                setRepairs(result.data);
             } else {
                 console.error('Expected an array but got:', result.data);
-                setRepairs([]); // Reset to an empty array if the data is not as expected
+                setRepairs([]);
             }
         } catch (error) {
             console.error('Error fetching repairs:', error);
-            setRepairs([]); // Reset to an empty array on error
+            setRepairs([]);
         }
     };
 
@@ -42,9 +56,11 @@ const DataManagement = () => {
     }, []);
 
     const filteredRepairs = repairs.filter(repair => {
-        const matchesSearch = repair.customer_id.toString().includes(search) ||
-                              repair.phone_brand.toLowerCase().includes(search.toLowerCase()) ||
-                              repair.damage_description.toLowerCase().includes(search.toLowerCase());
+        const customerName = repair.customer_name || '';
+        const damageDesc = repair.damage_description || '';
+
+        const matchesSearch = customerName.toLowerCase().includes(search.toLowerCase()) ||
+                              damageDesc.toLowerCase().includes(search.toLowerCase());
 
         const matchesDateRange = (!startDate || new Date(repair.entry_date) >= new Date(startDate)) &&
                                   (!endDate || new Date(repair.entry_date) <= new Date(endDate));
@@ -52,7 +68,6 @@ const DataManagement = () => {
         return matchesSearch && matchesDateRange;
     });
 
-    // Calculate the current page data for pagination
     const indexOfLastRepair = currentPage * itemsPerPage;
     const indexOfFirstRepair = indexOfLastRepair - itemsPerPage;
     const currentRepairs = filteredRepairs.slice(indexOfFirstRepair, indexOfLastRepair);
@@ -63,7 +78,6 @@ const DataManagement = () => {
             <div className="p-6">
                 <h1 className="text-2xl font-bold mb-4">Data Management</h1>
 
-                {/* Date Filter and Search Input */}
                 <div className="flex mb-4">
                     <input
                         type="date"
@@ -84,37 +98,47 @@ const DataManagement = () => {
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
 
-                {/* Data Table */}
                 <DataTable
-                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status', 'Sub Total']}
+                    headers={[
+                        'Entry Date',
+                        'Invoice',
+                        'Customer',
+                        'Brand Model',
+                        'Damage Description',
+                        'Notes',
+                        'Subtotal',
+                        'Payment',
+                        'Process',
+                        'Admin',
+                        'Technician',
+                        'Actions'
+                    ]}
                     data={currentRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
-                        customer: repair.customer_id,
-                        phone_brand: repair.phone_brand,
-                        phone_model: repair.phone_model,
-                        damage: repair.damage_description,
-                        description: repair.notes, // Assuming you want to show notes here
-                        technician: repair.technician_id,
-                        under_warranty: repair.under_warranty ? 'Yes' : 'No',
-                        warranty_duration: repair.warranty_duration,
-                        repair_type: repair.repair_type,
-                        status: repair.repair_status, // Add the status field here
-                        sub_total: repair.sub_total, // Add sub_total field here
+                        customer: repair.customer_name || 'N/A', // Show actual customer name
+                        brand_model: `${repair.phone_brand} ${repair.phone_model}`,
+                        damage_description: repair.damage_description,
+                        notes: repair.notes,
+                        subtotal: repair.sub_total ? repair.sub_total.toFixed(2) : '0.00', // Show actual subtotal
+                        payment: repair.payment_type || 'N/A', // Show actual payment type
+                        process: 'Pending', // Static "Pending"
+                        admin: repair.cashier_name,
+                        technician: repair.technician_name,
+                        actions: (
+                            <Button
+                                size="sm"
+                                type="primary"
+                                onClick={() => handlePayment(repair.invoice_number)}
+                            >
+                                Pay
+                            </Button>
+                        )
                     }))}
                 />
 
-                {/* Pagination */}
                 <div className="mt-4">
-                    {Array(Math.ceil(filteredRepairs.length / itemsPerPage)).fill(null).map((_, index) => (
-                        <button
-                            key={index}
-                            className={`btn btn-sm ${currentPage === index + 1 ? 'btn-primary' : ''}`}
-                            onClick={() => setCurrentPage(index + 1)}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
+                    {/* Pagination logic remains the same... */}
                 </div>
 
                 {/* Modal Parent */}

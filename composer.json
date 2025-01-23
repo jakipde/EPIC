@@ -18,6 +18,7 @@
         "laravel/prompts": "^0.1.25",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.0",
+        "midtrans/midtrans-php": "^2.6",
         "rap2hpoutre/fast-excel": "^5.5",
         "react/async": "^4.3",
         "spatie/async": "^1.6.1",
