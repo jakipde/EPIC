@@ -21,7 +21,7 @@ class Payments extends Migration
                 ->default('pending');
             $table->enum('payment_method', ['cash', 'card', 'bank_transfer', 'other'])
                 ->nullable();
-            $table->unsignedBigInteger('cashier_id')->nullable();
+            $table->ulid('cashier_id')->nullable(); // Change to ulid
             $table->text('notes')->nullable();
             $table->timestamps();
 
@@ -34,6 +34,7 @@ class Payments extends Migration
                 ->references('id')->on('invoices')
                 ->onDelete('cascade');
 
+            // Update foreign key for cashier_id
             $table->foreign('cashier_id')
                 ->references('id')->on('users')
                 ->onDelete('set null');

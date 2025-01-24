@@ -17,8 +17,8 @@ const ServiceFormModal = ({
     const [entryDate, setEntryDate] = useState('');
     const [customerId, setCustomerId] = useState(selectedCustomerId || '');
     const [customerPhone, setCustomerPhone] = useState('');
-    const [cashierName, setCashierName] = useState(''); // Store cashier name
-    const [technicianName, setTechnicianName] = useState(''); // Store technician name
+    const [cashierName, setCashierName] = useState('');
+    const [technicianName, setTechnicianName] = useState('');
     const [cashierId, setCashierId] = useState(null);
     const [technicianId, setTechnicianId] = useState(null);
     const [error, setError] = useState(null);
@@ -31,7 +31,7 @@ const ServiceFormModal = ({
     const [damageDescription, setDamageDescription] = useState('');
     const [underWarranty, setUnderWarranty] = useState(false);
     const [warrantyDuration, setWarrantyDuration] = useState('');
-    const [warrantyUnit, setWarrantyUnit] = useState('days'); // Default to 'days'
+    const [warrantyUnit, setWarrantyUnit] = useState('days');
     const [notes, setNotes] = useState('');
     const [repairType, setRepairType] = useState('');
     const [serviceType, setServiceType] = useState('');
@@ -126,21 +126,20 @@ const ServiceFormModal = ({
     }, []);
 
     useEffect(() => {
-        // Ensure subTotal is a string before using replace
-        const parsedSubTotal = parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0; // Parse as float
-        const parsedDownPayment = parseFloat(downPayment.replace(/[^0-9.]/g, "")) || 0; // Parse as float
+        const parsedSubTotal = parseFloat(subTotal.replace(/[^0-9]/g, "")) || 0;
+        const parsedDownPayment = parseFloat(downPayment.replace(/[^0-9]/g, "")) || 0;
         const calculatedTotal = Math.max(0, parsedSubTotal - parsedDownPayment);
         setTotal(calculatedTotal);
     }, [subTotal, downPayment]);
 
     const handleSubTotalChange = (e) => {
-        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimal point
-        setSubTotal(value); // Set as a string
+        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimals
+        setSubTotal(value);
     };
 
     const handleDownPaymentChange = (e) => {
-        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimal point
-        setDownPayment(value); // Set as a string
+        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimals
+        setDownPayment(value);
     };
 
     const formatCurrency = (value, includeDecimals = false) => {
@@ -224,9 +223,9 @@ const ServiceFormModal = ({
             service_type: serviceType,
             total_price: total,
             down_payment: parseFloat(downPayment) || 0,
+            sub_total: parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0, // Store subTotal value
             completeness: Object.keys(completeness).filter(key => completeness[key]), // Convert completeness to an array of keys where the value is true
             invoice_number: invoiceNumber,
-            sub_total: parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0, // Include subTotal in the newRepair object
         };
 
         console.log('Submitting repair data:', newRepair);
@@ -596,16 +595,16 @@ const ServiceFormModal = ({
                             />
                         </div>
                         <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Total</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={formatCurrency(total, false)} // No decimals for total as well
-                                readOnly
-                                className="input input-bordered"
-                            />
-                        </div>
+                        <label className="label">
+                            <span className="label-text text-green-600">Total</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={formatCurrency(total, false)} // No decimals for total as well
+                            readOnly
+                            className="input input-bordered"
+                        />
+                    </div>
                     </div>
                     <div className="form-control mb-3">
                         <label className="label">
