@@ -39,8 +39,8 @@ class RepairsController extends Controller
     $validator = Validator::make($request->all(), [
         'entry_date' => 'required|date',
         'customer_id' => 'required|exists:customers,id',
-        'cashier_id' => 'required|exists:users,id',  // Adjusted to use cashier_id
-        'technician_id' => 'required|exists:users,id', // Adjusted to use technician_id
+        'cashier_id' => 'required|exists:users,id',
+        'technician_id' => 'required|exists:users,id',
         'phone_brand' => 'required|string|max:255',
         'phone_model' => 'required|string|max:255',
         'imei_sn_1' => 'nullable|string|max:255',
@@ -52,9 +52,9 @@ class RepairsController extends Controller
         'repair_type' => 'required|string|max:255',
         'service_type' => 'nullable|string|max:255',
         'total_price' => 'required|numeric',
-        'down_payment' => 'nullable|numeric',
-        'sub_total' => 'nullable|numeric',
-        'completeness' => 'nullable|array', // Accept completeness as an array
+        'down_payment' => 'required|numeric',
+        'sub_total' => 'required|numeric',
+        'completeness' => 'nullable|array',
         'invoice_number' => 'required|string|max:255',
     ]);
 

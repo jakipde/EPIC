@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import Select from 'react-select';
 import CompletenessModal from './CompletenessModal';
 
 const ServiceFormModal = ({
@@ -52,8 +51,8 @@ const ServiceFormModal = ({
     const [devices, setDevices] = useState([]);
 
     // Pricing states
-    const [subTotal, setSubTotal] = useState(''); // Initialize as an empty string
-    const [downPayment, setDownPayment] = useState(''); // Initialize as an empty string
+    const [subTotal, setSubTotal] = useState('0.00'); // Initialize as a string with two decimal places
+    const [downPayment, setDownPayment] = useState('0.00'); // Initialize as a string with two decimal places
     const [total, setTotal] = useState(0);
     const [voucher, setVoucher] = useState('');
     const [paymentType, setPaymentType] = useState('');
@@ -88,14 +87,16 @@ const ServiceFormModal = ({
         fetchData();
     }, []);
 
-    const handleBrandChange = (selectedOption) => {
+    const handleBrandChange = (e) => {
+        const selectedOption = brands.find(brand => brand.value === e.target.value);
         setSelectedBrand(selectedOption);
         setSelectedDevice(null);
         setDeviceImage('');
         setDeviceDescription('');
     };
 
-    const handleDeviceChange = (selectedOption) => {
+    const handleDeviceChange = (e) => {
+        const selectedOption = devices.find(device => device.value === e.target.value);
         setSelectedDevice(selectedOption);
         if (selectedOption) {
             setDeviceImage(selectedOption.img);
@@ -126,8 +127,8 @@ const ServiceFormModal = ({
     }, []);
 
     useEffect(() => {
-        const parsedSubTotal = parseFloat(subTotal.replace(/[^0-9]/g, "")) || 0;
-        const parsedDownPayment = parseFloat(downPayment.replace(/[^0-9]/g, "")) || 0;
+        const parsedSubTotal = parseFloat(subTotal) || 0;
+        const parsedDownPayment = parseFloat(downPayment) || 0;
         const calculatedTotal = Math.max(0, parsedSubTotal - parsedDownPayment);
         setTotal(calculatedTotal);
     }, [subTotal, downPayment]);
@@ -199,7 +200,7 @@ const ServiceFormModal = ({
         e.preventDefault();
 
         // Validate required fields
-        if (!entryDate || !customerId || !cashierName || !technicianName || !selectedBrand || !selectedDevice || !damageDescription || !repairType || !serviceType) {
+        if (!entryDate || !customerId || !cashierId || !technicianId || !selectedBrand || !selectedDevice || !damageDescription || !repairType || !serviceType) {
             setError("Please fill in all required fields.");
             return;
         }
@@ -208,23 +209,22 @@ const ServiceFormModal = ({
         const newRepair = {
             entry_date: entryDate,
             customer_id: customerId,
-            cashier_id: cashierId, // Add cashier ID
-            technician_id: technicianId, // Add technician ID
+            cashier_id: cashierId,
+            technician_id: technicianId,
             phone_brand: selectedBrand ? selectedBrand.label : '',
             phone_model: selectedDevice ? selectedDevice.label : '',
             imei_sn_1: imeiSn1,
             imei_sn_2: imeiSn2,
             damage_description: damageDescription,
             under_warranty: underWarranty,
-            warranty_duration: warrantyDuration,
-            warranty_unit: warrantyUnit,
+            warranty_duration: warrantyDuration || null,
             notes: notes,
             repair_type: repairType,
-            service_type: serviceType,
-            total_price: total,
-            down_payment: parseFloat(downPayment) || 0,
-            sub_total: parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0, // Store subTotal value
-            completeness: Object.keys(completeness).filter(key => completeness[key]), // Convert completeness to an array of keys where the value is true
+            service_type: serviceType || null,
+            total_price: parseFloat(total.toFixed(2)), // Ensure total is a float with two decimals
+            down_payment: parseFloat(downPayment) || 0, // Ensure down payment is a float
+            sub_total: parseFloat(subTotal) || 0, // Ensure sub total is a float
+            completeness: Object.keys(completeness).filter(key => completeness[key]),
             invoice_number: invoiceNumber,
         };
 
@@ -264,9 +264,9 @@ const ServiceFormModal = ({
         setNotes('');
         setRepairType('');
         setServiceType('');
-        setSubTotal(''); // Reset subTotal to an empty string
+        setSubTotal('0.00'); // Reset subTotal to a string with two decimal places
         setVoucher('');
-        setDownPayment(''); // Reset downPayment to an empty string
+        setDownPayment('0.00'); // Reset downPayment to a string with two decimal places
         setTotal(0);
         setPaymentType('');
     };
@@ -327,28 +327,38 @@ const ServiceFormModal = ({
                                 <label className="label">
                                     <span className="label-text">Phone Brand</span>
                                 </label>
-                                <Select
-                                    options={brands}
-                                    onChange={(selectedOption) => {
-                                        handleBrandChange(selectedOption);
-                                    }}
-                                    placeholder="Select Brand"
-                                    isClearable
-                                />
+                                <select
+                                    value={selectedBrand ? selectedBrand.value : ''}
+                                    onChange={handleBrandChange}
+                                    className="select select-bordered"
+                                    required
+                                >
+                                    <option value="">Select Brand</option>
+                                    {brands.map(brand => (
+                                        <option key={brand.value} value={brand.value}>
+                                            {brand.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
                                     <span className="label-text">Phone Model</span>
                                 </label>
-                                <Select
-                                    options={devices.filter(device => device.brandId === selectedBrand?.value)}
-                                    onChange={(selectedOption) => {
-                                        handleDeviceChange(selectedOption);
-                                    }}
-                                    placeholder="Select Model"
-                                    isClearable
-                                    isDisabled={!selectedBrand}
-                                />
+                                <select
+                                    value={selectedDevice ? selectedDevice.value : ''}
+                                    onChange={handleDeviceChange}
+                                    className="select select-bordered"
+                                    required
+                                    disabled={!selectedBrand}
+                                >
+                                    <option value="">Select Model</option>
+                                    {devices.filter(device => device.brandId === selectedBrand?.value).map(device => (
+                                        <option key={device.value} value={device.value}>
+                                            {device.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="form-control mb-3">
                                 <label className="label">
@@ -409,34 +419,46 @@ const ServiceFormModal = ({
                                     <label className="label">
                                         <span className="label-text">Cashier</span>
                                     </label>
-                                    <Select
-                                        options={cashiers.map(cashier => ({
-                                            value: cashier.id,
-                                            label: cashier.name
-                                        }))}
-                                        onChange={(option) => {
-                                            setCashierId(option.value);
-                                            setCashierName(option.label); // Store cashier name
+                                    <select
+                                        value={cashierId || ''}
+                                        onChange={(e) => {
+                                            const selectedCashier = cashiers.find(cashier => cashier.id === e.target.value);
+                                            setCashierId(selectedCashier ? selectedCashier.id : null);
+                                            setCashierName(selectedCashier ? selectedCashier.name : '');
                                         }}
-                                        placeholder="Select Cashier"
-                                    />
+                                        className="select select-bordered"
+                                        required
+                                    >
+                                        <option value="">Select Cashier</option>
+                                        {cashiers.map(cashier => (
+                                            <option key={cashier.id} value={cashier.id}>
+                                                {cashier.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className="form-control w-full ml-2">
                                     <label className="label">
                                         <span className="label-text">Technician</span>
                                     </label>
-                                    <Select
-                                        options={technicians.map(technician => ({
-                                            value: technician.id,
-                                            label: technician.name
-                                        }))}
-                                        onChange={(option) => {
-                                            setTechnicianId(option.value);
-                                            setTechnicianName(option.label); // Store technician name
+                                    <select
+                                        value={technicianId || ''}
+                                        onChange={(e) => {
+                                            const selectedTechnician = technicians.find(technician => technician.id === e.target.value);
+                                            setTechnicianId(selectedTechnician ? selectedTechnician.id : null);
+                                            setTechnicianName(selectedTechnician ? selectedTechnician.name : '');
                                         }}
-                                        placeholder="Select Technician"
-                                    />
+                                        className="select select-bordered"
+                                        required
+                                    >
+                                        <option value="">Select Technician</option>
+                                        {technicians.map(technician => (
+                                            <option key={technician.id} value={technician.id}>
+                                                {technician.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                             <div className="form-control mb-3 mt-8">
@@ -595,16 +617,16 @@ const ServiceFormModal = ({
                             />
                         </div>
                         <div className="form-control">
-                        <label className="label">
-                            <span className="label-text text-green-600">Total</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={formatCurrency(total, false)} // No decimals for total as well
-                            readOnly
-                            className="input input-bordered"
-                        />
-                    </div>
+                            <label className="label">
+                                <span className="label-text text-green-600">Total</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={formatCurrency(total, false)} // No decimals for total as well
+                                readOnly
+                                className="input input-bordered"
+                            />
+                        </div>
                     </div>
                     <div className="form-control mb-3">
                         <label className="label">
