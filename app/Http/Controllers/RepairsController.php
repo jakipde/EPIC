@@ -35,47 +35,41 @@ class RepairsController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'entry_date' => 'required|date',
-        'customer_id' => 'required|exists:customers,id',
-        'cashier_id' => 'required|exists:users,id',  // Adjusted to use cashier_id
-        'technician_id' => 'required|exists:users,id', // Adjusted to use technician_id
-        'phone_brand' => 'required|string|max:255',
-        'phone_model' => 'required|string|max:255',
-        'imei_sn_1' => 'nullable|string|max:255',
-        'imei_sn_2' => 'nullable|string|max:255',
-        'damage_description' => 'required|string',
-        'under_warranty' => 'required|boolean',
-        'warranty_duration' => 'nullable|integer',
-        'notes' => 'nullable|string',
-        'repair_type' => 'required|string|max:255',
-        'service_type' => 'nullable|string|max:255',
-        'total_price' => 'required|numeric',
-        'down_payment' => 'nullable|numeric',
-        'sub_total' => 'nullable|numeric',
-        'completeness' => 'nullable|array', // Accept completeness as an array
-        'invoice_number' => 'required|string|max:255',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'entry_date' => 'required|date',
+            'customer_id' => 'required|exists:customers,id',
+            'cashier_id' => 'required|exists:admins,id',
+            'phone_brand' => 'required|string|max:255',
+            'phone_model' => 'required|string|max:255',
+            'imei_sn_1' => 'nullable|string|max:255',
+            'imei_sn_2' => 'nullable|string|max:255',
+            'damage_description' => 'required|string',
+            'technician_id' => 'required|exists:technicians,id',
+            'under_warranty' => 'required|boolean',
+            'warranty_duration' => 'nullable|integer',
+            'notes' => 'nullable|string',
+            'repair_type' => 'required|string|max:255',
+            'service_type' => 'nullable|string|max:255',
+            'total_price' => 'required|numeric',
+            'completeness' => 'nullable|string',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-    }
-
-    try {
-        // Process the completeness field
-        $requestData = $request->all();
-        if (isset($requestData['completeness'])) {
-            $requestData['completeness'] = json_encode($requestData['completeness']);
+        if ($validator->fails()) {
+            Log::error('Validation errors: ', $validator->errors()->all());
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        // Create the repair
-        $repair = Repair::create($requestData);
-        return response()->json(['success' => true, 'message' => 'Repair created successfully.', 'repair' => $repair], 201);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Failed to save repair. ' . $e->getMessage()], 500);
+        try {
+            // Create the repair
+            $repair = Repair::create($request->all());
+
+            return response()->json(['success' => true, 'message' => 'Repair created successfully.', 'repair' => $repair], 201);
+        } catch (\Exception $e) {
+            Log::error('Error saving repair: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to save repair.'], 500);
+        }
     }
-}
 
     public function show($id)
     {
@@ -95,18 +89,17 @@ class RepairsController extends Controller
         $request->validate([
             'entry_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
-            'cashier_name' => 'required|exists:users,id',
+            'cashier_id' => 'required|exists:admins,id',
             'phone_brand' => 'required|string|max:255',
             'phone_model' => 'required|string|max:255',
             'damage_description' => 'required|string',
-            'technician_name' => 'required|exists:users,id',
+            'technician_id' => 'required|exists:technicians,id',
             'under_warranty' => 'required|boolean',
             'warranty_duration' => 'nullable|integer',
             'notes' => 'nullable|string',
             'repair_type' => 'required|string|max:255',
             'service_type' => 'nullable|string|max:255', // Add this line if service_type is needed
-            'total_price' => 'required|numeric',
-            'down_payment' => 'nullable|numeric',
+            'total_price' => 'required|numeric', // Include total_price since it's now required
             'completeness' => 'nullable|string', // Add completeness if required
         ]);
 

@@ -32,26 +32,28 @@ const DataManagement = () => {
         });
     };
 
-    const fetchRepairs = async () => {
-        try {
-            const response = await fetch('/api/repairs');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const result = await response.json();
-            if (Array.isArray(result.data)) {
-                setRepairs(result.data);
-            } else {
-                console.error('Expected an array but got:', result.data);
-                setRepairs([]);
-            }
-        } catch (error) {
-            console.error('Error fetching repairs:', error);
-            setRepairs([]);
-        }
-    };
-
     useEffect(() => {
+        const fetchRepairs = async () => {
+            try {
+                const response = await fetch('/api/repairs'); // Adjust the URL to your API endpoint
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('Fetched repairs data:', data); // Log the fetched data
+                // Check if data is an array
+                if (Array.isArray(data)) {
+                    setRepairs(data); // Set repairs if it's an array
+                } else {
+                    console.error('Expected an array but got:', data);
+                    setRepairs([]); // Reset to an empty array if the data is not as expected
+                }
+            } catch (error) {
+                console.error('Error fetching repairs:', error);
+                setRepairs([]); // Reset to an empty array on error
+            }
+        };
+
         fetchRepairs();
     }, []);
 
@@ -97,43 +99,22 @@ const DataManagement = () => {
                     />
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
-
+                 {/* Data Table */}
                 <DataTable
-                    headers={[
-                        'Entry Date',
-                        'Invoice',
-                        'Customer',
-                        'Brand Model',
-                        'Damage Description',
-                        'Notes',
-                        'Subtotal',
-                        'Payment',
-                        'Process',
-                        'Admin',
-                        'Technician',
-                        'Actions'
-                    ]}
+                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status']}
                     data={currentRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
-                        customer: repair.customer_name || 'N/A', // Show actual customer name
-                        brand_model: `${repair.phone_brand} ${repair.phone_model}`,
-                        damage_description: repair.damage_description,
-                        notes: repair.notes,
-                        subtotal: repair.sub_total ? repair.sub_total.toFixed(2) : '0.00', // Show actual subtotal
-                        payment: repair.payment_type || 'N/A', // Show actual payment type
-                        process: 'Pending', // Static "Pending"
-                        admin: repair.cashier_name,
-                        technician: repair.technician_name,
-                        actions: (
-                            <Button
-                                size="sm"
-                                type="primary"
-                                onClick={() => handlePayment(repair.invoice_number)}
-                            >
-                                Pay
-                            </Button>
-                        )
+                        customer: repair.customer_id,
+                        phone_brand: repair.phone_brand,
+                        phone_model: repair.phone_model,
+                        damage: repair.damage_description,
+                        description: repair.notes, // Assuming you want to show notes here
+                        technician: repair.technician_id,
+                        under_warranty: repair.under_warranty ? 'Yes' : 'No',
+                        warranty_duration: repair.warranty_duration,
+                        repair_type: repair.repair_type,
+                        status: repair.repair_status, // Add the status field here
                     }))}
                 />
 
