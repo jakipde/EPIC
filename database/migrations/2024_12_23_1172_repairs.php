@@ -27,10 +27,12 @@ return new class extends Migration
             $table->string('repair_type');
             $table->string('service_type')->nullable();
             $table->decimal('total_price', 10, 2);
+            $table->decimal('down_payment', 10, 2)->nullable();
+            $table->decimal('sub_total', 10, 2)->nullable();
             $table->string('repair_status')->default('pending');
             $table->date('exit_date')->nullable();
             $table->string('print_type')->nullable();
-            $table->text('completeness')->nullable();
+            $table->json('completeness')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

@@ -30,6 +30,7 @@ class Repair extends Model
         'repair_type',       // Type of repair (e.g., screen replacement)
         'service_type',      // Type of service (e.g., hardware, software)
         'total_price',       // Total price for the repair
+        'down_payment',
         'completeness',      // Status of the repair (e.g., complete, incomplete)
         'exit_date',         // Date when the repair was completed or exited
         'print_type',        // Type of print (if applicable)

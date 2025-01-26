@@ -44,7 +44,7 @@ const ServiceFormModal = ({
     const [devices, setDevices] = useState([]);
 
     // Pricing states
-    const [subTotal, setSubTotal] = useState('');
+    const [subTotal, setSubTotal] = useState('0');
     const [downPayment, setDownPayment] = useState('');
     const [total, setTotal] = useState(0);
     const [voucher, setVoucher] = useState('');
@@ -118,15 +118,15 @@ const ServiceFormModal = ({
     }, []);
 
     useEffect(() => {
-        const parsedSubTotal = parseFloat(subTotal.replace(/[^0-9]/g, "")) || 0;
-        const parsedDownPayment = parseFloat(downPayment.replace(/[^0-9]/g, "")) || 0;
+        const parsedSubTotal = parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0;
+        const parsedDownPayment = parseFloat(downPayment.replace(/[^0-9.]/g, "")) || 0;
         const calculatedTotal = Math.max(0, parsedSubTotal - parsedDownPayment);
         setTotal(calculatedTotal);
     }, [subTotal, downPayment]);
 
     const handleSubTotalChange = (e) => {
         const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimal point
-        setSubTotal(value); // Set as a string
+        setSubTotal(value || '0'); // Ensure it's always a string
     };
 
     const handleDownPaymentChange = (e) => {
@@ -195,6 +195,8 @@ const ServiceFormModal = ({
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const invoiceNumber = generateInvoiceNumber();
+
         const newRepair = {
             entry_date: entryDate,
             customer_id: customerId,
@@ -213,20 +215,22 @@ const ServiceFormModal = ({
             service_type: serviceType,
             total_price: total,
             down_payment: parseFloat(downPayment) || 0,
-            completeness: Object.keys(completeness).filter(key => completeness[key]), // Convert completeness to an array of keys where the value is true
+            completeness: Object.keys(completeness).filter(key => completeness[key]),
             invoice_number: invoiceNumber,
-            sub_total: parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0, // Include subTotal in the newRepair object
+            sub_total: parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0,
         };
+
+        console.log('Submitting repair:', newRepair); // Log the payload
 
         try {
             const response = await axios.post('/api/repairs', newRepair);
             if (response.data.success) {
-                onAddRepair(response.data.repair); // Call the function to add the new repair to the table
+                onAddRepair(response.data.repair);
                 resetForm();
                 onClose();
             }
         } catch (error) {
-            console.error('Error submitting repair:', error);
+            console.error('Error submitting repair:', error.response ? error.response.data : error.message);
         }
     };
 

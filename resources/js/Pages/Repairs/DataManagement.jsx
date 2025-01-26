@@ -16,6 +16,10 @@ const DataManagement = () => {
     const [repairs, setRepairs] = useState([]);
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
 
+    // New states for cashiers and technicians
+    const [cashiers, setCashiers] = useState([]);
+    const [technicians, setTechnicians] = useState([]);
+
     const handlePayment = (invoiceNumber) => {
         const snapToken = '{{ $snapToken }}'; // Replace with actual token retrieval logic
 
@@ -32,29 +36,45 @@ const DataManagement = () => {
         });
     };
 
-    useEffect(() => {
-        const fetchRepairs = async () => {
-            try {
-                const response = await fetch('/api/repairs'); // Adjust the URL to your API endpoint
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                console.log('Fetched repairs data:', data); // Log the fetched data
-                // Check if data is an array
-                if (Array.isArray(data)) {
-                    setRepairs(data); // Set repairs if it's an array
-                } else {
-                    console.error('Expected an array but got:', data);
-                    setRepairs([]); // Reset to an empty array if the data is not as expected
-                }
-            } catch (error) {
-                console.error('Error fetching repairs:', error);
-                setRepairs([]); // Reset to an empty array on error
+    const fetchRepairs = async () => {
+        try {
+            const response = await fetch('/api/repairs');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        };
+            const result = await response.json();
+            if (Array.isArray(result.data)) {
+                setRepairs(result.data);
+            } else {
+                console.error('Expected an array but got:', result.data);
+                setRepairs([]);
+            }
+        } catch (error) {
+            console.error('Error fetching repairs:', error);
+            setRepairs([]);
+        }
+    };
 
+    // Fetch cashiers and technicians
+    const fetchUsersByRoleName = async (roleName) => {
+        try {
+            const response = await axios.get(`/api/users?role_name=${roleName}`);
+            console.log(`Users response data:`, response.data);
+            if (roleName === 'Cashier') {
+                setCashiers(response.data); // Set the cashiers state
+            } else if (roleName === 'Technician') {
+                setTechnicians(response.data); // Set the technicians state
+            }
+        } catch (error) {
+            console.error(`Error fetching users:`, error.response ? error.response.data : error.message);
+        }
+    };
+
+    useEffect(() => {
         fetchRepairs();
+        // Fetch cashiers and technicians
+        fetchUsersByRoleName('Cashier');
+        fetchUsersByRoleName('Technician');
     }, []);
 
     const filteredRepairs = repairs.filter(repair => {
@@ -99,22 +119,43 @@ const DataManagement = () => {
                     />
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
-                 {/* Data Table */}
+
                 <DataTable
-                    headers={['Entry Date', 'Invoice', 'Customer', 'Phone Brand', 'Phone Model', 'Damage', 'Description', 'Technician', 'Under Warranty', 'Warranty Duration', 'Notes', 'Repair Type', 'Status']}
+                    headers={[
+                        'Entry Date',
+                        'Invoice',
+                        'Customer',
+                        'Brand Model',
+                        'Damage Description',
+                        'Notes',
+                        'Subtotal',
+                        'Payment',
+                        'Process',
+                        'Admin',
+                        'Technician',
+                        'Actions'
+                    ]}
                     data={currentRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
-                        customer: repair.customer_id,
-                        phone_brand: repair.phone_brand,
-                        phone_model: repair.phone_model,
-                        damage: repair.damage_description,
-                        description: repair.notes, // Assuming you want to show notes here
-                        technician: repair.technician_id,
-                        under_warranty: repair.under_warranty ? 'Yes' : 'No',
-                        warranty_duration: repair.warranty_duration,
-                        repair_type: repair.repair_type,
-                        status: repair.repair_status, // Add the status field here
+                        customer: repair.customer_name || 'N/A', // Show actual customer name
+                        brand_model: `${repair.phone_brand} ${repair.phone_model}`,
+                        damage_description: repair.damage_description,
+                        notes: repair.notes,
+                        subtotal: repair.sub_total ? repair.sub_total.toFixed(2) : '0.00', // Show actual subtotal
+                        payment: repair.payment_type || 'N/A', // Show actual payment type
+                        process: 'Pending', // Static "Pending"
+                        admin: repair.cashier_name || cashiers.find(c => c.id === repair.cashier_id)?.name || 'N/A',
+                        technician: repair.technician_name || technicians.find(t => t.id === repair.technician_id)?.name || 'N/A',
+                        actions: (
+                            <Button
+                                size="sm"
+                                type="primary"
+                                onClick={() => handlePayment(repair.invoice_number)}
+                            >
+                                Pay
+                            </Button>
+                        )
                     }))}
                 />
 
