@@ -34,7 +34,8 @@ class Repair extends Model
         'completeness',      // Status of the repair (e.g., complete, incomplete)
         'exit_date',         // Date when the repair was completed or exited
         'print_type',        // Type of print (if applicable)
-        'invoice_number'     // Invoice number for tracking
+        'invoice_number',
+        'payment_method'     // Invoice number for tracking
     ];
 
     // Optionally, you can define relationships here

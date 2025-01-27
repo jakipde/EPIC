@@ -14,6 +14,7 @@ const DataManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5);
     const [repairs, setRepairs] = useState([]);
+    const [customers, setCustomers] = useState([]); // State for customers
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
 
     // New states for cashiers and technicians
@@ -24,13 +25,13 @@ const DataManagement = () => {
         const snapToken = '{{ $snapToken }}'; // Replace with actual token retrieval logic
 
         snap.pay(snapToken, {
-            onSuccess: function(result) {
+            onSuccess: function (result) {
                 console.log('Payment successful:', result);
             },
-            onPending: function(result) {
+            onPending: function (result) {
                 console.log('Payment pending:', result);
             },
-            onError: function(result) {
+            onError: function (result) {
                 console.log('Payment failed:', result);
             }
         });
@@ -55,11 +56,19 @@ const DataManagement = () => {
         }
     };
 
+    const fetchCustomers = async () => {
+        try {
+            const response = await axios.get('/api/customers');
+            setCustomers(response.data);
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+        }
+    };
+
     // Fetch cashiers and technicians
     const fetchUsersByRoleName = async (roleName) => {
         try {
             const response = await axios.get(`/api/users?role_name=${roleName}`);
-            console.log(`Users response data:`, response.data);
             if (roleName === 'Cashier') {
                 setCashiers(response.data); // Set the cashiers state
             } else if (roleName === 'Technician') {
@@ -72,7 +81,7 @@ const DataManagement = () => {
 
     useEffect(() => {
         fetchRepairs();
-        // Fetch cashiers and technicians
+        fetchCustomers(); // Fetch customers
         fetchUsersByRoleName('Cashier');
         fetchUsersByRoleName('Technician');
     }, []);
@@ -82,10 +91,10 @@ const DataManagement = () => {
         const damageDesc = repair.damage_description || '';
 
         const matchesSearch = customerName.toLowerCase().includes(search.toLowerCase()) ||
-                              damageDesc.toLowerCase().includes(search.toLowerCase());
+            damageDesc.toLowerCase().includes(search.toLowerCase());
 
         const matchesDateRange = (!startDate || new Date(repair.entry_date) >= new Date(startDate)) &&
-                                  (!endDate || new Date(repair.entry_date) <= new Date(endDate));
+            (!endDate || new Date(repair.entry_date) <= new Date(endDate));
 
         return matchesSearch && matchesDateRange;
     });
@@ -138,7 +147,7 @@ const DataManagement = () => {
                     data={currentRepairs.map((repair) => ({
                         entry_date: repair.entry_date,
                         invoice: repair.invoice_number,
-                        customer: repair.customer_name || 'N/A', // Show actual customer name
+                        customer: customers.find(customer => customer.id === repair.customer_id)?.name || 'N/A', // Display customer name
                         brand_model: `${repair.phone_brand} ${repair.phone_model}`,
                         damage_description: repair.damage_description,
                         notes: repair.notes,

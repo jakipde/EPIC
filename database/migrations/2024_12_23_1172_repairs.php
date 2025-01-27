@@ -26,6 +26,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->string('repair_type');
             $table->string('service_type')->nullable();
+            $table->string('payment_method')->nullable();
             $table->decimal('total_price', 10, 2);
             $table->decimal('down_payment', 10, 2)->nullable();
             $table->decimal('sub_total', 10, 2)->nullable();
