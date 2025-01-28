@@ -69,6 +69,11 @@ class RepairsController extends Controller
                 $requestData['completeness'] = json_encode($requestData['completeness']);
             }
 
+            // Calculate remaining payment
+            $requestData['remaining_payment'] = $requestData['total_price'] - ($requestData['down_payment'] ?? 0);
+            // Set payment status based on remaining payment
+            $requestData['payment_status'] = $requestData['remaining_payment'] > 0 ? 'In Debt' : 'Paid off';
+
             // Create the repair
             $repair = Repair::create($requestData);
             return response()->json(['success' => true, 'message' => 'Repair created successfully.', 'repair' => $repair], 201);
@@ -79,14 +84,10 @@ class RepairsController extends Controller
 
     public function show($id)
     {
-        // Fetch the repair record by ID
-        $repair = Repair::find($id); // Use find() for debugging
-
+        $repair = Repair::find($id);
         if (!$repair) {
             return response()->json(['error' => 'Repair not found'], 404);
         }
-
-        // Return the repair data as JSON
         return response()->json($repair);
     }
 
@@ -107,17 +108,24 @@ class RepairsController extends Controller
             'service_type' => 'nullable|string|max:255',
             'total_price' => 'required|numeric',
             'down_payment' => 'nullable|numeric',
-            'completeness' => 'nullable|string',
-            'payment_method' => 'required|string|max:255', // Add validation for payment_method
+            'payment_method' => 'required|string|max:255',
         ]);
 
         try {
             $repair = Repair::findOrFail($id);
-            $repair->update($request->all());
+            $requestData = $request->all();
+
+            // Calculate remaining payment
+            $requestData['remaining_payment'] = $requestData['total_price'] - ($requestData['down_payment'] ?? 0);
+            // Set payment status based on remaining payment
+            $requestData['payment_status'] = $requestData['remaining_payment'] > 0 ? 'In Debt' : 'Paid off';
+
+            $repair->update($requestData);
 
             return response()->json(['success' => true, 'message' => 'Repair updated successfully.']);
         } catch (\Exception $e) {
-            // Existing error handling...
+            Log::error('Error updating repair: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to update repair.'], 500);
         }
     }
 

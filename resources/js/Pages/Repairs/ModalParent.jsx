@@ -3,25 +3,48 @@ import ServiceFormModal from "./ServiceFormModal";
 import NewCustomerModal from "./NewCustomerModal";
 import CompletenessModal from "./CompletenessModal";
 import PrintModal from "./PrintModal";
+import RepairDetailModal from "./RepairDetailModal"; // Import the RepairDetailModal
 
-const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
+const ModalParent = ({
+    isServiceFormModalOpen,
+    setServiceFormModalOpen,
+    isRepairDetailModalOpen,
+    setRepairDetailModalOpen,
+    selectedRepair
+}) => {
     const [isNewCustomerModalOpen, setNewCustomerModalOpen] = useState(false);
     const [isCompletenessModalOpen, setCompletenessModalOpen] = useState(false);
     const [isPrintModalOpen, setPrintModalOpen] = useState(false);
     const [repairs, setRepairs] = useState([]);
     const [customers, setCustomers] = useState([]);
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
-    const [customerPhone, setCustomerPhone] = useState(''); // State for customer phone
+    const [customerPhone, setCustomerPhone] = useState('');
 
     // Completeness state
     const [completeness, setCompleteness] = useState({
         simTray: false,
         simCard: false,
         softCase: false,
-        memoryCard: false,
+        microSD: false,
         box: false,
         charger: false,
     });
+
+    const completenessMapping = {
+        simTray: "SIM Tray",
+        simCard: "SIM Card",
+        softCase: "Soft Case",
+        microSD: "MicroSD",
+        box: "Box",
+        charger: "Charger (Adaptor or Cable)",
+    };
+
+    const formatCompleteness = (completeness) => {
+        return Object.keys(completeness)
+            .filter(key => completeness[key])
+            .map(key => completenessMapping[key])
+            .join(', ');
+    };
 
     const handleAddRepair = (repair) => {
         setRepairs((prevRepairs) => [...prevRepairs, repair]);
@@ -44,11 +67,11 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
                 setCustomers={setCustomers}
                 selectedCustomerId={selectedCustomerId}
                 setSelectedCustomerId={setSelectedCustomerId}
-                setCustomerPhone={setCustomerPhone} // Pass the function to set customer phone
-                setCompletenessModalOpen={setCompletenessModalOpen} // Pass function to open completeness modal
-                completeness={completeness} // Pass completeness state
-                setCompleteness={setCompleteness} // Pass function to update completeness state
-                setPrintModalOpen={setPrintModalOpen} // Pass function to open print modal
+                setCustomerPhone={setCustomerPhone}
+                setCompletenessModalOpen={setCompletenessModalOpen}
+                completeness={completeness}
+                setCompleteness={setCompleteness}
+                setPrintModalOpen={setPrintModalOpen}
             />
 
             <NewCustomerModal
@@ -57,17 +80,23 @@ const ModalParent = ({ isServiceFormModalOpen, setServiceFormModalOpen }) => {
                 onAddCustomer={handleAddCustomer}
             />
 
-            {/* Modals */}
             <CompletenessModal
                 isOpen={isCompletenessModalOpen}
-                onClose={() => setCompletenessModalOpen(false)} // Close completeness modal
-                initialCompleteness={completeness} // Pass completeness state here
-                onChange={setCompleteness} // Function to update completeness state
+                onClose={() => setCompletenessModalOpen(false)}
+                initialCompleteness={completeness}
+                onChange={setCompleteness}
             />
 
             <PrintModal
                 isOpen={isPrintModalOpen}
-                onClose={() => setPrintModalOpen(false)} // Close print modal
+                onClose={() => setPrintModalOpen(false)}
+            />
+
+            {/* Repair Detail Modal */}
+            <RepairDetailModal
+                isOpen={isRepairDetailModalOpen}
+                onClose={() => setRepairDetailModalOpen(false)}
+                repair={selectedRepair} // Pass the selected repair details
             />
         </div>
     );

@@ -30,6 +30,8 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2);
             $table->decimal('down_payment', 10, 2)->nullable();
             $table->decimal('sub_total', 10, 2)->nullable();
+            $table->string('payment_status')->default('Pending'); // New column for payment status
+            $table->decimal('remaining_payment', 10, 2)->default(0); // New column for remaining payment
             $table->string('repair_status')->default('pending');
             $table->date('exit_date')->nullable();
             $table->string('print_type')->nullable();

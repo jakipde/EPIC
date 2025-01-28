@@ -16,7 +16,7 @@ module.exports = {
         "halloween",
         "garden",
         "forest",
-        "aqua", // Ensure aqua is included
+        "aqua",
         "lofi",
         "pastel",
         "fantasy",

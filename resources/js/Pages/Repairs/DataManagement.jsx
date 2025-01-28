@@ -4,6 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import DataTable from '@/Components/DaisyUI/DataTable';
+import RepairDetailModal from "./RepairDetailModal"; // Import the RepairDetailModal
 import ModalParent from './ModalParent';
 import axios from 'axios';
 
@@ -14,28 +15,12 @@ const DataManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5);
     const [repairs, setRepairs] = useState([]);
-    const [customers, setCustomers] = useState([]); // State for customers
+    const [customers, setCustomers] = useState([]);
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
-
-    // New states for cashiers and technicians
+    const [isRepairDetailModalOpen, setRepairDetailModalOpen] = useState(false);
+    const [selectedRepair, setSelectedRepair] = useState(null);
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
-
-    const handlePayment = (invoiceNumber) => {
-        const snapToken = '{{ $snapToken }}'; // Replace with actual token retrieval logic
-
-        snap.pay(snapToken, {
-            onSuccess: function (result) {
-                console.log('Payment successful:', result);
-            },
-            onPending: function (result) {
-                console.log('Payment pending:', result);
-            },
-            onError: function (result) {
-                console.log('Payment failed:', result);
-            }
-        });
-    };
 
     const fetchRepairs = async () => {
         try {
@@ -65,14 +50,13 @@ const DataManagement = () => {
         }
     };
 
-    // Fetch cashiers and technicians
     const fetchUsersByRoleName = async (roleName) => {
         try {
             const response = await axios.get(`/api/users?role_name=${roleName}`);
             if (roleName === 'Cashier') {
-                setCashiers(response.data); // Set the cashiers state
+                setCashiers(response.data);
             } else if (roleName === 'Technician') {
-                setTechnicians(response.data); // Set the technicians state
+                setTechnicians(response.data);
             }
         } catch (error) {
             console.error(`Error fetching users:`, error.response ? error.response.data : error.message);
@@ -81,13 +65,13 @@ const DataManagement = () => {
 
     useEffect(() => {
         fetchRepairs();
-        fetchCustomers(); // Fetch customers
+        fetchCustomers();
         fetchUsersByRoleName('Cashier');
         fetchUsersByRoleName('Technician');
     }, []);
 
     const filteredRepairs = repairs.filter(repair => {
-        const customerName = repair.customer_name || '';
+        const customerName = customers.find(customer => customer.id === repair.customer_id)?.name || '';
         const damageDesc = repair.damage_description || '';
 
         const matchesSearch = customerName.toLowerCase().includes(search.toLowerCase()) ||
@@ -102,6 +86,34 @@ const DataManagement = () => {
     const indexOfLastRepair = currentPage * itemsPerPage;
     const indexOfFirstRepair = indexOfLastRepair - itemsPerPage;
     const currentRepairs = filteredRepairs.slice(indexOfFirstRepair, indexOfLastRepair);
+
+    const formatCurrency = (value) => {
+        if (value === null || value === undefined) return 'Rp0';
+        const number = parseFloat(value);
+        if (isNaN(number)) return 'Rp0';
+        return `Rp${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+    };
+
+    const handleRowClick = (repair) => {
+        console.log('Selected repair:', repair); // Log the selected repair
+        setSelectedRepair(repair); // Set the selected repair
+        setRepairDetailModalOpen(true); // Open the RepairDetailModal
+    };
+
+    const mappedRepairs = currentRepairs.map(repair => ({
+        id: repair.id, // Keep the ID for internal use
+        entry_date: repair.entry_date,
+        invoice: repair.invoice_number,
+        customer: customers.find(customer => customer.id === repair.customer_id)?.name || 'N/A',
+        brand_model: `${repair.phone_brand} ${repair.phone_model}`,
+        damage_description: repair.damage_description,
+        notes: repair.notes,
+        total: formatCurrency(repair.total_price),
+        payment: repair.payment_method || 'N/A',
+        status: repair.status || 'Pending',
+        admin: cashiers.find(c => c.id === repair.cashier_id)?.name || 'N/A',
+        technician: technicians.find(t => t.id === repair.technician_id)?.name || 'N/A',
+    }));
 
     return (
         <AuthenticatedLayout page="Data Management">
@@ -130,42 +142,9 @@ const DataManagement = () => {
                 </div>
 
                 <DataTable
-                    headers={[
-                        'Entry Date',
-                        'Invoice',
-                        'Customer',
-                        'Brand Model',
-                        'Damage Description',
-                        'Notes',
-                        'Subtotal',
-                        'Payment',
-                        'Process',
-                        'Admin',
-                        'Technician',
-                        'Actions'
-                    ]}
-                    data={currentRepairs.map((repair) => ({
-                        entry_date: repair.entry_date,
-                        invoice: repair.invoice_number,
-                        customer: customers.find(customer => customer.id === repair.customer_id)?.name || 'N/A', // Display customer name
-                        brand_model: `${repair.phone_brand} ${repair.phone_model}`,
-                        damage_description: repair.damage_description,
-                        notes: repair.notes,
-                        subtotal: repair.sub_total ? repair.sub_total.toFixed(2) : '0.00', // Show actual subtotal
-                        payment: repair.payment_type || 'N/A', // Show actual payment type
-                        process: 'Pending', // Static "Pending"
-                        admin: repair.cashier_name || cashiers.find(c => c.id === repair.cashier_id)?.name || 'N/A',
-                        technician: repair.technician_name || technicians.find(t => t.id === repair.technician_id)?.name || 'N/A',
-                        actions: (
-                            <Button
-                                size="sm"
-                                type="primary"
-                                onClick={() => handlePayment(repair.invoice_number)}
-                            >
-                                Pay
-                            </Button>
-                        )
-                    }))}
+                    headers={['No', 'Entry Date', 'Invoice', 'Customer', 'Brand Model', 'Damage Description', 'Notes', 'Total', 'Payment', 'Status', 'Admin', 'Technician']}
+                    data={mappedRepairs} // Pass the mapped repairs including the ID
+                    onRowClick={handleRowClick} // Pass the row click handler
                 />
 
                 <div className="mt-4">
@@ -174,8 +153,21 @@ const DataManagement = () => {
 
                 {/* Modal Parent */}
                 <ModalParent
-                    isServiceFormModalOpen={isServiceFormModalOpen}
+                    isServiceFormModalOpen ={isServiceFormModalOpen}
                     setServiceFormModalOpen={setServiceFormModalOpen}
+                    isRepairDetailModalOpen={isRepairDetailModalOpen}
+                    setRepairDetailModalOpen={setRepairDetailModalOpen}
+                    selectedRepair={selectedRepair} // Pass the selected repair details
+                />
+
+                {/* Repair Detail Modal */}
+                <RepairDetailModal
+                    isOpen={isRepairDetailModalOpen}
+                    onClose={() => setRepairDetailModalOpen(false)}
+                    repair={selectedRepair} // Pass the selected repair details
+                    customers={customers} // Pass the customers array
+                    cashiers={cashiers} // Pass the cashiers array
+                    technicians={technicians} // Pass the technicians array
                 />
             </div>
         </AuthenticatedLayout>

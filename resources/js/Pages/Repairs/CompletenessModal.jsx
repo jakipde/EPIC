@@ -37,6 +37,16 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) =
     }));
   };
 
+  // Completeness mapping for display names
+  const completenessMapping = {
+    simTray: "SIM Tray",
+    simCard: "SIM Card",
+    softCase: "Soft Case",
+    memoryCard: "SD Card",
+    box: "Box",
+    charger: "Charger (Adaptor or Cable)",
+  };
+
   return (
     <div className="modal modal-open">
       <div className="modal-box">
@@ -49,7 +59,7 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) =
             {['simTray', 'simCard', 'softCase'].map((item) => (
               <div className="form-control mb-3" key={item}>
                 <label className="label cursor-pointer">
-                  <span className="label-text">{item.replace(/([A-Z])/g, ' $1')}</span>
+                  <span className="label-text">{completenessMapping[item]}</span> {/* Use mapping for display */}
                   <input
                     type="checkbox"
                     checked={initialCompleteness[item] || false} // Use fallback to avoid undefined error
@@ -66,7 +76,7 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) =
             {['memoryCard', 'box', 'charger'].map((item) => (
               <div className="form-control mb-3" key={item}>
                 <label className="label cursor-pointer">
-                  <span className="label-text">{item.replace(/([A-Z])/g, ' $1')}</span>
+                  <span className="label-text">{completenessMapping[item]}</span> {/* Use mapping for display */}
                   <input
                     type="checkbox"
                     checked={initialCompleteness[item] || false} // Use fallback to avoid undefined error

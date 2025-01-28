@@ -48,7 +48,17 @@ const ServiceFormModal = ({
     const [downPayment, setDownPayment] = useState('');
     const [total, setTotal] = useState(0);
     const [voucher, setVoucher] = useState('');
+    const [remaining, setRemaining] = useState(0);
+    const [isPaidOff, setIsPaidOff] = useState(false);
     const [paymentType, setPaymentType] = useState('');
+
+    const paymentMethods = {
+        Cash: { tax: 0 },
+        'Bank Transfer': { tax: 0, fixedFee: 4000 }, // No tax
+        'E-Wallets': { tax: 0.02 }, // 2% tax
+        'Credit Card': { tax: 0.029, fixedFee: 2000 }, // 2.9% + IDR 2,000
+        'Cardless Credit': { tax: 0.02 }, // 2% tax
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -118,29 +128,66 @@ const ServiceFormModal = ({
     }, []);
 
     useEffect(() => {
-        const parsedSubTotal = parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0;
-        const parsedDownPayment = parseFloat(downPayment.replace(/[^0-9.]/g, "")) || 0;
-        const calculatedTotal = Math.max(0, parsedSubTotal - parsedDownPayment);
+        const parsedSubTotal = parseInt(subTotal.replace(/[^0-9]/g, ""), 10) || 0;
+        const parsedDownPayment = parseInt(downPayment.replace(/[^0-9]/g, ""), 10) || 0;
+
+        let calculatedTotal = parsedSubTotal;
+
+        if (paymentType && paymentMethods[paymentType]) {
+            const { tax, fixedFee } = paymentMethods[paymentType];
+            calculatedTotal += calculatedTotal * tax; // Apply percentage tax
+
+            if (fixedFee) {
+                calculatedTotal += fixedFee; // Add fixed fee if applicable
+            }
+        }
+
         setTotal(calculatedTotal);
-    }, [subTotal, downPayment]);
+        setRemaining(Math.max(0, calculatedTotal - parsedDownPayment));
+    }, [subTotal, downPayment, paymentType]);
 
     const handleSubTotalChange = (e) => {
-        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimal point
-        setSubTotal(value || '0'); // Ensure it's always a string
+        const value = String(e.target.value).replace(/[^0-9]/g, ''); // Ensure value is a string
+        setSubTotal(value || '0');
     };
 
     const handleDownPaymentChange = (e) => {
-        const value = e.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and decimal point
-        setDownPayment(value); // Set as a string
+        const inputValue = e.target.value;
+        const value = String(inputValue).replace(/[^0-9]/g, ''); // Ensure value is a string
+        const parsedValue = parseInt(value, 10) || 0;
+        const parsedSubTotal = parseInt(subTotal.replace(/[^0-9]/g, ""), 10) || 0;
+
+        if (parsedValue <= parsedSubTotal) {
+            setDownPayment(formatCurrency(value));
+        } else {
+            setDownPayment(formatCurrency(subTotal));
+        }
     };
 
-    const formatCurrency = (value, includeDecimals = false) => {
-        return 'Rp' + new Intl.NumberFormat('id-ID', {
-            style: 'decimal',
-            minimumFractionDigits: includeDecimals ? 2 : 0,
-            maximumFractionDigits: includeDecimals ? 2 : 0,
-        }).format(value);
+    const formatCurrency = (value) => {
+        if (!value) return 'Rp0';
+        const number = parseInt(String(value).replace(/[^0-9]/g, ''), 10); // Ensure value is a string
+        return `Rp${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
     };
+
+    useEffect(() => {
+        if (isPaidOff) {
+            setDownPayment(formatCurrency(total.toString()));
+        }
+    }, [total, isPaidOff]);
+
+    const handlePaidOffClick = () => {
+        setDownPayment(total.toString());
+    };
+
+    useEffect(() => {
+        const parsedRemaining = Math.max(0, total - parseInt(downPayment.replace(/[^0-9]/g, ""), 10) || 0);
+        if (parsedRemaining === 0) {
+            setRemaining('Paid');
+        } else {
+            setRemaining(parsedRemaining);
+        }
+    }, [total, downPayment]);
 
     useEffect(() => {
         if (isOpen) {
@@ -183,13 +230,7 @@ const ServiceFormModal = ({
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
 
-        const asciiTime = [
-            hours.toString().split('').map(char => char.charCodeAt(0)).join(''),
-            minutes.toString().split('').map(char => char.charCodeAt(0)).join(''),
-            seconds.toString().split('').map(char => char.charCodeAt(0)).join('')
-        ].join('');
-
-        return `INV-${day}${month}${year}${asciiTime}`;
+        return `INV-${day}${month}${year}${hours}${minutes}${seconds}`;
     };
 
     const handleSubmit = async (e) => {
@@ -214,13 +255,14 @@ const ServiceFormModal = ({
             repair_type: repairType,
             service_type: serviceType,
             total_price: total,
-            down_payment: parseFloat(downPayment) || 0,
+            down_payment: parseFloat(downPayment.replace(/[^0-9.]/g, "")) || 0, // Ensure downPayment is a string
             completeness: Object.keys(completeness).filter(key => completeness[key]),
             invoice_number: invoiceNumber,
-            sub_total: parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0,
+            sub_total: parseFloat(subTotal.replace(/[^0-9.]/g, "")) || 0, // Ensure subTotal is a string
+            payment_method: paymentType,
         };
 
-        console.log('Submitting repair:', newRepair); // Log the payload
+        console.log('Submitting repair:', newRepair);
 
         try {
             const response = await axios.post('/api/repairs', newRepair);
@@ -244,13 +286,13 @@ const ServiceFormModal = ({
         setImeiSn2('');
         setDamageDescription('');
         setUnderWarranty(false);
-        setWarrantyDuration(0);
+        setWarrantyDuration(''); // Reset to an empty string
         setNotes('');
         setRepairType('');
         setServiceType('');
-        setSubTotal(0);
+        setSubTotal('0');
         setVoucher('');
-        setDownPayment(0);
+        setDownPayment('0');
         setTotal(0);
         setPaymentType('');
     };
@@ -390,35 +432,44 @@ const ServiceFormModal = ({
                                     ))}
                                 </select>
                             </div>
-                        <div className="flex justify-between mb-3">
-                            <div className="form-control w-full mr-2">
-                                <label className="label">
-                                    <span className="label-text">Cashier</span>
-                                </label>
-                                <Select
-                                    options={cashiers.map(cashier => ({
-                                        value: cashier.id,
-                                        label: cashier.name
-                                    }))}
-                                    onChange={(option) => setCashierId(option.value)}
-                                    placeholder="Select Cashier"
-                                />
+                            <div className="flex mb-3">
+                                <div className="form-control w-1/2 mr-2">
+                                    <label className="label">
+                                        <span className="label-text">Cashier</span>
+                                    </label>
+                                    <select
+                                        value={cashierId}
+                                        onChange={(e) => setCashierId(e.target.value)}
+                                        className="select select-bordered"
+                                        required
+                                    >
+                                        <option value="">-- Select Cashier --</option>
+                                        {cashiers.map(cashier => (
+                                            <option key={cashier.id} value={cashier.id}>
+                                                {cashier.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-control w-1/2 ml-2">
+                                    <label className="label">
+                                        <span className="label-text">Technician</span>
+                                    </label>
+                                    <select
+                                        value={technicianId}
+                                        onChange={(e) => setTechnicianId(e.target.value)}
+                                        className="select select-bordered"
+                                        required
+                                    >
+                                        <option value="">-- Select Technician --</option>
+                                        {technicians.map(technician => (
+                                            <option key={technician.id} value={technician.id}>
+                                                {technician.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
-
-                            <div className="form-control w-full ml-2">
-                                <label className="label">
-                                    <span className="label-text">Technician</span>
-                                </label>
-                                <Select
-                                    options={technicians.map(technician => ({
-                                        value: technician.id,
-                                        label: technician.name
-                                    }))}
-                                    onChange={(option) => setTechnicianId(option.value)}
-                                    placeholder="Select Technician"
-                                />
-                            </div>
-                        </div>
                             <div className="form-control mb-3 mt-8">
                                 <div className="flex items-center">
                                     <input
@@ -539,43 +590,52 @@ const ServiceFormModal = ({
                                 required
                             />
                         </div>
-                        <div className="form-control">
+                        <div className="form-control mb-3">
                             <label className="label">
-                                <span className="label-text text-green-600">Voucher</span>
+                                <span className="label-text">Down Payment</span>
                             </label>
-                            <select
-                                value={voucher}
-                                onChange={(e) => setVoucher(e.target.value)}
-                                className="select select-bordered"
-                            >
-                                <option value="">-- Select Voucher --</option>
-                                <option value="Voucher 1">Voucher 1</option>
-                                <option value="Voucher 2">Voucher 2</option>
-                            </select>
+                            <div className="flex items-center">
+                                <input
+                                    type="text"
+                                    value={downPayment}
+                                    onChange={handleDownPaymentChange}
+                                    placeholder="Enter Down Payment"
+                                    className="input input-bordered flex-grow"
+                                    required
+                                />
+                                <label className="flex items-center ml-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={isPaidOff}
+                                        onChange={() => setIsPaidOff(!isPaidOff)}
+                                        className="checkbox"
+                                    />
+                                    <span className="ml-1">Paid Off</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-green-600">Down Payment</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={formatCurrency(parseFloat(downPayment.replace(/[^0-9]/g, "")) || 0, false)}
-                                onChange={handleDownPaymentChange}
-                                className="input input-bordered"
-                                placeholder="Enter down payment"
-                            />
-                        </div>
-                        <div className="form-control">
+                    <div className="form-control">
                             <label className="label">
                                 <span className="label-text text-green-600">Total</span>
                             </label>
                             <input
                                 type="text"
-                                value={formatCurrency(total, false)} // No decimals for total as well
+                                value={formatCurrency(total)}
                                 readOnly
                                 className="input input-bordered"
+                            />
+                        </div>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text text-green-600">Remaining Payment</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={remaining === 'Paid' ? 'Paid' : formatCurrency(remaining)}
+                                readOnly
+                                className={`input input-bordered ${remaining === 'Paid' ? 'text-green-600' : ''}`} // Greenish color for "Paid"
                             />
                         </div>
                     </div>
@@ -591,11 +651,12 @@ const ServiceFormModal = ({
                         >
                             <option value="">-- Select Payment Type --</option>
                             <option value="Cash">Cash</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="E-Wallets">E-Wallets</option>
                             <option value="Credit Card">Credit Card</option>
-                            <option value="QR code">QR code</option>
+                            <option value="Cardless Credit">Cardless Credit</option>
                         </select>
-                </div>
-
+                    </div>
                 <div className="flex justify-center mb-3 mt-6 space-x-4">
                     <div className="form-control">
                         <button
