@@ -17,10 +17,10 @@ export default function AuthenticatedLayout({
     action = '',
 }) {
     const {
-        props: { auth, flash },
+        props: { auth = { user: null }, flash },
     } = usePage();
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         if (flash.message !== null) {
@@ -30,8 +30,12 @@ export default function AuthenticatedLayout({
 
     useEffect(() => {
         themeChange(false);
-        // 👆 false parameter is required for react project
     }, []);
+
+    if (!auth || !auth.user) {
+        router.visit(route('login'));
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="min-h-screen">
@@ -125,12 +129,12 @@ export default function AuthenticatedLayout({
                 <div className="mb-4"></div>
             </main>
             <button
-                onClick={() => setIsModalOpen(true)} // Open modal on click
+                onClick={() => setIsModalOpen(true)}
                 className="fixed bottom-4 right-4 p-4 rounded-full bg-blue-500 text-white shadow-lg"
             >
                 +
             </button>
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} /> {/* Modal component */}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
             <Toaster
                 theme="system"
                 richColors="true"

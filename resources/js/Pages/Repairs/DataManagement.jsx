@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
-import DataTable from '@/Components/DaisyUI/DataTable';
-import RepairDetailModal from "./RepairDetailModal"; // Import the RepairDetailModal
+import RepairDetailModal from "./RepairDetailModal";
 import ModalParent from './ModalParent';
 import axios from 'axios';
+import { AgGridReact } from 'ag-grid-react';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+
+// Register all AG Grid modules
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 const DataManagement = () => {
     const [search, setSearch] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
     const [repairs, setRepairs] = useState([]);
     const [customers, setCustomers] = useState([]);
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
@@ -25,16 +27,9 @@ const DataManagement = () => {
     const fetchRepairs = async () => {
         try {
             const response = await fetch('/api/repairs');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             const result = await response.json();
-            if (Array.isArray(result.data)) {
-                setRepairs(result.data);
-            } else {
-                console.error('Expected an array but got:', result.data);
-                setRepairs([]);
-            }
+            setRepairs(Array.isArray(result.data) ? result.data : []);
         } catch (error) {
             console.error('Error fetching repairs:', error);
             setRepairs([]);
@@ -53,11 +48,8 @@ const DataManagement = () => {
     const fetchUsersByRoleName = async (roleName) => {
         try {
             const response = await axios.get(`/api/users?role_name=${roleName}`);
-            if (roleName === 'Cashier') {
-                setCashiers(response.data);
-            } else if (roleName === 'Technician') {
-                setTechnicians(response.data);
-            }
+            if (roleName === 'Cashier') setCashiers(response.data);
+            else if (roleName === 'Technician') setTechnicians(response.data);
         } catch (error) {
             console.error(`Error fetching users:`, error.response ? error.response.data : error.message);
         }
@@ -83,10 +75,6 @@ const DataManagement = () => {
         return matchesSearch && matchesDateRange;
     });
 
-    const indexOfLastRepair = currentPage * itemsPerPage;
-    const indexOfFirstRepair = indexOfLastRepair - itemsPerPage;
-    const currentRepairs = filteredRepairs.slice(indexOfFirstRepair, indexOfLastRepair);
-
     const formatCurrency = (value) => {
         if (value === null || value === undefined) return 'Rp0';
         const number = parseFloat(value);
@@ -94,16 +82,39 @@ const DataManagement = () => {
         return `Rp${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
     };
 
-    const handleRowClick = (repair) => {
-        console.log('Selected repair:', repair); // Log the selected repair
-        setSelectedRepair(repair); // Set the selected repair
-        setRepairDetailModalOpen(true); // Open the RepairDetailModal
+    const handleRowClick = (event) => {
+        const repair = event.data;
+        console.log('Selected repair:', repair);
+        setSelectedRepair(repair);
+        setRepairDetailModalOpen(true);
     };
 
-    const mappedRepairs = currentRepairs.map(repair => ({
-        id: repair.id, // Keep the ID for internal use
+    // Column definitions for AG Grid
+    const columnDefs = useMemo(() => [
+        { headerName: "No", valueGetter: "node.rowIndex + 1", width: 70, resizable: true },
+        { headerName: "Entry Date", field: "entry_date", resizable: true },
+        { headerName: "Invoice", field: "invoice_number", resizable: true },
+        { headerName: "Customer", field: "customer", cellClass: 'text-green-600 font-bold', resizable: true },
+        { headerName: "Brand Model", field: "brand_model", resizable: true },
+        { headerName: "Damage Description", field: "damage_description", cellClass: 'text-red-500', resizable: true },
+        { headerName: "Notes", field: "notes", resizable: true },
+        { headerName: "Total", field: "total", cellClass: 'text-purple-700 font-bold', resizable: true },
+        { headerName: "Payment", field: "payment", resizable: true },
+        { headerName: "Status", field: "status", resizable: true },
+        {
+            headerName: "Actions",
+            cellRenderer: (params) => {
+                return `<button class="btn btn-primary" onclick="handleEdit(${params.data.id})">Edit</button>`;
+            },
+            resizable: true,
+            width: 100
+        }
+    ], []);
+
+    const rowData = useMemo(() => filteredRepairs.map(repair => ({
+        id: repair.id,
         entry_date: repair.entry_date,
-        invoice: repair.invoice_number,
+        invoice_number: repair.invoice_number,
         customer: customers.find(customer => customer.id === repair.customer_id)?.name || 'N/A',
         brand_model: `${repair.phone_brand} ${repair.phone_model}`,
         damage_description: repair.damage_description,
@@ -111,9 +122,36 @@ const DataManagement = () => {
         total: formatCurrency(repair.total_price),
         payment: repair.payment_method || 'N/A',
         status: repair.status || 'Pending',
-        admin: cashiers.find(c => c.id === repair.cashier_id)?.name || 'N/A',
-        technician: technicians.find(t => t.id === repair.technician_id)?.name || 'N/A',
-    }));
+    })), [filteredRepairs, customers]);
+
+    const onGridSizeChanged = useCallback((params) => {
+        const gridWidth = document.querySelector('.ag-body-viewport').clientWidth;
+        const columnsToShow = [];
+        const columnsToHide = [];
+        let totalColsWidth = 0;
+        const allColumns = params.api.getAllColumns();
+
+        if (allColumns && allColumns.length > 0) {
+            for (let i = 0; i < allColumns.length; i++) {
+                const column = allColumns[i];
+                totalColsWidth += column.getMinWidth();
+                if (totalColsWidth > gridWidth) {
+                    columnsToHide.push(column.getColId());
+                } else {
+                    columnsToShow.push(column.getColId());
+                }
+            }
+        }
+
+        // Show/hide columns based on current grid width
+        params.api.setColumnsVisible(columnsToShow, true);
+        params.api.setColumnsVisible(columnsToHide, false);
+
+        // Wait until columns stopped moving and fill out any available space
+        window.setTimeout(() => {
+            params.api.sizeColumnsToFit();
+        }, 10);
+    }, []);
 
     return (
         <AuthenticatedLayout page="Data Management">
@@ -141,33 +179,34 @@ const DataManagement = () => {
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
 
-                <DataTable
-                    headers={['No', 'Entry Date', 'Invoice', 'Customer', 'Brand Model', 'Damage Description', 'Notes', 'Total', 'Payment', 'Status', 'Admin', 'Technician']}
-                    data={mappedRepairs} // Pass the mapped repairs including the ID
-                    onRowClick={handleRowClick} // Pass the row click handler
-                />
-
-                <div className="mt-4">
-                    {/* Pagination logic remains the same... */}
+                <div className="ag-theme-alpine" style={{ height: 400, width: '100%' }}>
+                    <AgGridReact
+                        columnDefs={columnDefs}
+                        rowData={rowData}
+                        onRowClicked={handleRowClick}
+                        onGridSizeChanged={onGridSizeChanged}
+                        pagination={true}
+                        paginationPageSize={5}
+                    />
                 </div>
 
                 {/* Modal Parent */}
                 <ModalParent
-                    isServiceFormModalOpen ={isServiceFormModalOpen}
+                    isServiceFormModalOpen={isServiceFormModalOpen}
                     setServiceFormModalOpen={setServiceFormModalOpen}
                     isRepairDetailModalOpen={isRepairDetailModalOpen}
                     setRepairDetailModalOpen={setRepairDetailModalOpen}
-                    selectedRepair={selectedRepair} // Pass the selected repair details
+                    selectedRepair={selectedRepair}
                 />
 
                 {/* Repair Detail Modal */}
                 <RepairDetailModal
                     isOpen={isRepairDetailModalOpen}
                     onClose={() => setRepairDetailModalOpen(false)}
-                    repair={selectedRepair} // Pass the selected repair details
-                    customers={customers} // Pass the customers array
-                    cashiers={cashiers} // Pass the cashiers array
-                    technicians={technicians} // Pass the technicians array
+                    repair={selectedRepair}
+                    customers={customers}
+                    cashiers={cashiers}
+                    technicians={technicians}
                 />
             </div>
         </AuthenticatedLayout>

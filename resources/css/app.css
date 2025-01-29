@@ -109,3 +109,22 @@
     transition: opacity 200ms;
 }
 
+.text-green-600 {
+    color: #38a169; /* Customize green color */
+}
+
+.text-blue-600 {
+    color: #3182ce; /* Customize blue color */
+}
+
+.text-red-500 {
+    color: #e53e3e; /* Customize red color */
+}
+
+.text-purple-700 {
+    color: #6b46c1; /* Customize purple color */
+}
+
+.font-bold {
+    font-weight: bold;
+}
