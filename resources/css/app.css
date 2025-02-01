@@ -128,3 +128,19 @@
 .font-bold {
     font-weight: bold;
 }
+
+.repair-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.repair-detail-table th, .repair-detail-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.repair-detail-table th {
+    background-color: #f4f4f4;
+}
