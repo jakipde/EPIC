@@ -144,3 +144,24 @@
 .repair-detail-table th {
     background-color: #f4f4f4;
 }
+
+.expand-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #007bff; /* Bootstrap primary color for example */
+}
+
+.expand-button:hover {
+    color: #0056b3; /* Darker shade on hover */
+}
+
+.ag-theme-alpine .ag-row-detail {
+    background-color: #f9f9f9;
+}
+
+.ag-theme-alpine .ag-row-detail .ag-cell {
+    border: 1px solid #ccc;
+    padding: 8px;
+}

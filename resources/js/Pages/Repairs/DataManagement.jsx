@@ -7,6 +7,8 @@ import axios from 'axios';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { MasterDetailModule } from 'ag-grid-enterprise';
+import RepairDetailModal from "./RepairDetailModal"; // Import the RepairDetailModal
+import ModalParent from './ModalParent';
 
 // Register all AG Grid modules including MasterDetailModule
 ModuleRegistry.registerModules([AllCommunityModule, MasterDetailModule]);
@@ -17,6 +19,11 @@ const DataManagement = () => {
     const [endDate, setEndDate] = useState('');
     const [repairs, setRepairs] = useState([]);
     const [customers, setCustomers] = useState([]);
+    const [cashiers, setCashiers] = useState([]);
+    const [technicians, setTechnicians] = useState([]);
+    const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
+    const [isRepairDetailModalOpen, setRepairDetailModalOpen] = useState(false);
+    const [selectedRepair, setSelectedRepair] = useState(null);
 
     const fetchRepairs = async () => {
         try {
@@ -37,9 +44,29 @@ const DataManagement = () => {
         }
     };
 
+    const fetchCashiers = async () => {
+        try {
+            const response = await axios.get('/api/cashiers');
+            setCashiers(response.data);
+        } catch (error) {
+            console.error('Error fetching cashiers:', error);
+        }
+    };
+
+    const fetchTechnicians = async () => {
+        try {
+            const response = await axios.get('/api/technicians');
+            setTechnicians(response.data);
+        } catch (error) {
+            console.error('Error fetching technicians:', error);
+        }
+    };
+
     useEffect(() => {
         fetchRepairs();
         fetchCustomers();
+        fetchCashiers();
+        fetchTechnicians();
     }, []);
 
     const filteredRepairs = repairs.filter(repair => {
@@ -57,7 +84,20 @@ const DataManagement = () => {
     };
 
     const columnDefs = useMemo(() => [
-        { headerName: "No", valueGetter: "node.rowIndex + 1", width: 70, resizable: true },
+        {
+            headerName: "No",
+            valueGetter: "node.rowIndex + 1",
+            width: 70,
+            resizable: true,
+            cellRenderer: (params) => (
+                <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => params.node.setExpanded(!params.node.expanded)}>
+                    <span>{params.node.rowIndex + 1}</span>
+                    <button className={`expand-button ${params.node.expanded ? 'expanded' : ''}`} style={{ marginLeft: '5px', background: 'none', border: 'none' }}>
+                        {params.node.expanded ? "▼" : "►"}
+                    </button>
+                </div>
+            ),
+        },
         { headerName: "Entry Date", field: "entry_date", flex: 1, resizable: true },
         { headerName: "Invoice", field: "invoice_number", flex: 1, resizable: true },
         { headerName: "Customer", field: "customer", flex: 1, resizable: true },
@@ -85,39 +125,66 @@ const DataManagement = () => {
     const detailCellRendererParams = useMemo(() => ({
         detailGridOptions: {
             columnDefs: [
-                { headerName: "Column", field: "column" },
-                { headerName: "Value", field: "value" },
+                { headerName: "Entry Date", field: "entry_date" },
+                { headerName: "Invoice Number", field: "invoice_number" },
+                { headerName: "Customer Name", field: "customer_name" },
+                { headerName: "Cashier Name", field: "cashier_name" },
+                { headerName: "Technician Name", field: "technician_name" },
+                { headerName: "Phone Brand", field: "phone_brand" },
+                { headerName: "Phone Model", field: "phone_model" },
+                { headerName: "IMEI SN 1", field: "imei_sn_1" },
+                { headerName: "IMEI SN 2", field: "imei_sn_2" },
+                { headerName: "Damage Description", field: "damage_description" },
+                { headerName: "Under Warranty", field: "under_warranty" },
+                { headerName: "Warranty Duration", field: "warranty_duration" },
+                { headerName: "Notes", field: "notes" },
+                { headerName: "Repair Type", field: "repair_type" },
+                { headerName: "Service Type", field: "service_type" },
+                { headerName: "Total Price", field: "total_price" },
+                { headerName: "Down Payment", field: "down_payment" },
+                { headerName: "Remaining Payment", field: "remaining_payment" },
+                { headerName: "Payment Method", field: "payment_method" },
+                { headerName: "Payment Status", field: "payment_status" },
             ],
+            getRowNodeId: (data) => data.invoice_number,
         },
         getDetailRowData: params => {
-            const repairDetails = params.data; // Use the main row data for details
+            const repairDetails = params.data;
+            const customer = customers.find(c => c.id === repairDetails.customer_id);
+            const cashier = cashiers.find(c => c.id === repairDetails.cashier_id);
+            const technician = technicians.find(t => t.id === repairDetails.technician_id);
+
             params.successCallback([
-                { column: "Entry Date", value: repairDetails.entry_date },
-                { column: "Invoice Number", value: repairDetails.invoice_number },
-                { column: "Customer Name", value: customers.find(customer => customer.id === repairDetails.customer_id)?.name || 'N/A' },
-                { column: "Cashier Name", value: repairDetails.cashierName },
-                { column: "Technician Name", value: repairDetails.technicianName },
-                { column: "Phone Brand", value: repairDetails.phone_brand },
-                { column: "Phone Model", value: repairDetails.phone_model },
-                { column: "IMEI SN 1", value: repairDetails.imei_sn_1 },
-                { column: "IMEI SN 2", value: repairDetails.imei_sn_2 },
-                { column: "Damage Description", value: repairDetails.damage_description },
-                { column: "Under Warranty", value: repairDetails.under_warranty ? 'Yes' : 'No' },
-                { column: "Warranty Duration", value: `${repairDetails.warranty_duration} ${repairDetails.warranty_unit}` },
-                { column: "Notes", value: repairDetails.notes },
-                { column: "Repair Type", value: repairDetails.repair_type },
-                { column: "Service Type", value: repairDetails.service_type },
-                { column: "Total Price", value: repairDetails.total_price },
-                { column: "Down Payment", value: repairDetails.down_payment },
-                { column: "Remaining Payment", value: repairDetails.remaining_payment },
-                { column: "Payment Method", value: repairDetails.payment_method },
-                { column: "Payment Status", value: repairDetails.payment_status },
-                { column: "Technician Notes", value: repairDetails.technician_notes },
-                { column: "Repair Timeline", value: repairDetails.timeline },
-                { column: "Parts Used", value: repairDetails.parts_used },
+                {
+                    entry_date: repairDetails.entry_date,
+                    invoice_number: repairDetails.invoice_number,
+                    customer_name: customer ? customer.name : 'N/A',
+                    cashier_name: cashier ? cashier.name : 'N/A',
+                    technician_name: technician ? technician.name : 'N/A',
+                    phone_brand: repairDetails.phone_brand,
+                    phone_model: repairDetails.phone_model,
+                    imei_sn_1: repairDetails.imei_sn_1,
+                    imei_sn_2: repairDetails.imei_sn_2,
+                    damage_description: repairDetails.damage_description,
+                    under_warranty: repairDetails.under_warranty ? 'Yes' : 'No',
+                    warranty_duration: `${repairDetails.warranty_duration} ${repairDetails.warranty_unit}`,
+                    notes: repairDetails.notes,
+                    repair_type: repairDetails.repair_type,
+                    service_type: repairDetails.service_type,
+                    total_price: formatCurrency(repairDetails.total_price),
+                    down_payment: formatCurrency(repairDetails.down_payment),
+                    remaining_payment: formatCurrency(repairDetails.remaining_payment),
+                    payment_method: repairDetails.payment_method,
+                    payment_status: repairDetails.payment_status,
+                }
             ]);
         }
-    }), [customers]);
+    }), [customers, cashiers, technicians]);
+
+    const handleRowClick = (params) => {
+        setSelectedRepair(params.data);
+        setRepairDetailModalOpen(true);
+    };
 
     return (
         <AuthenticatedLayout page="Data Management">
@@ -142,10 +209,10 @@ const DataManagement = () => {
                         value={search}
                         placeholder="Search repairs..."
                     />
-                    <Button size="sm" type="primary" className="ml-2">Add Data</Button>
+                    <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
 
-                <div className="ag-theme-alpine" style={{ height: 400, width: '100%' }}>
+                <div className="ag-theme-alpine" style={{ height: 500, width: '100%' }}>
                     <AgGridReact
                         columnDefs={columnDefs}
                         rowData={rowData}
@@ -153,145 +220,30 @@ const DataManagement = () => {
                         detailCellRendererParams={detailCellRendererParams}
                         pagination={true}
                         paginationPageSize={5}
-                        onRowClicked={(params) => params.node.setExpanded(!params.node.expanded)} // Toggle row expansion
+                        onRowClicked={handleRowClick}
                     />
                 </div>
+
+                {/* Modal Parent */}
+                <ModalParent
+                    isServiceFormModalOpen={isServiceFormModalOpen}
+                    setServiceFormModalOpen={setServiceFormModalOpen}
+                    isRepairDetailModalOpen={isRepairDetailModalOpen}
+                    setRepairDetailModalOpen={setRepairDetailModalOpen}
+                    selectedRepair={selectedRepair} // Pass the selected repair details
+                />
+
+                {/* Repair Detail Modal
+                <RepairDetailModal
+                    isOpen={isRepairDetailModalOpen}
+                    onClose={() => setRepairDetailModalOpen(false)}
+                    repair={selectedRepair} // Pass the selected repair details
+                    customers={customers} // Pass the customers array
+                    cashiers={cashiers} // Pass the cashiers array
+                    technicians={technicians} // Pass the technicians array
+                /> */}
             </div>
         </AuthenticatedLayout>
-    );
-};
-
-// RepairDetailRenderer component
-const RepairDetailRenderer = ({ data }) => {
-    const [repairDetails, setRepairDetails] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchRepairDetails = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const response = await axios.get(`/api/repairs/${data.id}`);
-                setRepairDetails(response.data);
-            } catch (error) {
-                setError('Error fetching repair details.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchRepairDetails();
-    }, [data.id]);
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>{error}</div>;
-
-    return (
-        <div className="repair-detail-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Column</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Entry Date</td>
-                        <td>{repairDetails.entry_date}</td>
-                    </tr>
-                    <tr>
-                        <td>Invoice Number</td>
-                        <td>{repairDetails.invoice_number}</td>
-                    </tr>
-                    <tr>
-                        <td>Customer Name</td>
-                        <td>{customers.find(customer => customer.id === repairDetails.customer_id)?.name || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td>Cashier Name</td>
-                        <td>{repairDetails.cashierName}</td>
-                    </tr>
-                    <tr>
-                        <td>Technician Name</td>
-                        <td>{repairDetails.technicianName}</td>
-                    </tr>
-                    <tr>
-                        <td>Phone Brand</td>
-                        <td>{repairDetails.phone_brand}</td>
-                    </tr>
-                    <tr>
-                        <td>Phone Model</td>
-                        <td>{repairDetails.phone_model}</td>
-                    </tr>
-                    <tr>
-                        <td>IMEI SN 1</td>
-                        <td>{repairDetails.imei_sn_1}</td>
-                    </tr>
-                    <tr>
-                        <td>IMEI SN 2</td>
-                        <td>{repairDetails.imei_sn_2}</td>
-                    </tr>
-                    <tr>
-                        <td>Damage Description</td>
-                        <td>{repairDetails.damage_description}</td>
-                    </tr>
-                    <tr>
-                        <td>Under Warranty</td>
-                        <td>{repairDetails.under_warranty ? 'Yes' : 'No'}</td>
-                    </tr>
-                    <tr>
-                        <td>Warranty Duration</td>
-                        <td>{`${repairDetails.warranty_duration} ${repairDetails.warranty_unit}`}</td>
-                    </tr>
-                    <tr>
-                        <td>Notes</td>
-                        <td>{repairDetails.notes}</td>
-                    </tr>
-                    <tr>
-                        <td>Repair Type</td>
-                        <td>{repairDetails.repair_type}</td>
-                    </tr>
-                    <tr>
-                        <td>Service Type</td>
-                        <td>{repairDetails.service_type}</td>
-                    </tr>
-                    <tr>
-                        <td>Total Price</td>
-                        <td>{repairDetails.total_price}</td>
-                    </tr>
-                    <tr>
-                        <td>Down Payment</td>
-                        <td>{repairDetails.down_payment}</td>
-                    </tr>
-                    <tr>
-                        <td>Remaining Payment</td>
-                        <td>{repairDetails.remaining_payment}</td>
-                    </tr>
-                    <tr>
-                        <td>Payment Method</td>
-                        <td>{repairDetails.payment_method}</td>
-                    </tr>
-                    <tr>
-                        <td>Payment Status</td>
-                        <td>{repairDetails.payment_status}</td>
-                    </tr>
-                    <tr>
-                        <td>Technician Notes</td>
-                        <td>{repairDetails.technician_notes}</td>
-                    </tr>
-                    <tr>
-                        <td>Repair Timeline</td>
-                        <td>{repairDetails.timeline}</td>
-                    </tr>
-                    <tr>
-                        <td>Parts Used</td>
-                        <td>{repairDetails.parts_used}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     );
 };
 
