@@ -165,3 +165,7 @@
     border: 1px solid #ccc;
     padding: 8px;
 }
+
+.text-center {
+    text-align: center;
+}

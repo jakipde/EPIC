@@ -39,8 +39,8 @@ class RepairsController extends Controller
         $validator = Validator::make($request->all(), [
             'entry_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
-            'cashier_id' => 'required|exists:users,id',
-            'technician_id' => 'required|exists:users,id',
+            'cashier_name' => 'required|exists:users,id',
+            'technician_name' => 'required|exists:users,id',
             'phone_brand' => 'required|string|max:255',
             'phone_model' => 'required|string|max:255',
             'imei_sn_1' => 'nullable|string|max:255',
@@ -96,8 +96,8 @@ class RepairsController extends Controller
         $request->validate([
             'entry_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
-            'cashier_id' => 'required|exists:users,id',
-            'technician_id' => 'required|exists:users,id',
+            'cashier_name' => 'required|exists:users,id',
+            'technician_name' => 'required|exists:users,id',
             'phone_brand' => 'required|string|max:255',
             'phone_model' => 'required|string|max:255',
             'damage_description' => 'required|string',

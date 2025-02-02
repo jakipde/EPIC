@@ -3,12 +3,15 @@ import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
+import StatusButton from '@/components/StatusButton';
 import axios from 'axios';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { MasterDetailModule } from 'ag-grid-enterprise';
-import RepairDetailModal from "./RepairDetailModal"; // Import the RepairDetailModal
+import RepairDetailModal from "./RepairDetailModal";
 import ModalParent from './ModalParent';
+import Modal from '@/Components/DaisyUI/Modal';
+import './StatusButtonTest.css'; // Import custom CSS
 
 // Register all AG Grid modules including MasterDetailModule
 ModuleRegistry.registerModules([AllCommunityModule, MasterDetailModule]);
@@ -24,6 +27,8 @@ const DataManagement = () => {
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
     const [isRepairDetailModalOpen, setRepairDetailModalOpen] = useState(false);
     const [selectedRepair, setSelectedRepair] = useState(null);
+    const [statusModalOpen, setStatusModalOpen] = useState(false);
+    const [currentRepair, setCurrentRepair] = useState(null);
 
     const fetchRepairs = async () => {
         try {
@@ -44,29 +49,24 @@ const DataManagement = () => {
         }
     };
 
-    const fetchCashiers = async () => {
+    const fetchUsersByRoleName = async (roleName) => {
         try {
-            const response = await axios.get('/api/cashiers');
-            setCashiers(response.data);
+            const response = await axios.get(`/api/users?role_name=${roleName}`);
+            if (roleName === 'Cashier') {
+                setCashiers(response.data);
+            } else if (roleName === 'Technician') {
+                setTechnicians(response.data);
+            }
         } catch (error) {
-            console.error('Error fetching cashiers:', error);
-        }
-    };
-
-    const fetchTechnicians = async () => {
-        try {
-            const response = await axios.get('/api/technicians');
-            setTechnicians(response.data);
-        } catch (error) {
-            console.error('Error fetching technicians:', error);
+            console.error(`Error fetching users:`, error.response ? error.response.data : error.message);
         }
     };
 
     useEffect(() => {
         fetchRepairs();
         fetchCustomers();
-        fetchCashiers();
-        fetchTechnicians();
+        fetchUsersByRoleName('Cashier');
+        fetchUsersByRoleName('Technician');
     }, []);
 
     const filteredRepairs = repairs.filter(repair => {
@@ -79,111 +79,178 @@ const DataManagement = () => {
     });
 
     const formatCurrency = (value) => {
-        if (value === null || value === undefined) return 'Rp0';
+        if (value === null || value === undefined || isNaN(value)) return 'Rp0';
         return `Rp${parseFloat(value).toLocaleString()}`;
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')} ${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+    };
+
+    const handleStatusChange = (repair) => {
+        setCurrentRepair(repair);
+        setStatusModalOpen(true);
+    };
+
+    const confirmStatusChange = () => {
+        const nextStatus = getNextStatus(currentRepair.status);
+        setRepairs(repairs.map(repair =>
+            repair.id === currentRepair.id ? { ...repair, status: nextStatus } : repair
+        ));
+        setStatusModalOpen(false);
+    };
+
+    const getNextStatus = (currentStatus) => {
+        const statusOrder = ["Queue", "Process", "Done", "Taken", "Refund"];
+        const currentIndex = statusOrder.indexOf(currentStatus);
+        return statusOrder[(currentIndex + 1) % statusOrder.length];
     };
 
     const columnDefs = useMemo(() => [
         {
             headerName: "No",
-            valueGetter: "node.rowIndex + 1",
-            width: 70,
+            valueGetter: (params) => {
+                const rowIndex = filteredRepairs.findIndex(r => r.id === params.data.id);
+                return rowIndex + 1;
+            },
+            flex: 0.4,
             resizable: true,
+            sortable: true,
+            editable: false,
+            headerClass: 'text-center', // Center header text
             cellRenderer: (params) => (
-                <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => params.node.setExpanded(!params.node.expanded)}>
-                    <span>{params.node.rowIndex + 1}</span>
-                    <button className={`expand-button ${params.node.expanded ? 'expanded' : ''}`} style={{ marginLeft: '5px', background: 'none', border: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px' }}>
+                    <span>{params.value}</span>
+                    <button
+                        className={`expand-button ${params.node.expanded ? 'expanded' : ''}`}
+                        style={{ marginLeft: '5px', background: 'none', border: 'none' }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            params.node.setExpanded(!params.node.expanded);
+                        }}
+                    >
                         {params.node.expanded ? "▼" : "►"}
                     </button>
                 </div>
             ),
         },
-        { headerName: "Entry Date", field: "entry_date", flex: 1, resizable: true },
-        { headerName: "Invoice", field: "invoice_number", flex: 1, resizable: true },
-        { headerName: "Customer", field: "customer", flex: 1, resizable: true },
-        { headerName: "Brand Model", field: "brand_model", flex: 1, resizable: true },
-        { headerName: "Damage Description", field: "damage_description", flex: 2, resizable: true },
-        { headerName: "Notes", field: "notes", flex: 1, resizable: true },
-        { headerName: "Total", field: "total", flex: 1, resizable: true },
-        { headerName: "Payment", field: "payment", flex: 1, resizable: true },
-        { headerName: "Status", field: "status", flex: 1, resizable: true },
-    ], []);
+        {
+            headerName: "Entry Date",
+            field: "entry_date",
+            flex: 1.1,
+            resizable: true,
+            sortable: true,
+            editable: false,
+            headerClass: 'text-center', // Center header text
+            valueGetter: (params) => {
+                const date = new Date(params.data.entry_date);
+                return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')} ${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+            }
+        },
+        { headerName: "Customer", field: "customer", flex: 0.8, resizable: true, sortable: true, editable: false, headerClass: 'text-center' },
+        { headerName: "Brand Model", field: "brand_model", flex: 1.3, resizable: true, sortable: true, editable: false, headerClass: 'text-center' },
+        { headerName: "Damage Description", field: "damage_description", flex: 1.4, resizable: true, sortable: true, editable: false, headerClass: 'text-center' },
+        { headerName: "Total", field: "total", flex: 0.7, resizable: true, sortable: true, editable: false, headerClass: 'text-center' },
+        {
+            headerName: "Status",
+            field: "status",
+            flex: 0.8,
+            resizable: true,
+            sortable: true,
+            editable: false,
+            headerClass: 'text-center',
+            cellRenderer: (params) => {
+                return (
+                    <span
+                        className={`status-button-custom ${params.value.toLowerCase()}`}
+                        onClick={() => handleStatusChange(params.data)}
+                    >
+                        {params.value}
+                    </span>
+                );
+            }
+        },
+    ], [filteredRepairs]);
 
     const rowData = useMemo(() => filteredRepairs.map(repair => ({
         id: repair.id,
         entry_date: repair.entry_date,
-        invoice_number: repair.invoice_number,
         customer: customers.find(customer => customer.id === repair.customer_id)?.name || 'N/A',
         brand_model: `${repair.phone_brand} ${repair.phone_model}`,
         damage_description: repair.damage_description,
         notes: repair.notes,
         total: formatCurrency(repair.total_price),
-        payment: repair.payment_method || 'N/A',
-        status: repair.status || 'Pending',
+        status: repair.status || 'Queue',
     })), [filteredRepairs, customers]);
 
     const detailCellRendererParams = useMemo(() => ({
         detailGridOptions: {
             columnDefs: [
-                { headerName: "Entry Date", field: "entry_date" },
-                { headerName: "Invoice Number", field: "invoice_number" },
-                { headerName: "Customer Name", field: "customer_name" },
-                { headerName: "Cashier Name", field: "cashier_name" },
-                { headerName: "Technician Name", field: "technician_name" },
-                { headerName: "Phone Brand", field: "phone_brand" },
-                { headerName: "Phone Model", field: "phone_model" },
-                { headerName: "IMEI SN 1", field: "imei_sn_1" },
-                { headerName: "IMEI SN 2", field: "imei_sn_2" },
-                { headerName: "Damage Description", field: "damage_description" },
-                { headerName: "Under Warranty", field: "under_warranty" },
-                { headerName: "Warranty Duration", field: "warranty_duration" },
-                { headerName: "Notes", field: "notes" },
-                { headerName: "Repair Type", field: "repair_type" },
-                { headerName: "Service Type", field: "service_type" },
-                { headerName: "Total Price", field: "total_price" },
-                { headerName: "Down Payment", field: "down_payment" },
-                { headerName: "Remaining Payment", field: "remaining_payment" },
-                { headerName: "Payment Method", field: "payment_method" },
-                { headerName: "Payment Status", field: "payment_status" },
+                { headerName: "Invoice Number", field: "invoice_number", headerClass: 'text-center' },
+                { headerName: "Cashier Name", field: "cashier_name", headerClass: 'text-center' },
+                { headerName: "Technician Name", field: "technician_name", headerClass: 'text-center' },
+                { headerName: "IMEI SN 1", field: "imei_sn_1", headerClass: 'text-center' },
+                { headerName: "IMEI SN 2", field: "imei_sn_2", headerClass: 'text-center' },
+                { headerName: "Under Warranty", field: "under_warranty", headerClass: 'text-center' },
+                { headerName: "Warranty Duration", field: "warranty_duration", headerClass: 'text-center' },
+                { headerName: "Notes", field: "notes", headerClass: 'text-center' },
+                { headerName: "Repair Type", field: "repair_type", headerClass: 'text-center' },
+                { headerName: "Service Type", field: "service_type", headerClass: 'text-center' },
+                { headerName: "Total Price", field: "total_price", headerClass: 'text-center' },
+                { headerName: "Down Payment", field: "down_payment", headerClass: 'text-center' },
+                { headerName: "Remaining Payment", field: "remaining_payment", headerClass: 'text-center' },
+                { headerName: "Payment Method", field: "payment_method", headerClass: 'text-center' },
+                { headerName: "Payment Status", field: "payment_status", headerClass: 'text-center' },
             ],
+            defaultColDef: {
+                flex: 1,
+                resizable: true,
+                sortable: true,
+                editable: false,
+            },
+            domLayout: 'normal', // Allow horizontal scrolling
             getRowNodeId: (data) => data.invoice_number,
         },
-        getDetailRowData: params => {
-            const repairDetails = params.data;
-            const customer = customers.find(c => c.id === repairDetails.customer_id);
-            const cashier = cashiers.find(c => c.id === repairDetails.cashier_id);
-            const technician = technicians.find(t => t.id === repairDetails.technician_id);
+        getDetailRowData: async (params) => {
+            try {
+                const response = await axios.get(`/api/repairs/${params.data.id}`);
+                const repairData = response.data;
 
-            params.successCallback([
-                {
-                    entry_date: repairDetails.entry_date,
-                    invoice_number: repairDetails.invoice_number,
-                    customer_name: customer ? customer.name : 'N/A',
-                    cashier_name: cashier ? cashier.name : 'N/A',
-                    technician_name: technician ? technician.name : 'N/A',
-                    phone_brand: repairDetails.phone_brand,
-                    phone_model: repairDetails.phone_model,
-                    imei_sn_1: repairDetails.imei_sn_1,
-                    imei_sn_2: repairDetails.imei_sn_2,
-                    damage_description: repairDetails.damage_description,
-                    under_warranty: repairDetails.under_warranty ? 'Yes' : 'No',
-                    warranty_duration: `${repairDetails.warranty_duration} ${repairDetails.warranty_unit}`,
-                    notes: repairDetails.notes,
-                    repair_type: repairDetails.repair_type,
-                    service_type: repairDetails.service_type,
-                    total_price: formatCurrency(repairDetails.total_price),
-                    down_payment: formatCurrency(repairDetails.down_payment),
-                    remaining_payment: formatCurrency(repairDetails.remaining_payment),
-                    payment_method: repairDetails.payment_method,
-                    payment_status: repairDetails.payment_status,
-                }
-            ]);
+                const customer = customers.find(c => c.id === repairData.customer_id);
+                const cashier = cashiers.find(c => c.id === repairData.cashier_id);
+                const technician = technicians.find(t => t.id === repairData.technician_id);
+
+                params.successCallback([
+                    {
+                        invoice_number: repairData.invoice_number,
+                        cashier_name: cashier ? cashier.name : 'N/A',
+                        technician_name: technician ? technician.name : 'N/A',
+                        imei_sn_1: repairData.imei_sn_1,
+                        imei_sn_2: repairData.imei_sn_2,
+                        under_warranty: repairData.under_warranty ? 'Yes' : 'No',
+                        warranty_duration: `${repairData.warranty_duration} ${repairData.warranty_unit}`,
+                        notes: repairData.notes,
+                        repair_type: repairData.repair_type,
+                        service_type: repairData.service_type,
+                        total_price: formatCurrency(repairData.total_price),
+                        down_payment: formatCurrency(repairData.down_payment),
+                        remaining_payment: formatCurrency(repairData.remaining_payment),
+                        payment_method: repairData.payment_method,
+                        payment_status: repairData.payment_status,
+                    }
+                ]);
+            } catch (error) {
+                console.error('Error fetching repair details:', error);
+                params.failCallback();
+            }
         }
     }), [customers, cashiers, technicians]);
 
     const handleRowClick = (params) => {
-        setSelectedRepair(params.data);
-        setRepairDetailModalOpen(true);
+        // Commenting out the modal opening logic
+        // setSelectedRepair(params.data);
+        // setRepairDetailModalOpen(true);
     };
 
     return (
@@ -212,7 +279,7 @@ const DataManagement = () => {
                     <Button size="sm" type="primary" className="ml-2" onClick={() => setServiceFormModalOpen(true)}>Add Data</Button>
                 </div>
 
-                <div className="ag-theme-alpine" style={{ height: 500, width: '100%' }}>
+                <div className="ag-theme-alpine" style={{ height: 600, width: '100%' }}>
                     <AgGridReact
                         columnDefs={columnDefs}
                         rowData={rowData}
@@ -221,8 +288,23 @@ const DataManagement = () => {
                         pagination={true}
                         paginationPageSize={5}
                         onRowClicked={handleRowClick}
+                        suppressReactUi={true}
+                        domLayout='autoHeight'
+                        className="ag-theme-quartz"
                     />
                 </div>
+
+                {/* Status Change Modal */}
+                <Modal isOpen={statusModalOpen} onClose={() => setStatusModalOpen(false)}>
+                    <div className="p-4">
+                        <h2 className="text-lg font-bold mb-4">Confirm Status Change</h2>
+                        <p>Are you sure you want to change the status to {getNextStatus(currentRepair?.status)}?</p>
+                        <div className="flex justify-end mt-4">
+                            <Button size="sm" type="secondary" className="mr-2" onClick={() => setStatusModalOpen(false)}>Cancel</Button>
+                            <Button size="sm" type="primary" onClick={confirmStatusChange}>Confirm</Button>
+                        </div>
+                    </div>
+                </Modal>
 
                 {/* Modal Parent */}
                 <ModalParent
@@ -230,18 +312,8 @@ const DataManagement = () => {
                     setServiceFormModalOpen={setServiceFormModalOpen}
                     isRepairDetailModalOpen={isRepairDetailModalOpen}
                     setRepairDetailModalOpen={setRepairDetailModalOpen}
-                    selectedRepair={selectedRepair} // Pass the selected repair details
+                    selectedRepair={selectedRepair}
                 />
-
-                {/* Repair Detail Modal
-                <RepairDetailModal
-                    isOpen={isRepairDetailModalOpen}
-                    onClose={() => setRepairDetailModalOpen(false)}
-                    repair={selectedRepair} // Pass the selected repair details
-                    customers={customers} // Pass the customers array
-                    cashiers={cashiers} // Pass the cashiers array
-                    technicians={technicians} // Pass the technicians array
-                /> */}
             </div>
         </AuthenticatedLayout>
     );
