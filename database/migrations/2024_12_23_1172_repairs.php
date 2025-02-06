@@ -9,8 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('repairs', function (Blueprint $table) {
-            $table->id();  // Primary key
-            $table->date('entry_date');
+            $table->id();
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
             $table->string('invoice_number')->nullable();
             $table->ulid('cashier_id')->nullable();
@@ -30,16 +29,15 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2);
             $table->decimal('down_payment', 10, 2)->nullable();
             $table->decimal('sub_total', 10, 2)->nullable();
-            $table->string('payment_status')->default('Pending'); // New column for payment status
-            $table->decimal('remaining_payment', 10, 2)->default(0); // New column for remaining payment
-            $table->string('repair_status')->default('pending');
+            $table->string('payment_status');
+            $table->decimal('remaining_payment', 10, 2)->default(0);
+            $table->string('repair_status')->default('Queue');
             $table->date('exit_date')->nullable();
             $table->string('print_type')->nullable();
             $table->json('completeness')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
-            // Define foreign keys
             $table->foreign('cashier_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('technician_id')->references('id')->on('users')->onDelete('set null');
         });

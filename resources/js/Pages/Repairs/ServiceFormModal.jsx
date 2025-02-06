@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react'; // Add useState and useEffect here
 import axios from 'axios';
 import Select from 'react-select';
 
@@ -8,14 +8,15 @@ const ServiceFormModal = ({
     onAddRepair,
     setNewCustomerModalOpen,
     setPrintModalOpen,
-    customers,
+    customers = [], // Default to an empty array
     setCustomers,
     selectedCustomerId,
     setCompletenessModalOpen,
     completeness,
+    createdAt,
+    currentRepair,
 }) => {
-    // State declarations
-    const [entryDate, setEntryDate] = useState('');
+    const [entryDate, setEntryDate] = useState(createdAt || '');
     const [customerId, setCustomerId] = useState(selectedCustomerId || '');
     const [customerPhone, setCustomerPhone] = useState('');
     const [cashierId, setCashierId] = useState(null);
@@ -59,6 +60,31 @@ const ServiceFormModal = ({
         'Credit Card': { tax: 0.029, fixedFee: 2000 }, // 2.9% + IDR 2,000
         'Cardless Credit': { tax: 0.02 }, // 2% tax
     };
+
+    useEffect(() => {
+        if (isOpen && currentRepair) {
+            setEntryDate(currentRepair.entry_date);
+            setCustomerId(currentRepair.customer_id);
+            setCustomerPhone(currentRepair.customer_phone);
+            setCashierId(currentRepair.cashier_id);
+            setTechnicianId(currentRepair.technician_id);
+            setSelectedBrand(currentRepair.phone_brand);
+            setSelectedDevice(currentRepair.phone_model);
+            setImeiSn1(currentRepair.imei_sn_1);
+            setImeiSn2(currentRepair.imei_sn_2);
+            setDamageDescription(currentRepair.damage_description);
+            setUnderWarranty(currentRepair.under_warranty);
+            setWarrantyDuration(currentRepair.warranty_duration);
+            setWarrantyUnit(currentRepair.warranty_unit);
+            setNotes(currentRepair.notes);
+            setRepairType(currentRepair.repair_type);
+            setServiceType(currentRepair.service_type);
+            setSubTotal(currentRepair.sub_total);
+            setDownPayment(currentRepair.down_payment);
+            setTotal(currentRepair.total_price);
+            setPaymentType(currentRepair.payment_method);
+        }
+    }, [isOpen, currentRepair]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -262,6 +288,27 @@ const ServiceFormModal = ({
             payment_method: paymentType,
         };
 
+        const updatedRepair = {
+            entry_date: entryDate,
+            customer_id: customerId,
+            cashier_id: cashierId,
+            technician_id: technicianId,
+            phone_brand: phoneBrand,
+            phone_model: phoneDevice,
+            imei_sn_1: imeiSn1,
+            imei_sn_2: imeiSn2,
+            damage_description: damageDescription,
+            under_warranty: underWarranty,
+            warranty_duration: warrantyDuration,
+            warranty_unit: warrantyUnit,
+            notes: notes,
+            repair_type: repairType,
+            service_type: serviceType,
+            total_price: total,
+            down_payment: downPayment,
+            payment_method: paymentType,
+        };
+
         console.log('Submitting repair:', newRepair);
 
         try {
@@ -423,7 +470,7 @@ const ServiceFormModal = ({
                                 <label className="label">
                                     <span className="label-text">Customer</span>
                                 </label>
-                                <select onChange={handleCustomerChange} value={customerId} className="select select-bordered">
+                                <select onChange={handleCustomerChange} value={customerId} className="select select-bordered" disabled>
                                     <option value="">Select a customer - {customerPhone}</option>
                                     {customers.map(customer => (
                                     <option key={customer.id} value={customer.id}>

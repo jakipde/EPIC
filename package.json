@@ -43,6 +43,7 @@
     "@mui/icons-material": "^6.4.0",
     "@mui/material": "^6.4.0",
     "@xobotyi/scrollbar-width": "^1.9.5",
+    "ag-charts-enterprise": "^11.0.4",
     "ag-grid-community": "^33.0.4",
     "ag-grid-enterprise": "^33.0.4",
     "ag-grid-react": "^33.0.4",

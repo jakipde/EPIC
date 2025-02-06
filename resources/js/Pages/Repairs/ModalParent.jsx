@@ -10,7 +10,9 @@ const ModalParent = ({
     setServiceFormModalOpen,
     isRepairDetailModalOpen,
     setRepairDetailModalOpen,
-    selectedRepair
+    selectedRepair,
+    onFormSubmit,
+    currentRepair, // Add currentRepair prop
 }) => {
     const [isNewCustomerModalOpen, setNewCustomerModalOpen] = useState(false);
     const [isCompletenessModalOpen, setCompletenessModalOpen] = useState(false);
@@ -19,7 +21,6 @@ const ModalParent = ({
     const [customers, setCustomers] = useState([]);
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
-
     // Completeness state
     const [completeness, setCompleteness] = useState({
         simTray: false,
@@ -62,41 +63,27 @@ const ModalParent = ({
                 isOpen={isServiceFormModalOpen}
                 onClose={() => setServiceFormModalOpen(false)}
                 onAddRepair={handleAddRepair}
-                setNewCustomerModalOpen={setNewCustomerModalOpen}
-                customers={customers}
-                setCustomers={setCustomers}
-                selectedCustomerId={selectedCustomerId}
-                setSelectedCustomerId={setSelectedCustomerId}
-                setCustomerPhone={setCustomerPhone}
-                setCompletenessModalOpen={setCompletenessModalOpen}
-                completeness={completeness}
-                setCompleteness={setCompleteness}
-                setPrintModalOpen={setPrintModalOpen}
+                currentRepair={currentRepair} // Pass current repair data to ServiceFormModal
             />
-
             <NewCustomerModal
                 isOpen={isNewCustomerModalOpen}
                 onClose={() => setNewCustomerModalOpen(false)}
                 onAddCustomer={handleAddCustomer}
             />
-
             <CompletenessModal
                 isOpen={isCompletenessModalOpen}
                 onClose={() => setCompletenessModalOpen(false)}
                 initialCompleteness={completeness}
                 onChange={setCompleteness}
             />
-
             <PrintModal
                 isOpen={isPrintModalOpen}
                 onClose={() => setPrintModalOpen(false)}
             />
-
             {/* Repair Detail Modal */}
             <RepairDetailModal
                 isOpen={isRepairDetailModalOpen}
                 onClose={() => setRepairDetailModalOpen(false)}
-                repair={selectedRepair} // Pass the selected repair details
             />
         </div>
     );
