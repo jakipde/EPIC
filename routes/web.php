@@ -53,12 +53,15 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
+Route::prefix('api')->group(function () {
+    Route::put('/repairs/{repair}/repair_status', [RepairsController::class, 'updateStatus']);
+});
 // Repairs management routes
 Route::prefix('/repairs')->group(function () {
     Route::get('/dashboard', [RepairsController::class, 'index'])->name('repairs.dashboard');
     Route::get('/data-management', [RepairsController::class, 'datamanagement'])->name('repairs.data-management');
     Route::get('/reports', [RepairsController::class, 'reports'])->name('repairs.reports');
+    Route::put('/api/repairs/{repair}/status', [RepairsController::class, 'updateStatus']);
 
 });
 

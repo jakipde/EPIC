@@ -2,22 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Default\User;
 
 class Repair extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
+        'invoice_number',
         'customer_id',
         'cashier_id',
         'technician_id',
         'phone_brand',
         'phone_model',
-        'imei_sn_1',
-        'imei_sn_2',
         'damage_description',
         'under_warranty',
         'warranty_duration',
@@ -30,15 +29,24 @@ class Repair extends Model
         'sub_total',
         'payment_status',
         'remaining_payment',
+        'repair_status', // Add repair_status field
         'exit_date',
         'print_type',
-        'invoice_number',
-        'payment_method',
         'completeness',
-        'repair_status',
     ];
 
-    protected $casts = [
-        'completeness' => 'array',
-    ];
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function cashier()
+    {
+        return $this->belongsTo(User::class, 'cashier_id');
+    }
+
+    public function technician()
+    {
+        return $this->belongsTo(User::class, 'technician_id');
+    }
 }

@@ -11,27 +11,20 @@ class SparePart extends Model
 
     protected $fillable = [
         'supplier_id',
-        'code',
-        'name',
-        'barcode_name',
+        'sku',
+        'product_name',
+        'name_in_barcode',
         'grade',
         'stock',
         'minimum_stock',
-        'modal_price',
-        'store_price',
-        'special_price',
+        'capital_price',
+        'stock_price',
         'selling_price',
         'ecommerce_link',
         'category_id',
         'sub_category_id',
         'description',
         'image',
-        'invoice_id',
-        'date',
-        'customer_id',
-        'payment_id',
-        'admin_id',
-        'profit',
     ];
 
     public function supplier()
@@ -47,25 +40,5 @@ class SparePart extends Model
     public function subCategory()
     {
         return $this->belongsTo(ProductSubCategory::class);
-    }
-
-    public function invoice()
-    {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
-    public function payment()
-    {
-        return $this->belongsTo(Payment::class);
-    }
-
-    public function admin()
-    {
-        return $this->belongsTo(Cashier::class);
     }
 }

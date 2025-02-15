@@ -225,11 +225,6 @@ const ServiceFormModal = ({
     }, [isOpen, selectedCustomerId]);
 
     useEffect(() => {
-        console.log('Cashiers:', cashiers);
-        console.log('Technicians:', technicians);
-    }, [cashiers, technicians]);
-
-    useEffect(() => {
         const selectedCustomer = customers.find(customer => customer.id === customerId);
         if (selectedCustomer) {
             setCustomerPhone(selectedCustomer.phone);

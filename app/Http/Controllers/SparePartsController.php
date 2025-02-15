@@ -3,33 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\SparePart;
-use App\Models\Product;
-use App\Models\Category; // Import the Category model
+use App\Models\Supplier;
+use App\Models\ProductCategory;
+use App\Models\ProductSubCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 
 class SparePartsController extends Controller
 {
     public function datainsights()
     {
         // Fetch all spare parts
-        $spareparts = SparePart::with('supplier', 'category', 'subCategory', 'invoice', 'customer', 'payment', 'admin')->get();
-
-        return Inertia::render('SparePart/DataInsights', [
-            'spareparts' => $spareparts,
-        ]);
-    }
-
-    public function warrantyreport()
-    {
-        // Render the Inertia page
-        return Inertia::render('SparePart/WarrantyReport');
-    }
-
-    public function show($id)
-    {
-        $spareparts = SparePart::with('supplier', 'category', 'subCategory', 'invoice', 'customer', 'payment', 'admin')->findOrFail($id); // Fetch the spare part by ID
+        $spareparts = SparePart::with('supplier', 'category', 'subCategory')->get();
 
         return Inertia::render('SparePart/DataInsights', [
             'spareparts' => $spareparts,
@@ -41,32 +26,31 @@ class SparePartsController extends Controller
         // Validation for creating a new spare part
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
-            'code' => 'required|string|max:255',
-            'name' => 'required|string|max:255',
-            'barcode_name' => 'required|string|max:255',
+            'sku' => 'required|string|max:255',
+            'product_name' => 'required|string|max:255',
+            'name_in_barcode' => 'required|string|max:255',
             'grade' => 'required|string|max:255',
             'stock' => 'required|integer',
             'minimum_stock' => 'required|integer',
-            'modal_price' => 'required|numeric',
-            'store_price' => 'required|numeric',
-            'special_price' => 'required|numeric',
+            'capital_price' => 'required|numeric',
+            'stock_price' => 'required|numeric',
             'selling_price' => 'required|numeric',
             'ecommerce_link' => 'nullable|string',
             'category_id' => 'required|exists:product_categories,id',
             'sub_category_id' => 'required|exists:product_sub_categories,id',
             'description' => 'nullable|string',
-            'image' => 'nullable|string',
-            'invoice_id' => 'required|exists:invoices,id',
-            'date' => 'required|date',
-            'customer_id' => 'required|exists:customers,id',
-            'payment_id' => 'required|exists:payments,id',
-            'admin_id' => 'required|exists:cashiers,id',
-            'profit' => 'required|numeric',
+            'image' => 'nullable|image',
         ]);
 
-        // Create the spare part
-        $sparePart = SparePart::create($request->all());
+        // Handle file upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public');
+            $request->merge(['image' => $imagePath]);
+        }
 
-        return redirect()->route('SparePart/datainsights')->with('success', 'Spare part created successfully.');
+        // Create the spare part
+        SparePart::create($request->all());
+
+        return redirect()->route('spareparts.datainsights')->with('success', 'Spare part created successfully.');
     }
 }

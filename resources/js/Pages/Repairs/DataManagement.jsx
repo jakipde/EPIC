@@ -15,7 +15,7 @@ import './StatusButtonTest.css'; // Import custom CSS
 ModuleRegistry.registerModules([AllCommunityModule, MasterDetailModule, ContextMenuModule]);
 
 // Set the license key
-LicenseManager.setLicenseKey("[YOUR_LICENSE_KEY_HERE]"); // Replace with your valid license key
+LicenseManager.setLicenseKey("[TRIAL]_this_{AG_Charts_and_AG_Grid}_Enterprise_key_{AG-076337}_is_granted_for_evaluation_only___Use_in_production_is_not_permitted___Please_report_misuse_to_legal@ag-grid.com___For_help_with_purchasing_a_production_key_please_contact_info@ag-grid.com___You_are_granted_a_{Single_Application}_Developer_License_for_one_application_only___All_Front-End_JavaScript_developers_working_on_the_application_would_need_to_be_licensed___This_key_will_deactivate_on_{14 March 2025}____[v3]_[0102]_MTc0MTkxMDQwMDAwMA==f7c8723db6b2e4c55a843f86bf24e52d"); // Replace with your valid license key
 
 const DataManagement = () => {
     const [search, setSearch] = useState('');
@@ -26,10 +26,11 @@ const DataManagement = () => {
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
-    const [statusModalOpen, setStatusModalOpen] = useState(false);
+    const [processModalOpen, setProcessModalOpen] = useState(false); // New state for process modal
     const [currentRepair, setCurrentRepair] = useState(null);
     const [statusFilter, setStatusFilter] = useState('All');
     const [notification, setNotification] = useState('');
+    const [spareParts, setSpareParts] = useState(''); // New state for spare parts
 
     const fetchRepairs = async () => {
         const response = await fetch('/api/repairs');
@@ -61,7 +62,7 @@ const DataManagement = () => {
             repair.damage_description.toLowerCase().includes(search.toLowerCase());
         const matchesDateRange = (!startDate || new Date(repair.entry_date) >= new Date(startDate)) &&
             (!endDate || new Date(repair.entry_date) <= new Date(endDate));
-        const matchesStatus = statusFilter === 'All' || repair.status === statusFilter;
+        const matchesStatus = statusFilter === 'All' || repair.repair_status === statusFilter;
         return matchesSearch && matchesDateRange && matchesStatus;
     });
 
@@ -77,15 +78,29 @@ const DataManagement = () => {
 
     const handleStatusChange = (repair) => {
         setCurrentRepair(repair);
-        setStatusModalOpen(true);
+        setProcessModalOpen(true);
     };
 
-    const confirmStatusChange = () => {
-        const nextStatus = getNextStatus(currentRepair.status);
-        setRepairs(repairs.map(repair =>
-            repair.id === currentRepair.id ? { ...repair, status: nextStatus } : repair
-        ));
-        setStatusModalOpen(false);
+    const confirmStatusChange = async () => {
+        const nextStatus = getNextStatus(currentRepair.repair_status);
+        try {
+            await axios.put(`/api/repairs/${currentRepair.id}/repair_status`, {
+                repair_status: nextStatus,
+                spare_parts: spareParts, // Include spare parts data
+                updated_at: new Date().toISOString().split('T')[0], // Update the current date
+                technician_id: currentRepair.technician_id,
+                outside_spare_parts: currentRepair.outside_spare_parts,
+                using_store_cash: currentRepair.using_store_cash
+            });
+            setRepairs(repairs.map(repair =>
+                repair.id === currentRepair.id ? { ...repair, repair_status: nextStatus } : repair
+            ));
+            setProcessModalOpen(false); // Close process modal if open
+            setNotification('Status updated successfully!');
+        } catch (error) {
+            console.error('Error updating status:', error);
+            setNotification('Failed to update status.');
+        }
     };
 
     const getNextStatus = (currentStatus) => {
@@ -102,7 +117,7 @@ const DataManagement = () => {
         { headerName: "Total", field: "total", flex: 0.7, headerClass: 'text-center' },
         {
             headerName: "Status",
-            field: "status",
+            field: "repair_status",
             flex: 0.8,
             headerClass: 'text-center',
             cellRenderer: (params) => (
@@ -120,63 +135,64 @@ const DataManagement = () => {
         brand_model: `${repair.phone_brand} ${repair.phone_model}`,
         damage_description: repair.damage_description,
         total: formatCurrency(repair.total_price),
-        status: repair.status || 'Queue',
+        repair_status: repair.repair_status || 'Queue',
     })), [filteredRepairs, customers]);
 
-    const detailCellRendererParams = useMemo(() => ({
-        detailGridOptions: {
-            columnDefs: [
-                { headerName: "Invoice Number", field: "invoice_number", headerClass: 'text-center' },
-                { headerName: "Cashier Name", field: "cashier_name", headerClass: 'text-center' },
-                { headerName: "Technician Name", field: "technician_name", headerClass: 'text-center' },
-                { headerName: "IMEI SN 1", field: "imei_sn_1", headerClass: 'text-center' },
-                { headerName: "IMEI SN 2", field: "imei_sn_2", headerClass: 'text-center' },
-                { headerName: "Under Warranty", field: "under_warranty", headerClass: 'text-center' },
-                { headerName: "Warranty Duration", field: "warranty_duration", headerClass: 'text-center' },
-                { headerName: "Notes", field: "notes", headerClass: 'text-center' },
-                { headerName: "Repair Type", field: "repair_type", headerClass: 'text-center' },
-                { headerName: "Service Type", field: "service_type", headerClass: 'text-center' },
-                { headerName: "Total Price", field: "total_price", headerClass: 'text-center' },
-                { headerName: "Down Payment", field: "down_payment", headerClass: 'text-center' },
-                { headerName: "Remaining Payment", field: "remaining_payment", headerClass: 'text-center' },
-                { headerName: "Payment Method", field: "payment_method", headerClass: 'text-center' },
-                { headerName: "Payment Status", field: "payment_status", headerClass: 'text-center' },
-            ],
-            domLayout: 'normal', // Allow horizontal scrolling
-            getRowNodeId: (data) => data.invoice_number,
-        },
-        getDetailRowData: async (params) => {
-            const response = await axios.get(`/api/repairs/${params.data.id}`);
-            const repairData = response.data;
+    // Update detailCellRendererParams
+const detailCellRendererParams = useMemo(() => ({
+    detailGridOptions: {
+        columnDefs: [
+            { headerName: "Invoice Number", field: "invoice_number", headerClass: 'text-center' },
+            { headerName: "Cashier Name", field: "cashier_name", headerClass: 'text-center' },
+            { headerName: "Technician Name", field: "technician_name", headerClass: 'text-center' },
+            { headerName: "IMEI SN 1", field: "imei_sn_1", headerClass: 'text-center' },
+            { headerName: "IMEI SN 2", field: "imei_sn_2", headerClass: 'text-center' },
+            { headerName: "Under Warranty", field: "under_warranty", headerClass: 'text-center' },
+            { headerName: "Warranty Duration", field: "warranty_duration", headerClass: 'text-center' },
+            { headerName: "Notes", field: "notes", headerClass: 'text-center' },
+            { headerName: "Repair Type", field: "repair_type", headerClass: 'text-center' },
+            { headerName: "Service Type", field: "service_type", headerClass: 'text-center' },
+            { headerName: "Total Price", field: "total_price", headerClass: 'text-center' },
+            { headerName: "Down Payment", field: "down_payment", headerClass: 'text-center' },
+            { headerName: "Remaining Payment", field: "remaining_payment", headerClass: 'text-center' },
+            { headerName: "Payment Method", field: "payment_method", headerClass: 'text-center' },
+            { headerName: "Payment Status", field: "payment_status", headerClass: 'text-center' },
+        ],
+        domLayout: 'normal', // Allow horizontal scrolling
+        getRowId: (params) => params.data.invoice_number, // Use getRowId instead of getRowNodeId
+    },
+    getDetailRowData: async (params) => {
+        const response = await axios.get(`/api/repairs/${params.data.id}`);
+        const repairData = response.data;
 
-            const customer = customers.find(c => c.id === repairData.customer_id);
-            const cashier = cashiers.find(c => c.id === repairData.cashier_id);
-            const technician = technicians.find(t => t.id === repairData.technician_id);
+        const customer = customers.find(c => c.id === repairData.customer_id);
+        const cashier = cashiers.find(c => c.id === repairData.cashier_id);
+        const technician = technicians.find(t => t.id === repairData.technician_id);
 
-            params.successCallback([{
-                invoice_number: repairData.invoice_number,
-                cashier_name: cashier ? cashier.name : 'N/A',
-                technician_name: technician ? technician.name : 'N/A',
-                imei_sn_1: repairData.imei_sn_1,
-                imei_sn_2: repairData.imei_sn_2,
-                under_warranty: repairData.under_warranty ? 'Yes' : 'No',
-                warranty_duration: `${repairData.warranty_duration} ${repairData.warranty_unit}`,
-                notes: repairData.notes || ' - ',
-                repair_type: repairData.repair_type,
-                service_type: repairData.service_type,
-                total_price: formatCurrency(repairData.total_price),
-                down_payment: formatCurrency(repairData.down_payment),
-                remaining_payment: formatCurrency(repairData.remaining_payment),
-                payment_method: repairData.payment_method,
-                payment_status: repairData.payment_status,
-                action: ''
-            }]);
-        }
-    }), [customers, cashiers, technicians]);
+        params.successCallback([{
+            invoice_number: repairData.invoice_number,
+            cashier_name: cashier ? cashier.name : 'N/A',
+            technician_name: technician ? technician.name : 'N/A',
+            imei_sn_1: repairData.imei_sn_1,
+            imei_sn_2: repairData.imei_sn_2,
+            under_warranty: repairData.under_warranty ? 'Yes' : 'No',
+            warranty_duration: `${repairData.warranty_duration} ${repairData.warranty_unit}`,
+            notes: repairData.notes || ' - ',
+            repair_type: repairData.repair_type,
+            service_type: repairData.service_type,
+            total_price: formatCurrency(repairData.total_price),
+            down_payment: formatCurrency(repairData.down_payment),
+            remaining_payment: formatCurrency(repairData.remaining_payment),
+            payment_method: repairData.payment_method,
+            payment_status: repairData.payment_status,
+            action: ''
+        }]);
+    }
+}), [customers, cashiers, technicians]);
 
     const handleEdit = (rowData) => {
-        setCurrentRepair(rowData); // Set the current repair data
-        setServiceFormModalOpen(true); // Open the modal
+        setCurrentRepair(rowData);
+        setServiceFormModalOpen(true);
     };
 
     const handleDelete = async (id) => {
@@ -243,7 +259,7 @@ const DataManagement = () => {
                 ],
             },
             {
-                name: 'Expand Content',
+                name: 'Expand/Close Row',
                 action: () => {
                     params.node.setExpanded(!params.node.expanded); // Expand or collapse the row
                 },
@@ -284,34 +300,90 @@ const DataManagement = () => {
                     ))}
                 </div>
                 <div className="ag-theme-alpine" style={{ height: 600, width: '100%', overflowX: 'auto' }}>
-                    <AgGridReact
-                        columnDefs={columnDefs}
-                        rowData={rowData}
-                        masterDetail={true}
-                        detailCellRendererParams={detailCellRendererParams}
-                        pagination={true}
-                        paginationPageSize={10}
-                        domLayout='normal' // Allow horizontal scrolling
-                        onRowClicked={(params) => params.node.setExpanded(!params.node.expanded)} // Expand on row click
-                        animateRows={true} // Add row animation
-                        defaultColDef={{
-                            sortable: true, // Enable sorting
-                            filter: true, // Enable filtering
-                            resizable: true, // Enable column resizing
-                        }}
-                        getContextMenuItems={getContextMenuItems} // Add context menu items
+                <AgGridReact
+                    columnDefs={columnDefs}
+                    rowData={rowData}
+                    masterDetail={true}
+                    detailCellRendererParams={detailCellRendererParams}
+                    pagination={true}
+                    paginationPageSize={20} // Change this to 20, 50, or 100
+                    paginationPageSizeSelector={[10, 20, 50, 100]} // Add 10 to the selector if you want to keep 10
+                    domLayout='normal' // Allow horizontal scrolling
+                    onRowClicked={(params) => params.node.setExpanded(!params.node.expanded)} // Expand on row click
+                    animateRows={true} // Add row animation
+                    defaultColDef={{
+                        sortable: true, // Enable sorting
+                        filter: true, // Enable filtering
+                        resizable: true, // Enable column resizing
+                    }}
+                    getContextMenuItems={getContextMenuItems} // Add context menu items
+                />
+                </div>
+                <Modal isOpen={processModalOpen} onClose={() => setProcessModalOpen(false)}>
+    <div className="p-4">
+        <h2 className="text-lg font-bold mb-4">Update Status</h2>
+        <p>Are you sure you want to update the status to {getNextStatus(currentRepair?.repair_status)}?</p>
+        {currentRepair?.repair_status === 'Process' && (
+            <>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Current Date</label>
+                    <input
+                        type="date"
+                        value={new Date().toISOString().split('T')[0]}
+                        className="input input-bordered w-full"
+                        readOnly
                     />
                 </div>
-                <Modal isOpen={statusModalOpen} onClose={() => setStatusModalOpen(false)}>
-                    <div className="p-4">
-                        <h2 className="text-lg font-bold mb-4">Confirm Status Change</h2>
-                        <p>Are you sure you want to change the status to {getNextStatus(currentRepair?.status)}?</p>
-                        <div className="flex justify-end mt-4">
-                            <Button size="sm" type="secondary" className="mr-2" onClick={() => setStatusModalOpen(false)}>Cancel</Button>
-                            <Button size="sm" type="primary" onClick={confirmStatusChange}>Confirm</Button>
-                        </div>
-                    </div>
-                </Modal>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Technician</label>
+                    <select
+                        value={currentRepair?.technician_id || ''}
+                        onChange={(e) => setCurrentRepair({ ...currentRepair, technician_id: e.target.value })}
+                        className="input input-bordered w-full"
+                    >
+                        <option value="">Select Technician</option>
+                        {technicians.map(tech => (
+                            <option key={tech.id} value={tech.id}>{tech.name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Spare Parts in Store</label>
+                    <input
+                        type="text"
+                        value={spareParts}
+                        onChange={(e) => setSpareParts(e.target.value)}
+                        className="input input-bordered w-full"
+                        placeholder="Enter spare parts in store"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Outside Store Spare Parts</label>
+                    <input
+                        type="text"
+                        value={currentRepair?.outside_spare_parts || ''}
+                        onChange={(e) => setCurrentRepair({ ...currentRepair, outside_spare_parts: e.target.value })}
+                        className="input input-bordered w-full"
+                        placeholder="Enter outside store spare parts"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Using Store Cash (Balance)</label>
+                    <input
+                        type="checkbox"
+                        checked={currentRepair?.using_store_cash || false}
+                        onChange={(e) => setCurrentRepair({ ...currentRepair, using_store_cash: e.target.checked })}
+                        className="input input-checkbox"
+                    />
+                </div>
+            </>
+        )}
+        <div className="flex justify-end mt-4">
+            <Button size="sm" type="secondary" className="mr-2" onClick={() => setProcessModalOpen(false)}>Cancel</Button>
+            <Button size="sm" type="primary" onClick={confirmStatusChange}>Update Status</Button>
+        </div>
+    </div>
+</Modal>
                 <ModalParent
                     isServiceFormModalOpen={isServiceFormModalOpen}
                     setServiceFormModalOpen={setServiceFormModalOpen}

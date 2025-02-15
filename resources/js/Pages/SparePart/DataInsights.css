@@ -1,0 +1,31 @@
+.status-button-custom {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.status-button-custom.queue {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.status-button-custom.process {
+    background-color: #5bc0de;
+    color: white;
+}
+
+.status-button-custom.done {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.status-button-custom.taken {
+    background-color: #0275d8;
+    color: white;
+}
+
+.status-button-custom.refund {
+    background-color: #d9534f;
+    color: white;
+}

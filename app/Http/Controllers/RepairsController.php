@@ -65,52 +65,64 @@ class RepairsController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'customer_id' => 'required|exists:customers,id',
-        'cashier_id' => 'required|exists:users,id',
-        'technician_id' => 'required|exists:users,id',
-        'phone_brand' => 'required|string|max:255',
-        'phone_model' => 'required|string|max:255',
-        'imei_sn_1' => 'nullable|string|max:255',
-        'imei_sn_2' => 'nullable|string|max:255',
-        'damage_description' => 'required|string',
-        'under_warranty' => 'required|boolean',
-        'warranty_duration' => 'nullable|integer',
-        'warranty_unit' => 'required|string|max:255',
-        'notes' => 'nullable|string',
-        'repair_type' => 'required|string|max:255',
-        'service_type' => 'nullable|string|max:255',
-        'total_price' => 'required|numeric',
-        'down_payment' => 'nullable|numeric',
-        'sub_total' => 'nullable|numeric',
-        'payment_method' => 'required|string|max:255',
-        'completeness' => 'nullable|array',
-        'invoice_number' => 'required|string|max:255',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'customer_id' => 'required|exists:customers,id',
+            'cashier_id' => 'required|exists:users,id',
+            'technician_id' => 'required|exists:users,id',
+            'phone_brand' => 'required|string|max:255',
+            'phone_model' => 'required|string|max:255',
+            'imei_sn_1' => 'nullable|string|max:255',
+            'imei_sn_2' => 'nullable|string|max:255',
+            'damage_description' => 'required|string',
+            'under_warranty' => 'required|boolean',
+            'warranty_duration' => 'nullable|integer',
+            'warranty_unit' => 'required|string|max:255',
+            'notes' => 'nullable|string',
+            'repair_type' => 'required|string|max:255',
+            'service_type' => 'nullable|string|max:255',
+            'total_price' => 'required|numeric',
+            'down_payment' => 'nullable|numeric',
+            'sub_total' => 'nullable|numeric',
+            'payment_method' => 'required|string|max:255',
+            'completeness' => 'nullable|array',
+            'invoice_number' => 'required|string|max:255',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-    }
-
-    try {
-        $requestData = $request->all();
-        if (isset($requestData['completeness'])) {
-            $requestData['completeness'] = json_encode($requestData['completeness']);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        // Calculate remaining payment
-        $requestData['remaining_payment'] = $requestData['total_price'] - ($requestData['down_payment'] ?? 0);
-        // Set payment status based on remaining payment
-        $requestData['payment_status'] = $requestData['remaining_payment'] > 0 ? 'In Debt' : 'Paid off';
+        try {
+            $requestData = $request->all();
+            if (isset($requestData['completeness'])) {
+                $requestData['completeness'] = json_encode($requestData['completeness']);
+            }
 
-        // Create the repair
-        $repair = Repair::create($requestData);
-        return response()->json(['success' => true, 'message' => 'Repair created successfully.', 'repair' => $repair], 201);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Failed to save repair. ' . $e->getMessage()], 500);
+            // Calculate remaining payment
+            $requestData['remaining_payment'] = $requestData['total_price'] - ($requestData['down_payment'] ?? 0);
+            // Set payment status based on remaining payment
+            $requestData['payment_status'] = $requestData['remaining_payment'] > 0 ? 'In Debt' : 'Paid off';
+
+            // Create the repair
+            $repair = Repair::create($requestData);
+            return response()->json(['success' => true, 'message' => 'Repair created successfully.', 'repair' => $repair], 201);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to save repair. ' . $e->getMessage()], 500);
+        }
     }
-}
+
+    public function updateStatus(Request $request, Repair $repair)
+    {
+        $request->validate([
+            'repair_status' => 'required|string',
+        ]);
+
+        $repair->repair_status = $request->repair_status;
+        $repair->save();
+
+        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+    }
 
     public function show($id)
     {
@@ -132,11 +144,13 @@ class RepairsController extends Controller
             'damage_description' => 'required|string',
             'under_warranty' => 'required|boolean',
             'warranty_duration' => 'nullable|integer',
+            'warranty_unit' => 'required|string|max:255',
             'notes' => 'nullable|string',
             'repair_type' => 'required|string|max:255',
             'service_type' => 'nullable|string|max:255',
             'total_price' => 'required|numeric',
             'down_payment' => 'nullable|numeric',
+            'sub_total' => 'nullable|numeric',
             'payment_method' => 'required|string|max:255',
         ]);
 
