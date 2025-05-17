@@ -27,44 +27,21 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                 customer_type: customerType,
             });
 
-            // Check for successful response
             if (response.status === 201) {
-                onAddCustomer(response.data); // Pass the new customer
+                const newCustomer = response.data;
+                onAddCustomer(newCustomer);
                 setSuccessMessage('Customer added successfully!');
                 resetForm();
 
-                // Close modal after a short delay
-                setTimeout(() => {
-                    setSuccessMessage(''); // Reset success message after 3 seconds
-                    onClose(); // Auto-close modal after success
-                }, 3000);
-
-            if (response.status === 201) {
-                const newCustomer = response.data; // Get the new customer from the response
-                onAddCustomer(newCustomer); // Pass the new customer to the parent component
-                setSuccessMessage('Customer added successfully!');
-                resetForm();
-
-                // Close the modal after a short delay
                 setTimeout(() => {
                     setSuccessMessage('');
                     onClose();
                 }, 2000);
-
             } else {
                 setErrorMessage('Failed to add customer: ' + (response.data.message || 'An unexpected error occurred.'));
             }
         } catch (error) {
-
-
-            // Provide a more detailed error message
-            if (error.response && error.response.data) {
-
             if (error.response) {
-
-
-            if (error.response) {
-
                 setErrorMessage('Failed to add customer: ' + (error.response.data.message || 'An unexpected error occurred.'));
             } else {
                 setErrorMessage('Failed to add customer. Please check your internet connection or try again later.');
@@ -92,14 +69,7 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                             value={customerName}
                             onChange={(e) => setCustomerName(e.target.value)}
                             className="input input-bordered"
-
-
-
                             placeholder="Enter customer name"
-
-
-                            placeholder="Enter customer name"
-
                             required
                         />
                     </div>
@@ -110,14 +80,7 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                             value={customerPhone}
                             onChange={(e) => setCustomerPhone(e.target.value)}
                             className="input input-bordered"
-
-
-
                             placeholder="Enter phone number"
-
-
-                            placeholder="Enter phone number"
-
                             required
                         />
                     </div>
@@ -143,22 +106,10 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
     );
 };
 
-
-
-export default NewCustomerModal;
-
-
-
-// PropTypes for type checking
 NewCustomerModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    onAddCustomer: PropTypes.func.isRequired, // Ensure this is defined
+    onAddCustomer: PropTypes.func.isRequired,
 };
 
-
 export default NewCustomerModal;
-
-
-export default NewCustomerModal;
-
