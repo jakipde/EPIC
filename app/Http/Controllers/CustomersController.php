@@ -12,9 +12,12 @@ class CustomersController extends Controller
 {
     public function index()
     {
-        // Fetch all customers
-        $customers = Customer::all();
-        return response()->json($customers);
+        try {
+            $customers = Customer::all(); // Fetch all customers
+            return response()->json($customers); // Return customers as JSON
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch customers.'], 500);
+        }
     }
 
     public function store(Request $request)

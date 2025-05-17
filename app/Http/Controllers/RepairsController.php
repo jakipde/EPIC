@@ -12,12 +12,27 @@ class RepairsController extends Controller
 {
     public function index()
     {
+<<<<<<< Updated upstream
         // Fetch repairs data with pagination
         $repairs = Repair::paginate(10); // Adjust the number as needed
 
         // Return the repairs as JSON
         return response()->json($repairs);
+=======
+
+
+        try {
+            $repairs = Repair::paginate(10);
+            return Inertia::render('Repairs/Dashboard', [
+                'repairs' => $repairs,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching repairs: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch repairs.'], 500);
+        }
+>>>>>>> Stashed changes
     }
+    
 
     public function datamanagement()
     {

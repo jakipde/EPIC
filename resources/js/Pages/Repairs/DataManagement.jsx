@@ -1,14 +1,22 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { MasterDetailModule, ContextMenuModule, LicenseManager } from 'ag-grid-enterprise';
+=======
+import React, { useState, useEffect, useMemo } from 'react';
+import { Head } from '@inertiajs/react';
+import { AgGridReact } from 'ag-grid-react';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'; 
+>>>>>>> Stashed changes
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SearchInput from '@/Components/DaisyUI/SearchInput';
 import Button from '@/Components/DaisyUI/Button';
 import axios from 'axios';
 import ModalParent from './ModalParent';
 import Modal from '@/Components/DaisyUI/Modal';
+<<<<<<< Updated upstream
 import './StatusButtonTest.css'; // Import custom CSS
 
 // Register AG Grid modules
@@ -16,6 +24,11 @@ ModuleRegistry.registerModules([AllCommunityModule, MasterDetailModule, ContextM
 
 // Set the license key
 LicenseManager.setLicenseKey("[TRIAL]_this_{AG_Charts_and_AG_Grid}_Enterprise_key_{AG-076337}_is_granted_for_evaluation_only___Use_in_production_is_not_permitted___Please_report_misuse_to_legal@ag-grid.com___For_help_with_purchasing_a_production_key_please_contact_info@ag-grid.com___You_are_granted_a_{Single_Application}_Developer_License_for_one_application_only___All_Front-End_JavaScript_developers_working_on_the_application_would_need_to_be_licensed___This_key_will_deactivate_on_{14 March 2025}____[v3]_[0102]_MTc0MTkxMDQwMDAwMA==f7c8723db6b2e4c55a843f86bf24e52d"); // Replace with your valid license key
+=======
+import './StatusButtonTest.css';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
+>>>>>>> Stashed changes
 
 const DataManagement = () => {
     const [search, setSearch] = useState('');
@@ -26,6 +39,7 @@ const DataManagement = () => {
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
     const [isServiceFormModalOpen, setServiceFormModalOpen] = useState(false);
+<<<<<<< Updated upstream
     const [processModalOpen, setProcessModalOpen] = useState(false); // New state for process modal
     const [currentRepair, setCurrentRepair] = useState(null);
     const [statusFilter, setStatusFilter] = useState('All');
@@ -47,6 +61,55 @@ const DataManagement = () => {
         const response = await axios.get(`/api/users?role_name=${roleName}`);
         if (roleName === 'Cashier') setCashiers(response.data);
         if (roleName === 'Technician') setTechnicians(response.data);
+=======
+    const [processModalOpen, setProcessModalOpen] = useState(false);
+    const [currentRepair, setCurrentRepair] = useState(null);
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [notification, setNotification] = useState('');
+    const [spareParts, setSpareParts] = useState('');
+    const [completenessModalOpen, setCompletenessModalOpen] = useState(false);
+    const [printModalOpen, setPrintModalOpen] = useState(false);
+    const [newCustomerModalOpen, setNewCustomerModalOpen] = useState(false);
+    const [completeness, setCompleteness] = useState({
+        simTray: false,
+        simCard: false,
+        softCase: false,
+        microSD: false,
+        box: false,
+        charger: false,
+    });
+
+    // Fetch data from APIs
+    const fetchRepairs = async () => {
+        try {
+            const response = await axios.get('/api/repairs');
+            setRepairs(response.data || []);
+        } catch (error) {
+            console.error('Error fetching repairs:', error);
+            setNotification('Failed to fetch repairs.');
+        }
+    };
+
+    const fetchCustomers = async () => {
+        try {
+            const response = await axios.get('/api/customers');
+            setCustomers(response.data || []);
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+            setNotification('Failed to fetch customers.');
+        }
+    };
+
+    const fetchUsersByRoleName = async (roleName) => {
+        try {
+            const response = await axios.get(`/api/users?role_name=${roleName}`);
+            if (roleName === 'Cashier') setCashiers(response.data || []);
+            if (roleName === 'Technician') setTechnicians(response.data || []);
+        } catch (error) {
+            console.error(`Error fetching ${roleName}s:`, error);
+            setNotification(`Failed to fetch ${roleName}s.`);
+        }
+>>>>>>> Stashed changes
     };
 
     useEffect(() => {
@@ -56,6 +119,7 @@ const DataManagement = () => {
         fetchUsersByRoleName('Technician');
     }, []);
 
+<<<<<<< Updated upstream
     const filteredRepairs = repairs.filter(repair => {
         const customerName = customers.find(customer => customer.id === repair.customer_id)?.name || '';
         const matchesSearch = customerName.toLowerCase().includes(search.toLowerCase()) ||
@@ -66,16 +130,40 @@ const DataManagement = () => {
         return matchesSearch && matchesDateRange && matchesStatus;
     });
 
+=======
+    // Filter repairs based on search, date range, and status
+    const filteredRepairs = useMemo(() => {
+        return repairs.filter(repair => {
+            const customerName = customers.find(customer => customer.id === repair.customer_id)?.name || '';
+            const matchesSearch = customerName.toLowerCase().includes(search.toLowerCase()) ||
+                repair.damage_description.toLowerCase().includes(search.toLowerCase());
+            const matchesDateRange = (!startDate || new Date(repair.entry_date) >= new Date(startDate)) &&
+                (!endDate || new Date(repair.entry_date) <= new Date(endDate));
+            const matchesStatus = statusFilter === 'All' || repair.repair_status === statusFilter;
+            return matchesSearch && matchesDateRange && matchesStatus;
+        });
+    }, [repairs, customers, search, startDate, endDate, statusFilter]);
+
+    // Format currency
+>>>>>>> Stashed changes
     const formatCurrency = (value) => {
         if (value == null || isNaN(value)) return 'Rp0';
         return `Rp${parseFloat(value).toLocaleString()}`;
     };
 
+<<<<<<< Updated upstream
+=======
+    // Format date
+>>>>>>> Stashed changes
     const formatDate = (dateString) => {
         const options = { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
         return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
+<<<<<<< Updated upstream
+=======
+    // Handle status change
+>>>>>>> Stashed changes
     const handleStatusChange = (repair) => {
         setCurrentRepair(repair);
         setProcessModalOpen(true);
@@ -86,8 +174,13 @@ const DataManagement = () => {
         try {
             await axios.put(`/api/repairs/${currentRepair.id}/repair_status`, {
                 repair_status: nextStatus,
+<<<<<<< Updated upstream
                 spare_parts: spareParts, // Include spare parts data
                 updated_at: new Date().toISOString().split('T')[0], // Update the current date
+=======
+                spare_parts: spareParts,
+                updated_at: new Date().toISOString(),
+>>>>>>> Stashed changes
                 technician_id: currentRepair.technician_id,
                 outside_spare_parts: currentRepair.outside_spare_parts,
                 using_store_cash: currentRepair.using_store_cash
@@ -95,7 +188,11 @@ const DataManagement = () => {
             setRepairs(repairs.map(repair =>
                 repair.id === currentRepair.id ? { ...repair, repair_status: nextStatus } : repair
             ));
+<<<<<<< Updated upstream
             setProcessModalOpen(false); // Close process modal if open
+=======
+            setProcessModalOpen(false);
+>>>>>>> Stashed changes
             setNotification('Status updated successfully!');
         } catch (error) {
             console.error('Error updating status:', error);
@@ -109,17 +206,30 @@ const DataManagement = () => {
         return statusOrder[(currentIndex + 1) % statusOrder.length];
     };
 
+<<<<<<< Updated upstream
     const columnDefs = useMemo(() => [
         { headerName: "Entry Date", field: "entry_date", flex: 1, headerClass: 'text-center', valueGetter: (params) => formatDate(params.data.entry_date) },
         { headerName: "Customer", field: "customer", flex: 1, headerClass: 'text-center' },
         { headerName: "Brand Model", field: "brand_model", flex: 1, headerClass: 'text-center' },
         { headerName: "Damage Description", field: "damage_description", flex: 1.5, headerClass: 'text-center' },
         { headerName: "Total", field: "total", flex: 0.7, headerClass: 'text-center' },
+=======
+    // Column definitions for AG Grid
+    const columnDefs = useMemo(() => [
+        { headerName: "Entry Date", field: "entry_date", flex: 1, valueGetter: (params) => formatDate(params.data.entry_date) },
+        { headerName: "Customer", field: "customer", flex: 1 },
+        { headerName: "Brand Model", field: "brand_model", flex: 1 },
+        { headerName: "Damage Description", field: "damage_description", flex: 1.5 },
+        { headerName: "Total", field: "total", flex: 0.7 },
+>>>>>>> Stashed changes
         {
             headerName: "Status",
             field: "repair_status",
             flex: 0.8,
+<<<<<<< Updated upstream
             headerClass: 'text-center',
+=======
+>>>>>>> Stashed changes
             cellRenderer: (params) => (
                 <span className={`status-button-custom ${params.value.toLowerCase()}`} onClick={() => handleStatusChange(params.data)}>
                     {params.value}
@@ -128,6 +238,10 @@ const DataManagement = () => {
         },
     ], [filteredRepairs]);
 
+<<<<<<< Updated upstream
+=======
+    // Row data for AG Grid
+>>>>>>> Stashed changes
     const rowData = useMemo(() => filteredRepairs.map(repair => ({
         id: repair.id,
         entry_date: repair.created_at,
@@ -138,6 +252,7 @@ const DataManagement = () => {
         repair_status: repair.repair_status || 'Queue',
     })), [filteredRepairs, customers]);
 
+<<<<<<< Updated upstream
     // Update detailCellRendererParams
 const detailCellRendererParams = useMemo(() => ({
     detailGridOptions: {
@@ -281,6 +396,8 @@ const detailCellRendererParams = useMemo(() => ({
         return result;
     }, []);
 
+=======
+>>>>>>> Stashed changes
     return (
         <AuthenticatedLayout page="Data Management">
             <Head title="Data Management" />
@@ -299,6 +416,7 @@ const detailCellRendererParams = useMemo(() => ({
                         </Button>
                     ))}
                 </div>
+<<<<<<< Updated upstream
                 <div className="ag-theme-alpine" style={{ height: 600, width: '100%', overflowX: 'auto' }}>
                 <AgGridReact
                     columnDefs={columnDefs}
@@ -391,9 +509,58 @@ const detailCellRendererParams = useMemo(() => ({
                     currentRepair={currentRepair} // Pass current repair data to ModalParent
                 />
                 {notification && <div className="notification">{notification}</div>} {/* Display notification */}
+=======
+                <div className="ag-theme-alpine" style={{ height: 600, width: '100%' }}>
+                    <AgGridReact
+                        columnDefs={columnDefs}
+                        rowData={rowData}
+                        pagination={true}
+                        paginationPageSize={20}
+                        domLayout="normal"
+                        animateRows={true}
+                        defaultColDef={{
+                            sortable: true,
+                            filter: true,
+                            resizable: true,
+                        }}
+                        context={{ /* data serpis */ }}
+                    />
+                </div>
+                <Modal isOpen={processModalOpen} onClose={() => setProcessModalOpen(false)}>
+                    <div className="p-4">
+                        <h2 className="text-lg font-bold mb-4">Update Status</h2>
+                        <p>Are you sure you want to update the status to {getNextStatus(currentRepair?.repair_status)}?</p>
+                        <div className="flex justify-end mt-4">
+                            <Button size="sm" type="secondary" className="mr-2" onClick={() => setProcessModalOpen(false)}>Cancel</Button>
+                            <Button size="sm" type="primary" onClick={confirmStatusChange}>Update Status</Button>
+                        </div>
+                    </div>
+                </Modal>
+                <ModalParent
+                    isServiceFormModalOpen={isServiceFormModalOpen}
+                    setServiceFormModalOpen={setServiceFormModalOpen}
+                    onFormSubmit={fetchRepairs}
+                    currentRepair={currentRepair}
+                    setCompletenessModalOpen={setCompletenessModalOpen}
+                    setPrintModalOpen={setPrintModalOpen}
+                    setNewCustomerModalOpen={setNewCustomerModalOpen}
+                    completenessModalOpen={completenessModalOpen}
+                    printModalOpen={printModalOpen}
+                    newCustomerModalOpen={newCustomerModalOpen}
+                    completeness={completeness}
+                    setCompleteness={setCompleteness}
+                    isRepairDetailModalOpen={false}
+                    setRepairDetailModalOpen={() => {}}
+                />
+                {notification && <div className="notification">{notification}</div>}
+>>>>>>> Stashed changes
             </div>
         </AuthenticatedLayout>
     );
 };
 
+<<<<<<< Updated upstream
 export default DataManagement;
+=======
+export default DataManagement;
+>>>>>>> Stashed changes

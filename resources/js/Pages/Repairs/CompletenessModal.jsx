@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import React, { useEffect } from 'react';
 
 const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) => {
@@ -95,6 +96,56 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) =
       </div>
     </div>
   );
+=======
+import React from 'react';
+
+const CompletenessModal = ({ isOpen, onClose, initialCompleteness = {}, onChange }) => {
+    const completenessMapping = {
+        simTray: "SIM Tray",
+        simCard: "SIM Card",
+        softCase: "Soft Case",
+        microSD: "MicroSD",
+        box: "Box",
+        charger: "Charger (Adaptor or Cable)",
+    };
+
+    const handleCheckboxChange = (key) => {
+        onChange((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal modal-open">
+            <div className="modal-box">
+                <h3 className="font-bold text-lg">Completeness</h3>
+                <div className="mt-4">
+                    {Object.keys(completenessMapping).map((key) => (
+                        <div key={key} className="form-control">
+                            <label className="cursor-pointer label">
+                                <span className="label-text">{completenessMapping[key]}</span>
+                                <input
+                                    type="checkbox"
+                                    className="checkbox"
+                                    checked={initialCompleteness[key] || false} // Default to false if undefined
+                                    onChange={() => handleCheckboxChange(key)}
+                                />
+                            </label>
+                        </div>
+                    ))}
+                </div>
+                <div className="modal-action">
+                    <button className="btn" onClick={onClose}>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+>>>>>>> Stashed changes
 };
 
 export default CompletenessModal;

@@ -43,10 +43,20 @@
     "@mui/icons-material": "^6.4.0",
     "@mui/material": "^6.4.0",
     "@xobotyi/scrollbar-width": "^1.9.5",
+<<<<<<< Updated upstream
     "ag-charts-enterprise": "^11.0.4",
     "ag-grid-community": "^33.0.4",
     "ag-grid-enterprise": "^33.0.4",
     "ag-grid-react": "^33.0.4",
+=======
+<<<<<<< Updated upstream
+=======
+    "ag-charts-enterprise": "^11.0.4",
+    "ag-grid-community": "^33.3.0",
+    "ag-grid-enterprise": "^33.0.4",
+    "ag-grid-react": "^33.3.0",
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     "chart.js": "^4.4.4",
     "fast-xml-parser": "^4.5.1",
     "framer-motion": "^11.18.0",
