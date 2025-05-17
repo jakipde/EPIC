@@ -1,4 +1,5 @@
-<<<<<<< Updated upstream
+
+
 import React, { useEffect } from 'react';
 
 const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) => {
@@ -96,7 +97,9 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness, onChange }) =
       </div>
     </div>
   );
-=======
+
+
+
 import React from 'react';
 
 const CompletenessModal = ({ isOpen, onClose, initialCompleteness = {}, onChange }) => {
@@ -145,7 +148,10 @@ const CompletenessModal = ({ isOpen, onClose, initialCompleteness = {}, onChange
             </div>
         </div>
     );
->>>>>>> Stashed changes
+
+
+
+
 };
 
 export default CompletenessModal;

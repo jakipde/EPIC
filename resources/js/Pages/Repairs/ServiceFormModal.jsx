@@ -1,8 +1,12 @@
-<<<<<<< Updated upstream
+
+
 import React, { useState, useEffect } from 'react'; // Add useState and useEffect here
-=======
+
 import React, { useState, useEffect } from 'react';
->>>>>>> Stashed changes
+
+
+import React, { useState, useEffect } from 'react';
+
 import axios from 'axios';
 import Select from 'react-select';
 
@@ -12,17 +16,23 @@ const ServiceFormModal = ({
     onAddRepair,
     setNewCustomerModalOpen,
     setPrintModalOpen,
-<<<<<<< Updated upstream
+
+
     customers = [], // Default to an empty array
     setCustomers,
     selectedCustomerId,
     setCompletenessModalOpen,
-=======
+
+
+
     setCompletenessModalOpen,
     customers = [],
     setCustomers,
     selectedCustomerId,
->>>>>>> Stashed changes
+
+
+
+
     completeness,
     createdAt,
     currentRepair,
@@ -32,10 +42,13 @@ const ServiceFormModal = ({
     const [customerPhone, setCustomerPhone] = useState('');
     const [cashierId, setCashierId] = useState(null);
     const [technicianId, setTechnicianId] = useState(null);
-<<<<<<< Updated upstream
+
+
     const [error, setError] = useState(null);
-=======
->>>>>>> Stashed changes
+
+
+
+
     const [selectedBrand, setSelectedBrand] = useState(null);
     const [selectedDevice, setSelectedDevice] = useState(null);
     const [deviceImage, setDeviceImage] = useState('');
@@ -51,44 +64,59 @@ const ServiceFormModal = ({
     const [notes, setNotes] = useState('');
     const [repairType, setRepairType] = useState('');
     const [serviceType, setServiceType] = useState('');
-<<<<<<< Updated upstream
+
+
 
     // State for dropdown data
-=======
->>>>>>> Stashed changes
+
+
+
+
     const [cashiers, setCashiers] = useState([]);
     const [technicians, setTechnicians] = useState([]);
     const [brands, setBrands] = useState([]);
     const [devices, setDevices] = useState([]);
-<<<<<<< Updated upstream
+
+
 
     // Pricing states
     const [subTotal, setSubTotal] = useState('0');
     const [downPayment, setDownPayment] = useState('');
     const [total, setTotal] = useState(0);
     const [voucher, setVoucher] = useState('');
-=======
+
     const [subTotal, setSubTotal] = useState('0');
     const [downPayment, setDownPayment] = useState('');
     const [total, setTotal] = useState(0);
->>>>>>> Stashed changes
+
+
+    const [subTotal, setSubTotal] = useState('0');
+    const [downPayment, setDownPayment] = useState('');
+    const [total, setTotal] = useState(0);
+
     const [remaining, setRemaining] = useState(0);
     const [isPaidOff, setIsPaidOff] = useState(false);
     const [paymentType, setPaymentType] = useState('');
 
     const paymentMethods = {
         Cash: { tax: 0 },
-<<<<<<< Updated upstream
+
+
         'Bank Transfer': { tax: 0, fixedFee: 4000 }, // No tax
         'E-Wallets': { tax: 0.02 }, // 2% tax
         'Credit Card': { tax: 0.029, fixedFee: 2000 }, // 2.9% + IDR 2,000
         'Cardless Credit': { tax: 0.02 }, // 2% tax
-=======
+
+
+
         'Bank Transfer': { tax: 0, fixedFee: 4000 },
         'E-Wallets': { tax: 0.02 },
         'Credit Card': { tax: 0.029, fixedFee: 2000 },
         'Cardless Credit': { tax: 0.02 },
->>>>>>> Stashed changes
+
+
+
+
     };
 
     useEffect(() => {
@@ -119,16 +147,22 @@ const ServiceFormModal = ({
     useEffect(() => {
         const fetchData = async () => {
             try {
-<<<<<<< Updated upstream
+
+
                 const response = await axios.get('/secret.json'); // Adjust path if necessary
                 const result = response.data;
 
                 // Extract brands and devices
-=======
+
                 const response = await axios.get('/secret.json');
                 const result = response.data;
 
->>>>>>> Stashed changes
+
+
+                const response = await axios.get('/secret.json');
+                const result = response.data;
+
+
                 const brandsData = result.root.brands.map(brand => ({
                     value: brand.id,
                     label: brand.name,
@@ -171,22 +205,30 @@ const ServiceFormModal = ({
     };
 
     const handleImeiSn1Change = (e) => {
-<<<<<<< Updated upstream
+
+
         const value = e.target.value.replace(/[^0-9]/g, ''); // Allow only digits
-=======
+
         const value = e.target.value.replace(/[^0-9]/g, '');
->>>>>>> Stashed changes
+
+
+        const value = e.target.value.replace(/[^0-9]/g, '');
+
         if (value.length <= 15) {
             setImeiSn1(value);
         }
     };
 
     const handleImeiSn2Change = (e) => {
-<<<<<<< Updated upstream
+
+
         const value = e.target.value.replace(/[^0-9]/g, ''); // Allow only digits
-=======
+
         const value = e.target.value.replace(/[^0-9]/g, '');
->>>>>>> Stashed changes
+
+
+        const value = e.target.value.replace(/[^0-9]/g, '');
+
         if (value.length <= 15) {
             setImeiSn2(value);
         }
@@ -205,17 +247,23 @@ const ServiceFormModal = ({
 
         if (paymentType && paymentMethods[paymentType]) {
             const { tax, fixedFee } = paymentMethods[paymentType];
-<<<<<<< Updated upstream
+
+
             calculatedTotal += calculatedTotal * tax; // Apply percentage tax
 
             if (fixedFee) {
                 calculatedTotal += fixedFee; // Add fixed fee if applicable
-=======
+
+
+
             calculatedTotal += calculatedTotal * tax;
 
             if (fixedFee) {
                 calculatedTotal += fixedFee;
->>>>>>> Stashed changes
+
+
+
+
             }
         }
 
@@ -224,21 +272,29 @@ const ServiceFormModal = ({
     }, [subTotal, downPayment, paymentType]);
 
     const handleSubTotalChange = (e) => {
-<<<<<<< Updated upstream
+
+
         const value = String(e.target.value).replace(/[^0-9]/g, ''); // Ensure value is a string
-=======
+
         const value = String(e.target.value).replace(/[^0-9]/g, '');
->>>>>>> Stashed changes
+
+
+        const value = String(e.target.value).replace(/[^0-9]/g, '');
+
         setSubTotal(value || '0');
     };
 
     const handleDownPaymentChange = (e) => {
         const inputValue = e.target.value;
-<<<<<<< Updated upstream
+
+
         const value = String(inputValue).replace(/[^0-9]/g, ''); // Ensure value is a string
-=======
+
         const value = String(inputValue).replace(/[^0-9]/g, '');
->>>>>>> Stashed changes
+
+
+        const value = String(inputValue).replace(/[^0-9]/g, '');
+
         const parsedValue = parseInt(value, 10) || 0;
         const parsedSubTotal = parseInt(subTotal.replace(/[^0-9]/g, ""), 10) || 0;
 
@@ -251,11 +307,15 @@ const ServiceFormModal = ({
 
     const formatCurrency = (value) => {
         if (!value) return 'Rp0';
-<<<<<<< Updated upstream
+
+
         const number = parseInt(String(value).replace(/[^0-9]/g, ''), 10); // Ensure value is a string
-=======
+
         const number = parseInt(String(value).replace(/[^0-9]/g, ''), 10);
->>>>>>> Stashed changes
+
+
+        const number = parseInt(String(value).replace(/[^0-9]/g, ''), 10);
+
         return `Rp${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
     };
 
@@ -298,12 +358,15 @@ const ServiceFormModal = ({
 
     const fetchCustomers = async () => {
         try {
-<<<<<<< Updated upstream
+
+
             const response = await axios.get('/api/customers');
             setCustomers(response.data);
         } catch (error) {
             console.error('Error fetching customers:', error);
-=======
+
+
+
             const response = await axios.get('/api/customers'); // Ensure this matches your defined route
             setCustomers(response.data);
         } catch (error) {
@@ -322,7 +385,10 @@ const ServiceFormModal = ({
             }
         } catch (error) {
             console.error(`Error fetching users:`, error);
->>>>>>> Stashed changes
+
+
+
+
         }
     };
 
@@ -360,7 +426,8 @@ const ServiceFormModal = ({
             repair_type: repairType,
             service_type: serviceType,
             total_price: total,
-<<<<<<< Updated upstream
+
+
             down_payment: parseFloat(downPayment.replace(/[^0-9.]/g, "")) || 0, // Ensure downPayment is a string
             completeness: Object.keys(completeness).filter(key => completeness[key]),
             invoice_number: invoiceNumber,
@@ -391,7 +458,9 @@ const ServiceFormModal = ({
 
         console.log('Submitting repair:', newRepair);
 
-=======
+
+
+
             down_payment: parseFloat(downPayment.replace(/[^0-9.]/g, "")) || 0,
             completeness: Object.keys(completeness).filter(key => completeness[key]),
             invoice_number: invoiceNumber,
@@ -399,7 +468,10 @@ const ServiceFormModal = ({
             payment_method: paymentType,
         };
 
->>>>>>> Stashed changes
+
+
+
+
         try {
             const response = await axios.post('/api/repairs', newRepair);
             if (response.data.success) {
@@ -422,19 +494,26 @@ const ServiceFormModal = ({
         setImeiSn2('');
         setDamageDescription('');
         setUnderWarranty(false);
-<<<<<<< Updated upstream
+
+
         setWarrantyDuration(''); // Reset to an empty string
-=======
+
         setWarrantyDuration('');
->>>>>>> Stashed changes
+
+
+        setWarrantyDuration('');
+
         setNotes('');
         setRepairType('');
         setServiceType('');
         setSubTotal('0');
-<<<<<<< Updated upstream
+
+
         setVoucher('');
-=======
->>>>>>> Stashed changes
+
+
+
+
         setDownPayment('0');
         setTotal(0);
         setPaymentType('');
@@ -447,7 +526,8 @@ const ServiceFormModal = ({
         setCustomerPhone(selectedCustomer ? selectedCustomer.phone : '');
     };
 
-<<<<<<< Updated upstream
+
+
     const fetchUsersByRoleName = async (roleName) => {
         try {
             const response = await axios.get(`/api/users?role_name=${roleName}`);
@@ -463,8 +543,10 @@ const ServiceFormModal = ({
         }
     };
 
-=======
->>>>>>> Stashed changes
+
+
+
+
     if (!isOpen) return null;
 
     return (
@@ -531,11 +613,15 @@ const ServiceFormModal = ({
                                 <input
                                     type="text"
                                     value={imeiSn1}
-<<<<<<< Updated upstream
+
+
                                     onChange={handleImeiSn1Change} // Updated handler
-=======
+
                                     onChange={handleImeiSn1Change}
->>>>>>> Stashed changes
+
+
+                                    onChange={handleImeiSn1Change}
+
                                     placeholder="ex: 851591001xxx"
                                     className="input input-bordered"
                                     required
@@ -548,11 +634,15 @@ const ServiceFormModal = ({
                                 <input
                                     type="text"
                                     value={imeiSn2}
-<<<<<<< Updated upstream
+
+
                                     onChange={handleImeiSn2Change} // Updated handler
-=======
+
                                     onChange={handleImeiSn2Change}
->>>>>>> Stashed changes
+
+
+                                    onChange={handleImeiSn2Change}
+
                                     placeholder="ex: 8515912328xxx"
                                     className="input input-bordered"
                                 />
@@ -577,7 +667,8 @@ const ServiceFormModal = ({
                                 <label className="label">
                                     <span className="label-text">Customer</span>
                                 </label>
-<<<<<<< Updated upstream
+
+
                                 <select onChange={handleCustomerChange} value={customerId} className="select select-bordered" disabled>
                                     <option value="">Select a customer - {customerPhone}</option>
                                     {customers.map(customer => (
@@ -586,7 +677,9 @@ const ServiceFormModal = ({
                                     </option>
                                     ))}
                                 </select>
-=======
+
+
+
                                     <select
                                         value={customerId || ''} // Use an empty string instead of null
                                         onChange={handleCustomerChange}
@@ -599,7 +692,10 @@ const ServiceFormModal = ({
                                             </option>
                                         ))}
                                     </select>
->>>>>>> Stashed changes
+
+
+
+
                             </div>
                             <div className="flex mb-3">
                                 <div className="form-control w-1/2 mr-2">
@@ -613,11 +709,15 @@ const ServiceFormModal = ({
                                         required
                                     >
                                         <option value="">-- Select Cashier --</option>
-<<<<<<< Updated upstream
+
+
                                         {cashiers.map(cashier => (
-=======
+
                                         {cashiers.map((cashier) => (
->>>>>>> Stashed changes
+
+
+                                        {cashiers.map((cashier) => (
+
                                             <option key={cashier.id} value={cashier.id}>
                                                 {cashier.name}
                                             </option>
@@ -635,11 +735,15 @@ const ServiceFormModal = ({
                                         required
                                     >
                                         <option value="">-- Select Technician --</option>
-<<<<<<< Updated upstream
+
+
                                         {technicians.map(technician => (
-=======
+
                                         {technicians.map((technician) => (
->>>>>>> Stashed changes
+
+
+                                        {technicians.map((technician) => (
+
                                             <option key={technician.id} value={technician.id}>
                                                 {technician.name}
                                             </option>
@@ -662,7 +766,8 @@ const ServiceFormModal = ({
                                         <>
                                             <input
                                                 type="number"
-<<<<<<< Updated upstream
+
+
                                                 value={warrantyDuration} // Will be empty when not set
                                                 onChange={(e) => {
                                                     const value = e.target.value === '' ? '' : Math.max(0, Math.min(99, parseInt(e.target.value, 10)));
@@ -670,7 +775,9 @@ const ServiceFormModal = ({
                                                 }}
                                                 className="input input-bordered mr-2"
                                                 max="99" // Optional: Limits input to 99 in the UI
-=======
+
+
+
                                                 value={warrantyDuration || ''} // Allow empty or set to a number
                                                 onChange={(e) => {
                                                     const value = e.target.value === '' ? '' : Math.max(0, Math.min(99, parseInt(e.target.value, 10)));
@@ -678,7 +785,10 @@ const ServiceFormModal = ({
                                                 }}
                                                 className="input input-bordered mr-2"
                                                 max="99"
->>>>>>> Stashed changes
+
+
+
+
                                             />
                                             <select
                                                 value={warrantyUnit}
@@ -717,11 +827,15 @@ const ServiceFormModal = ({
                                     <option value="">-- Select Repair Type --</option>
                                     <option value="screen">Screen Replacement</option>
                                     <option value="battery">Battery Replacement</option>
-<<<<<<< Updated upstream
+
+
                                     <option value="camera">Camera Repairs </option>
-=======
+
                                     <option value="camera">Camera Repairs</option>
->>>>>>> Stashed changes
+
+
+                                    <option value="camera">Camera Repairs</option>
+
                                     <option value="charging_port">Charging Port Repairs</option>
                                     <option value="speaker_microphone">Speaker/Microphone Repairs</option>
                                     <option value="button">Button Replacements</option>
@@ -754,13 +868,17 @@ const ServiceFormModal = ({
                         <button
                             type="button"
                             className="btn btn-secondary w-80"
-<<<<<<< Updated upstream
+
+
                             onClick={() => {
                                 setCompletenessModalOpen(true);
                             }}
-=======
+
                             onClick={() => setCompletenessModalOpen(true)}
->>>>>>> Stashed changes
+
+
+                            onClick={() => setCompletenessModalOpen(true)}
+
                         >
                             Completeness
                         </button>
@@ -857,13 +975,17 @@ const ServiceFormModal = ({
                         <button
                             type="button"
                             className="btn btn-secondary w-80"
-<<<<<<< Updated upstream
+
+
                             onClick={() => {
                                 setPrintModalOpen(true);
                             }}
-=======
+
                             onClick={() => setPrintModalOpen(true)}
->>>>>>> Stashed changes
+
+
+                            onClick={() => setPrintModalOpen(true)}
+
                         >
                             Print
                         </button>

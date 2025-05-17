@@ -1,24 +1,33 @@
 import React, { useState } from "react";
-<<<<<<< Updated upstream
-=======
+
+
+
 import PropTypes from "prop-types";
->>>>>>> Stashed changes
+
+
+import PropTypes from "prop-types";
+
 import ServiceFormModal from "./ServiceFormModal";
 import NewCustomerModal from "./NewCustomerModal";
 import CompletenessModal from "./CompletenessModal";
 import PrintModal from "./PrintModal";
-<<<<<<< Updated upstream
+
+
 import RepairDetailModal from "./RepairDetailModal"; // Import the RepairDetailModal
-=======
+
 import RepairDetailModal from "./RepairDetailModal";
->>>>>>> Stashed changes
+
+
+import RepairDetailModal from "./RepairDetailModal";
+
 
 const ModalParent = ({
     isServiceFormModalOpen,
     setServiceFormModalOpen,
     isRepairDetailModalOpen,
     setRepairDetailModalOpen,
-<<<<<<< Updated upstream
+
+
     selectedRepair,
     onFormSubmit,
     currentRepair, // Add currentRepair prop
@@ -39,7 +48,9 @@ const ModalParent = ({
         box: false,
         charger: false,
     });
-=======
+
+
+
     currentRepair,
     onFormSubmit,
     setCompletenessModalOpen,
@@ -56,7 +67,10 @@ const ModalParent = ({
     const handleAddCustomer = (newCustomer) => {
         setCustomers((prevCustomers) => [...prevCustomers, newCustomer]); // Add new customer to the list
     };
->>>>>>> Stashed changes
+
+
+
+
 
     const completenessMapping = {
         simTray: "SIM Tray",
@@ -69,7 +83,8 @@ const ModalParent = ({
 
     const formatCompleteness = (completeness) => {
         return Object.keys(completeness)
-<<<<<<< Updated upstream
+
+
             .filter(key => completeness[key])
             .map(key => completenessMapping[key])
             .join(', ');
@@ -83,16 +98,22 @@ const ModalParent = ({
         setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
         setSelectedCustomerId(newCustomer.id);
         setNewCustomerModalOpen(false);
-=======
+
             .filter((key) => completeness[key])
             .map((key) => completenessMapping[key])
             .join(", ");
->>>>>>> Stashed changes
+
+
+            .filter((key) => completeness[key])
+            .map((key) => completenessMapping[key])
+            .join(", ");
+
     };
 
     return (
         <div>
-<<<<<<< Updated upstream
+
+
             <ServiceFormModal
                 isOpen={isServiceFormModalOpen}
                 onClose={() => setServiceFormModalOpen(false)}
@@ -119,7 +140,9 @@ const ModalParent = ({
                 isOpen={isRepairDetailModalOpen}
                 onClose={() => setRepairDetailModalOpen(false)}
             />
-=======
+
+
+
             {isServiceFormModalOpen && (
                 <ServiceFormModal
                     isOpen={isServiceFormModalOpen}
@@ -160,14 +183,20 @@ const ModalParent = ({
                     onClose={() => setRepairDetailModalOpen(false)}
                 />
             )}
->>>>>>> Stashed changes
+
+
+
+
         </div>
     );
 };
 
-<<<<<<< Updated upstream
+
+
 export default ModalParent;
-=======
+
+
+
 // PropTypes for type checking
 ModalParent.propTypes = {
     isServiceFormModalOpen: PropTypes.bool.isRequired,
@@ -186,5 +215,9 @@ ModalParent.propTypes = {
     setCompleteness: PropTypes.func.isRequired,
 };
 
+
 export default ModalParent;
->>>>>>> Stashed changes
+
+
+export default ModalParent;
+

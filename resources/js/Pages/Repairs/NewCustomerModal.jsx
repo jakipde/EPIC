@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-<<<<<<< Updated upstream
-=======
 import PropTypes from 'prop-types';
->>>>>>> Stashed changes
 import axios from 'axios';
 
 const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
@@ -17,10 +14,6 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
         setErrorMessage('');
         setSuccessMessage('');
 
-<<<<<<< Updated upstream
-=======
-        // Validate phone number
->>>>>>> Stashed changes
         const phoneRegex = /^[0-9]{10,15}$/;
         if (!phoneRegex.test(customerPhone)) {
             setErrorMessage('Please enter a valid phone number.');
@@ -28,17 +21,12 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
         }
 
         try {
-<<<<<<< Updated upstream
-=======
-            // Send POST request to add a new customer
->>>>>>> Stashed changes
             const response = await axios.post('/api/customers', {
                 name: customerName,
                 phone: customerPhone,
                 customer_type: customerType,
             });
 
-<<<<<<< Updated upstream
             // Check for successful response
             if (response.status === 201) {
                 onAddCustomer(response.data); // Pass the new customer
@@ -50,7 +38,7 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                     setSuccessMessage(''); // Reset success message after 3 seconds
                     onClose(); // Auto-close modal after success
                 }, 3000);
-=======
+
             if (response.status === 201) {
                 const newCustomer = response.data; // Get the new customer from the response
                 onAddCustomer(newCustomer); // Pass the new customer to the parent component
@@ -62,17 +50,21 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                     setSuccessMessage('');
                     onClose();
                 }, 2000);
->>>>>>> Stashed changes
+
             } else {
                 setErrorMessage('Failed to add customer: ' + (response.data.message || 'An unexpected error occurred.'));
             }
         } catch (error) {
-<<<<<<< Updated upstream
+
+
             // Provide a more detailed error message
             if (error.response && error.response.data) {
-=======
+
             if (error.response) {
->>>>>>> Stashed changes
+
+
+            if (error.response) {
+
                 setErrorMessage('Failed to add customer: ' + (error.response.data.message || 'An unexpected error occurred.'));
             } else {
                 setErrorMessage('Failed to add customer. Please check your internet connection or try again later.');
@@ -100,10 +92,14 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                             value={customerName}
                             onChange={(e) => setCustomerName(e.target.value)}
                             className="input input-bordered"
-<<<<<<< Updated upstream
-=======
+
+
+
                             placeholder="Enter customer name"
->>>>>>> Stashed changes
+
+
+                            placeholder="Enter customer name"
+
                             required
                         />
                     </div>
@@ -114,10 +110,14 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
                             value={customerPhone}
                             onChange={(e) => setCustomerPhone(e.target.value)}
                             className="input input-bordered"
-<<<<<<< Updated upstream
-=======
+
+
+
                             placeholder="Enter phone number"
->>>>>>> Stashed changes
+
+
+                            placeholder="Enter phone number"
+
                             required
                         />
                     </div>
@@ -143,9 +143,12 @@ const NewCustomerModal = ({ isOpen, onClose, onAddCustomer }) => {
     );
 };
 
-<<<<<<< Updated upstream
+
+
 export default NewCustomerModal;
-=======
+
+
+
 // PropTypes for type checking
 NewCustomerModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
@@ -153,5 +156,9 @@ NewCustomerModal.propTypes = {
     onAddCustomer: PropTypes.func.isRequired, // Ensure this is defined
 };
 
+
 export default NewCustomerModal;
->>>>>>> Stashed changes
+
+
+export default NewCustomerModal;
+

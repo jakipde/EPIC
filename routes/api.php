@@ -55,14 +55,17 @@ Route::middleware([JwtCustomApiVerification::class])
         Route::post('files', [FileController::class, 'store'])->name('api.file.store');
     });
 
-<<<<<<< Updated upstream
-=======
+
+
 // Category-related API routes
 Route::group([], function () {
     Route::get('/categories/{id}/fields', [CategoryController::class, 'getFields'])->name('api.categories.fields');
 });
 
->>>>>>> Stashed changes
+
+
+
+
     Route::prefix('repairs')->group(function () {
         Route::post('/', [RepairsController::class, 'store'])->name('repairs.store');
         Route::get('/', [RepairsController::class, 'index'])->name('repairs.index');
@@ -73,11 +76,15 @@ Route::group([], function () {
 
     // Customers API routes
     Route::prefix('customers')->group(function () {
-<<<<<<< Updated upstream
+
+
         Route::get('/', [CustomersController::class, 'index']);  // Fetch all customers
-=======
+
         Route::get('/', [CustomersController::class, 'index']);
->>>>>>> Stashed changes
+
+
+        Route::get('/', [CustomersController::class, 'index']);
+
         Route::post('/', [CustomersController::class, 'store']); // Add a new customer
         Route::get('/{id}', [CustomersController::class, 'show']); // Fetch a single customer by ID
         Route::put('/{id}', [CustomersController::class, 'update']); // Update a customer
@@ -112,8 +119,12 @@ Route::group([], function () {
         Route::get('{id}', [ProductSubCategoryController::class, 'show'])->name('product_subcategories.show');
         Route::put('{id}', [ProductSubCategoryController::class, 'update'])->name('product_subcategories.update');
         Route::delete('{id}', [ProductSubCategoryController::class, 'destroy'])->name('product_subcategories.destroy');
-<<<<<<< Updated upstream
+
+
     });
-=======
+
     });
->>>>>>> Stashed changes
+
+
+    });
+
